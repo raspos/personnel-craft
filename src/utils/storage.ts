@@ -32,7 +32,8 @@ export const DEFAULT_WISHES: WishSelection = {
     longTermWorkers: '모름',
     bossRelation: '잘 모름',
     relationTemp: '보통',
-    recruitIntent: '전혀 모름'
+    recruitIntent: '전혀 모름',
+    competitors: '모름'
   },
   second: {
     deptName: '경제부',
@@ -40,7 +41,8 @@ export const DEFAULT_WISHES: WishSelection = {
     longTermWorkers: '모름',
     bossRelation: '잘 모름',
     relationTemp: '보통',
-    recruitIntent: '전혀 모름'
+    recruitIntent: '전혀 모름',
+    competitors: '모름'
   },
   third: {
     deptName: '산업부',
@@ -48,7 +50,8 @@ export const DEFAULT_WISHES: WishSelection = {
     longTermWorkers: '모름',
     bossRelation: '잘 모름',
     relationTemp: '보통',
-    recruitIntent: '전혀 모름'
+    recruitIntent: '전혀 모름',
+    competitors: '모름'
   },
   avoidDept: '',
   currentBossIntent: '잘 모르겠다',
@@ -59,12 +62,12 @@ export const DEFAULT_FARMING_STATE: FarmingState = {
   currentTurn: 1,
   remainingPoints: 8,
   metrics: {
-    bossInterest: 30,
-    deptAwareness: 25,
-    rumorSpread: 15,
-    stayPressure: 35,
-    infoConfidence: 40,
-    articleScore: 20,
+    bossInterest: { first: 0, second: 0, third: 0 },
+    deptAwareness: { first: 0, second: 0, third: 0 },
+    rumorSpread: 0,
+    stayPressure: 30,
+    infoConfidence: 20,
+    articleScore: 0,
     sproutStage: {
       first: 0,
       second: 0,
@@ -135,7 +138,21 @@ export function saveWishes(wishes: WishSelection) {
 export function loadFarmingState(): FarmingState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_FARMING);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // 구버전 단일 숫자 형태의 bossInterest / deptAwareness가 남아있을 경우 객체로 승격
+      if (parsed.metrics) {
+        if (typeof parsed.metrics.bossInterest === 'number') {
+          const val = parsed.metrics.bossInterest;
+          parsed.metrics.bossInterest = { first: val, second: Math.round(val * 0.7), third: Math.round(val * 0.5) };
+        }
+        if (typeof parsed.metrics.deptAwareness === 'number') {
+          const val = parsed.metrics.deptAwareness;
+          parsed.metrics.deptAwareness = { first: val, second: Math.round(val * 0.7), third: Math.round(val * 0.5) };
+        }
+      }
+      return parsed;
+    }
   } catch (e) {
     console.error('Failed to load farming state', e);
   }

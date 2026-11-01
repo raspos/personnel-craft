@@ -258,11 +258,23 @@ export function runSimulation(
         : farmingState.metrics.sproutStage.third;
       farmingBonus += currentSprout * 5;
 
-      // 3) 희망 부서 내 인지도 (deptAwareness: 0 ~ 100) -> 부서원들의 환영도 (최대 +8점)
-      const awarenessBonus = Math.round((farmingState.metrics.deptAwareness / 100) * 8);
+      // 3) 희망 부서 내 인지도 (지망별 완벽 분리 적용!) -> 해당 부서원들의 환영도 (최대 +10점)
+      const rawAw = farmingState.metrics.deptAwareness;
+      const targetAwareness = typeof rawAw === 'number'
+        ? rawAw
+        : (wishRank === 1 ? rawAw.first : wishRank === 2 ? rawAw.second : rawAw.third) || 0;
+      const awarenessBonus = Math.round((targetAwareness / 100) * 10);
       farmingBonus += awarenessBonus;
 
-      // 4) 소문 확산도 (rumorSpread: 0 ~ 100)
+      // 4) 희망 부서장 관심도 (지망별 완벽 분리 적용!) -> 해당 부서장의 영입 추진력 (최대 +10점)
+      const rawBi = farmingState.metrics.bossInterest;
+      const targetBossInterest = typeof rawBi === 'number'
+        ? rawBi
+        : (wishRank === 1 ? rawBi.first : wishRank === 2 ? rawBi.second : rawBi.third) || 0;
+      const bossInterestBonus = Math.round((targetBossInterest / 100) * 10);
+      farmingBonus += bossInterestBonus;
+
+      // 5) 소문 확산도 (rumorSpread: 0 ~ 100)
       const rumor = farmingState.metrics.rumorSpread;
       if (rumor >= 30 && rumor <= 65) {
         farmingBonus += 4; // 적정 공론화 이득
@@ -271,12 +283,29 @@ export function runSimulation(
       }
     }
 
-    // F. 경쟁률 패널티 (TO 1명일 때 경쟁 강도)
+    // F. 실제 경쟁 기자 수 & TO 결합 경쟁 강도 배율 산출 (경쟁자 모델 현실화)
     let competitorPenalty = 1.0;
-    if (wish.expectedTO === '1명') {
-      competitorPenalty = 0.85; // 단 1자리: 치열한 경쟁
-    } else if (wish.expectedTO === '3명' || wish.expectedTO === '4명 이상') {
-      competitorPenalty = 1.15; // 다수 공석: 수월한 진입
+    const comp = wish.competitors || '모름';
+
+    if (comp === '0명 (단독 지원)') {
+      // 경쟁자 없음: TO가 1명이어도 무혈입성 우대
+      competitorPenalty = wish.expectedTO === '1명' ? 1.25 : 1.35;
+    } else if (comp === '1~2명 (보통)') {
+      if (wish.expectedTO === '1명') competitorPenalty = 0.90;
+      else if (wish.expectedTO === '2명') competitorPenalty = 1.05;
+      else if (wish.expectedTO === '3명' || wish.expectedTO === '4명 이상') competitorPenalty = 1.20;
+    } else if (comp === '3~4명 (경쟁 치열)') {
+      if (wish.expectedTO === '1명') competitorPenalty = 0.65;
+      else if (wish.expectedTO === '2명') competitorPenalty = 0.80;
+      else if (wish.expectedTO === '3명' || wish.expectedTO === '4명 이상') competitorPenalty = 0.95;
+    } else if (comp === '5명 이상 (바늘구멍)') {
+      if (wish.expectedTO === '1명') competitorPenalty = 0.40;
+      else if (wish.expectedTO === '2명') competitorPenalty = 0.55;
+      else if (wish.expectedTO === '3명' || wish.expectedTO === '4명 이상') competitorPenalty = 0.70;
+    } else {
+      // '모름' 기본 휴리스틱 모델
+      if (wish.expectedTO === '1명') competitorPenalty = 0.85;
+      else if (wish.expectedTO === '3명' || wish.expectedTO === '4명 이상') competitorPenalty = 1.15;
     }
 
     // 최종 합산 가중치

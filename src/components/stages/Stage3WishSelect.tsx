@@ -7,7 +7,8 @@ import {
   DeptBossRelation,
   RelationTemp,
   BossRecruitIntent,
-  CurrentBossIntent
+  CurrentBossIntent,
+  CompetitorCount
 } from '../../types/game';
 import { DEFAULT_DEPARTMENTS, getDepartmentByName } from '../../data/departments';
 import { ArrowRight, ArrowLeft, MessageSquare, AlertTriangle, Building2, UserCheck, ShieldAlert } from 'lucide-react';
@@ -312,7 +313,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               </div>
 
               {/* ⑤ 부서장의 영입 의사 신호 */}
-              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 sm:col-span-2 lg:col-span-2">
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
                   ⑤ 부서장의 영입 의사 신호 (가장 강력)
                 </label>
@@ -329,19 +330,40 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                   <option value="부정적 반응">부정적 반응 (-15점 사실상 거부)</option>
                 </select>
               </div>
+
+              {/* ⑥ 지원 예상 경쟁자 수 (경쟁률 모델) */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ⑥ 이번 인사 예상 경쟁 기자 수
+                </label>
+                <select
+                  value={currentWishConfig.competitors || '모름'}
+                  onChange={(e) => updateCurrentWish({ competitors: e.target.value as CompetitorCount })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="모름">모름 (표준 추정 경쟁률)</option>
+                  <option value="0명 (단독 지원)">0명 (단독 지원 - 무혈입성 우대)</option>
+                  <option value="1~2명 (보통)">1~2명 (보통 수준 경쟁)</option>
+                  <option value="3~4명 (경쟁 치열)">3~4명 (경쟁 치열 - 격전지)</option>
+                  <option value="5명 이상 (바늘구멍)">5명 이상 (바늘구멍 - 극심한 경쟁)</option>
+                </select>
+                <div className="text-[10px] text-slate-500 mt-1">
+                  * TO 대비 지원 경쟁자 수에 따라 실질적인 발령 확률이 직접 변동합니다.
+                </div>
+              </div>
             </div>
           </>
         )}
       </div>
 
-      {/* ⑥ 현재 부서장 이동 의사 & ⑦ 기피 부서 설정 */}
+      {/* ⑦ 현재 부서장 이동 의사 & ⑧ 기피 부서 설정 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* ⑥ 현재 부서장의 이동 의사 */}
+        {/* ⑦ 현재 부서장의 이동 의사 */}
         <div className="voxel-card p-4 border-amber-500/40 bg-slate-900/90">
           <div className="flex items-center gap-2 mb-2">
             <UserCheck className="w-4 h-4 text-amber-400" />
             <h3 className="font-pixel text-sm text-slate-100 font-bold">
-              ⑥ 현재 부서장({currentDeptName})의 방출 의사
+              ⑦ 현재 부서장({currentDeptName})의 방출 의사
             </h3>
           </div>
           <p className="text-xs text-slate-400 mb-2">
@@ -363,12 +385,12 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           </select>
         </div>
 
-        {/* ⑦ 기피 부서 (1곳) */}
+        {/* ⑧ 기피 부서 (1곳) */}
         <div className="voxel-card p-4 border-rose-500/40 bg-slate-900/90">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="w-4 h-4 text-rose-400" />
             <h3 className="font-pixel text-sm text-slate-100 font-bold">
-              ⑦ 절대 가고 싶지 않은 기피 부서 (1곳)
+              ⑧ 절대 가고 싶지 않은 기피 부서 (1곳)
             </h3>
           </div>
           <p className="text-xs text-slate-400 mb-2">

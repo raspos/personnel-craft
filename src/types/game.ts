@@ -68,6 +68,13 @@ export type CurrentBossIntent =
   | '잔류를 원하는 분위기다'
   | '반드시 남기려고 한다';
 
+export type CompetitorCount =
+  | '0명 (단독 지원)'
+  | '1~2명 (보통)'
+  | '3~4명 (경쟁 치열)'
+  | '5명 이상 (바늘구멍)'
+  | '모름';
+
 export interface WishDeptConfig {
   deptName: string;
   expectedTO: DeptTO;
@@ -75,6 +82,7 @@ export interface WishDeptConfig {
   bossRelation: DeptBossRelation;
   relationTemp: RelationTemp;
   recruitIntent: BossRecruitIntent;
+  competitors?: CompetitorCount; // [신규] 지원 예상 경쟁자 수
 }
 
 export interface WishSelection {
@@ -147,14 +155,20 @@ export interface FinalAppointmentResult {
    [신규] STAGE 3.5 — 추석 이후 인사 농사 시스템 타입 정의
    ======================================================== */
 
+export interface DeptPerWishMetric {
+  first: number;
+  second: number;
+  third: number;
+}
+
 export interface PersonnelFarmingMetrics {
-  bossInterest: number;        // ① 희망 부서장 관심도 (0 ~ 100)
-  deptAwareness: number;       // ② 희망 부서 내 인지도 (0 ~ 100)
-  rumorSpread: number;         // ③ 소문 확산도 (0 ~ 100)
-  stayPressure: number;        // ④ 현재 부서 잔류 압력 (0 ~ 100)
-  infoConfidence: number;      // ⑤ 인사 정보 신뢰도 (0 ~ 100)
-  articleScore: number;        // 기사 작성 성과 점수 (0 ~ 100)
-  sproutStage: {               // 블록 밭 새싹 단계 (0 ~ 3)
+  bossInterest: DeptPerWishMetric;  // ① 희망 부서장 관심도 (지망별 0 ~ 100 분리)
+  deptAwareness: DeptPerWishMetric; // ② 희망 부서 내 인지도 (지망별 0 ~ 100 분리)
+  rumorSpread: number;              // ③ 소문 확산도 (0 ~ 100)
+  stayPressure: number;             // ④ 현재 부서 잔류 압력 (0 ~ 100)
+  infoConfidence: number;           // ⑤ 인사 정보 신뢰도 (0 ~ 100)
+  articleScore: number;             // 기사 작성 성과 점수 (0 ~ 100)
+  sproutStage: {                    // 블록 밭 새싹 단계 (0 ~ 3)
     first: number;
     second: number;
     third: number;

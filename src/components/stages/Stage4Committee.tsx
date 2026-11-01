@@ -194,9 +194,15 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
                 <span className="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
                 1지망: {wishes.first.deptName}
                 {wishes.first.expectedTO === '0명' && (
-                  <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
-                    확정 TO 0명 (0% 고정)
-                  </span>
+                  activeEvent?.id === 'event_opening_1st' ? (
+                    <span className="text-amber-300 text-[10px] bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600 font-pixel animate-pulse">
+                      🚨 긴급 결원 발생 (0명 제약 해제 & 단독 공석 신설)
+                    </span>
+                  ) : (
+                    <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
+                      확정 TO 0명 (0% 고정)
+                    </span>
+                  )
                 )}
               </span>
               <div className="flex items-center gap-2 font-pixel">

@@ -1,81 +1,84 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, Users } from 'lucide-react';
+import { Award, CheckCircle2 } from 'lucide-react';
 
-interface VisitorStats {
-  today: number;
-  total: number;
+const STORAGE_TODAY_DATE = 'pcraft_run_date_v3';
+const STORAGE_TODAY_RUNS = 'pcraft_today_runs_v3';
+const STORAGE_TOTAL_RUNS = 'pcraft_total_runs_v3';
+
+// 실제 인사발령 완주(STAGE 5 결과 개봉) 시 호출하는 함수
+export function recordCompletedRun(): void {
+  try {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const storedDate = localStorage.getItem(STORAGE_TODAY_DATE);
+
+    let todayRuns = parseInt(localStorage.getItem(STORAGE_TODAY_RUNS) || '0', 10);
+    let totalRuns = parseInt(localStorage.getItem(STORAGE_TOTAL_RUNS) || '0', 10);
+
+    if (storedDate !== dateStr) {
+      todayRuns = 1;
+      localStorage.setItem(STORAGE_TODAY_DATE, dateStr);
+    } else {
+      todayRuns += 1;
+    }
+
+    totalRuns += 1;
+
+    localStorage.setItem(STORAGE_TODAY_RUNS, String(todayRuns));
+    localStorage.setItem(STORAGE_TOTAL_RUNS, String(totalRuns));
+
+    // 이벤트 디스패치로 화면 동기화
+    window.dispatchEvent(new Event('pcraft_run_completed'));
+  } catch (e) {
+    console.error('Failed to record completed run', e);
+  }
 }
 
 export const VisitorCounter: React.FC = () => {
-  const [stats, setStats] = useState<VisitorStats>({ today: 1, total: 1 });
+  const [stats, setStats] = useState<{ today: number; total: number }>({ today: 0, total: 0 });
+
+  const loadStats = () => {
+    try {
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const storedDate = localStorage.getItem(STORAGE_TODAY_DATE);
+
+      const todayRuns = storedDate === dateStr ? parseInt(localStorage.getItem(STORAGE_TODAY_RUNS) || '0', 10) : 0;
+      const totalRuns = parseInt(localStorage.getItem(STORAGE_TOTAL_RUNS) || '0', 10);
+
+      setStats({ today: todayRuns, total: totalRuns });
+    } catch {
+      setStats({ today: 0, total: 0 });
+    }
+  };
 
   useEffect(() => {
-    // 키 이름을 v2로 변경하여 이전에 저장되었던 임의 테스트 숫자(123 등)를 완전히 리셋
-    const todayKey = 'pcraft_visit_date_v2';
-    const todayCountKey = 'pcraft_today_count_v2';
-    const totalCountKey = 'pcraft_total_count_v2';
-    const sessionKey = 'pcraft_counted_session_v2';
-
-    // 기존 v1 키 잔재 청소
-    try {
-      localStorage.removeItem('pcraft_visit_date');
-      localStorage.removeItem('pcraft_today_count');
-      localStorage.removeItem('pcraft_total_count');
-      localStorage.removeItem('pcraft_counted_session');
-    } catch {}
-
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-    const storedDate = localStorage.getItem(todayKey);
-    let todayCount = parseInt(localStorage.getItem(todayCountKey) || '0', 10);
-    let totalCount = parseInt(localStorage.getItem(totalCountKey) || '0', 10);
-
-    const isNewSession = !sessionStorage.getItem(sessionKey);
-
-    if (storedDate !== dateStr) {
-      // 날짜가 바뀌면 오늘 카운트는 1로 시작
-      todayCount = 1;
-      localStorage.setItem(todayKey, dateStr);
-    } else if (isNewSession) {
-      todayCount += 1;
-    }
-
-    if (isNewSession) {
-      totalCount += 1;
-      sessionStorage.setItem(sessionKey, 'true');
-    }
-
-    // 최소 1 보장
-    todayCount = Math.max(1, todayCount);
-    totalCount = Math.max(1, totalCount);
-
-    localStorage.setItem(todayCountKey, String(todayCount));
-    localStorage.setItem(totalCountKey, String(totalCount));
-
-    setStats({ today: todayCount, total: totalCount });
+    loadStats();
+    const handleUpdate = () => loadStats();
+    window.addEventListener('pcraft_run_completed', handleUpdate);
+    return () => window.removeEventListener('pcraft_run_completed', handleUpdate);
   }, []);
 
   return (
     <div 
       className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-pixel shadow-inner select-none"
-      title="기자님이 이 브라우저에서 진행한 가상 정기인사 시뮬레이션 플레이 기록입니다."
+      title="기자님이 5단계 최종 인사발령 결과까지 완주한 실제 시뮬레이션 기록입니다."
     >
       <div className="flex items-center gap-1.5 text-slate-400">
-        <Eye className="w-3.5 h-3.5 text-blue-400" />
-        <span>오늘 플레이</span>
+        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+        <span>오늘 완주</span>
         <span className="font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.today.toLocaleString()}회
+          {stats.today}회
         </span>
       </div>
 
       <span className="text-slate-700">|</span>
 
       <div className="flex items-center gap-1.5 text-slate-400">
-        <Users className="w-3.5 h-3.5 text-emerald-400" />
-        <span>누적 도전</span>
+        <Award className="w-3.5 h-3.5 text-emerald-400" />
+        <span>누적 완주</span>
         <span className="font-bold text-emerald-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.total.toLocaleString()}회
+          {stats.total}회
         </span>
       </div>
     </div>

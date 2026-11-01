@@ -35,6 +35,22 @@ export function executeFarmingAction(
   const updatedState: FarmingState = JSON.parse(JSON.stringify(currentState));
   const updatedWishes: WishSelection = JSON.parse(JSON.stringify(currentWishes));
 
+  const targetKey: 'first' | 'second' | 'third' = targetWishIndex === 1
+    ? 'first'
+    : targetWishIndex === 2
+    ? 'second'
+    : 'third';
+
+  // metrics 호환성 방어 (구버전 숫자형 객체 안전 변환)
+  if (typeof updatedState.metrics.bossInterest === 'number') {
+    const v = updatedState.metrics.bossInterest;
+    updatedState.metrics.bossInterest = { first: v, second: 0, third: 0 };
+  }
+  if (typeof updatedState.metrics.deptAwareness === 'number') {
+    const v = updatedState.metrics.deptAwareness;
+    updatedState.metrics.deptAwareness = { first: v, second: 0, third: 0 };
+  }
+
   let targetWish: WishDeptConfig = targetWishIndex === 1
     ? updatedWishes.first
     : targetWishIndex === 2
@@ -50,7 +66,7 @@ export function executeFarmingAction(
 
   switch (actionType) {
     case 'meet_boss': {
-      actionTitle = `${targetWish.deptName} 부서장 면담`;
+      actionTitle = `${targetWish.deptName} 부서장 면담 (${targetWishIndex}지망)`;
       const visits = (updatedState.bossVisitCount[targetWish.deptName] || 0) + 1;
       updatedState.bossVisitCount[targetWish.deptName] = visits;
 
@@ -65,10 +81,11 @@ export function executeFarmingAction(
           dialogueText = '우리 부서에 지원하고 싶다고? 자네 경력이면 충분히 경쟁력이 있지. 고민해보겠네.';
         }
 
-        updatedState.metrics.bossInterest = Math.min(100, updatedState.metrics.bossInterest + 20);
-        updatedState.metrics.deptAwareness = Math.min(100, updatedState.metrics.deptAwareness + 15);
+        // 오직 해당 지망 부서의 관심도 및 인지도만 상승!
+        updatedState.metrics.bossInterest[targetKey] = Math.min(100, updatedState.metrics.bossInterest[targetKey] + 25);
+        updatedState.metrics.deptAwareness[targetKey] = Math.min(100, updatedState.metrics.deptAwareness[targetKey] + 15);
         outcomeText = `${targetWish.deptName} 부서장이 긍정적인 관심을 표명했습니다.`;
-        impactText = '부서장 관심도 +20P, 영입 의사 신호 강화';
+        impactText = `[${targetWishIndex}지망] 부서장 관심도 +25P, 영입 의사 신호 강화`;
 
         if (targetWish.recruitIntent === '특별한 의사 표현 없음' || targetWish.recruitIntent === '전혀 모름') {
           targetWish.recruitIntent = '관심은 있어 보임';
@@ -82,18 +99,21 @@ export function executeFarmingAction(
 
       } else if (visits === 2) {
         dialogueText = '자네 뜻은 확실히 알았으니 너무 보채진 말게. 편집국 전체 순환 판을 봐야 하니까.';
-        updatedState.metrics.bossInterest = Math.min(100, updatedState.metrics.bossInterest + 10);
-        outcomeText = `${targetWish.deptName} 부서장에게 확실한 인상을 남겼습니다.`;
-        impactText = '부서장 관심도 +10P, 직접 영입 제안 확보';
+        updatedState.metrics.bossInterest[targetKey] = Math.min(100, updatedState.metrics.bossInterest[targetKey] + 15);
+        // 연속 방문 부작용: 소문이 돌아 현재 부서장의 잔류 압박 발생
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 10);
+        outcomeText = `${targetWish.deptName} 부서장에게 확실한 인상을 남겼으나, 잦은 접촉이 현 부서장 귀에 들어갔습니다.`;
+        impactText = `[${targetWishIndex}지망] 부서장 관심도 +15P (직접 영입 확보), 현 부서 잔류 압력 +10P`;
 
         if (targetWish.recruitIntent === '긍정적 의사 표현' || targetWish.recruitIntent === '관심은 있어 보임') {
           targetWish.recruitIntent = '직접 함께 일하자고 제안';
         }
       } else {
         dialogueText = '자네 열정은 알겠는데, 자꾸 찾아오면 다른 데스크들 눈치도 보이고 오히려 곤란해져.';
-        updatedState.metrics.bossInterest = Math.max(10, updatedState.metrics.bossInterest - 15);
-        outcomeText = '지나치게 잦은 방문으로 부서장이 다소 부담스러워합니다.';
-        impactText = '부서장 관심도 -15P (체감 효과 발생)';
+        updatedState.metrics.bossInterest[targetKey] = Math.max(0, updatedState.metrics.bossInterest[targetKey] - 20);
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 20);
+        outcomeText = '지나치게 잦은 방문으로 부서장이 부담을 느끼며, 현 부서장의 잔류 압박이 커졌습니다.';
+        impactText = `[${targetWishIndex}지망] 부서장 관심도 -20P, 현 부서 잔류 압력 +20P (역풍 발생)`;
       }
 
       popupDialogue = {
@@ -105,12 +125,13 @@ export function executeFarmingAction(
     }
 
     case 'meet_peer': {
-      actionTitle = `${targetWish.deptName} 동료 기자 티타임`;
+      actionTitle = `${targetWish.deptName} 동료 기자 티타임 (${targetWishIndex}지망)`;
       dialogueText = '우리 부서에 2~3년 넘게 근무한 선배가 있어서 이번에 움직일 가능성이 높아 보여. 부장님은 요즘 데이터나 현장 감각 있는 후배를 데려오고 싶어 하시더라.';
-      updatedState.metrics.deptAwareness = Math.min(100, updatedState.metrics.deptAwareness + 20);
+      // 해당 지망의 인지도만 상승!
+      updatedState.metrics.deptAwareness[targetKey] = Math.min(100, updatedState.metrics.deptAwareness[targetKey] + 25);
       updatedState.metrics.infoConfidence = Math.min(100, updatedState.metrics.infoConfidence + 25);
       outcomeText = `${targetWish.deptName} 내부 분위기와 잠재적 이동 수요에 대한 고급 정보를 수집했습니다.`;
-      impactText = '부서 내 인지도 +20P, 정보 신뢰도 +25P (소문 성공률 증가)';
+      impactText = `[${targetWishIndex}지망] 부서 내 인지도 +25P, 정보 신뢰도 +25P (소문 성공률 증가)`;
 
       popupDialogue = {
         speaker: `${targetWish.deptName} 출입 동료 기자`,
@@ -121,18 +142,17 @@ export function executeFarmingAction(
     }
 
     case 'spread_rumor': {
-      actionTitle = `${targetWish.deptName} 지망 소문 흘리기`;
+      actionTitle = `${targetWish.deptName} 지망 소문 흘리기 (${targetWishIndex}지망)`;
       // 정보 신뢰도(infoConfidence)가 높을수록 소문 성공 확률 증가!
-      // 기본 50% + (신뢰도/100 * 35%) -> 최대 85% 성공!
       const successChance = 0.50 + ((updatedState.metrics.infoConfidence / 100) * 0.35);
       const isSuccess = Math.random() < successChance;
 
       if (isSuccess) {
         dialogueText = `김기자가 이번에 ${targetWish.deptName} 가고 싶어 한다는 얘기가 데스크 라인까지 돌던데? 부장님도 귀담아듣는 눈치야.`;
         updatedState.metrics.rumorSpread = Math.min(100, updatedState.metrics.rumorSpread + 25);
-        updatedState.metrics.deptAwareness = Math.min(100, updatedState.metrics.deptAwareness + 20);
+        updatedState.metrics.deptAwareness[targetKey] = Math.min(100, updatedState.metrics.deptAwareness[targetKey] + 20);
         outcomeText = `이동 희망 소문이 편집국에 성공적으로 퍼져 영입 의사가 강화되었습니다.`;
-        impactText = '소문 확산도 +25P, 영입 의사 1단계 상향!';
+        impactText = `소문 확산도 +25P, [${targetWishIndex}지망] 인지도 +20P 및 영입 의사 상향!`;
 
         // 영입 의사 실질적 상향 (확률에 직접 반영!)
         if (targetWish.recruitIntent === '특별한 의사 표현 없음' || targetWish.recruitIntent === '전혀 모름') {
@@ -213,16 +233,17 @@ export function executeFarmingAction(
 
     case 'write_article': {
       actionTitle = '인사 농사 대신 묵묵히 특종 기사 집필';
-      dialogueText = '[데스크 단체방 공지] 정기인사 앞두고 다들 어수선한데, 이번 기획기사처럼 묵묵히 취재에 집중하는 자세가 모범적입니다.';
-      updatedState.metrics.articleScore = Math.min(100, updatedState.metrics.articleScore + 30);
-      updatedState.metrics.bossInterest = Math.min(100, updatedState.metrics.bossInterest + 10);
-      outcomeText = '정치적 행동 대신 고품질 기사를 완성하여 편집국 간부진의 호평을 받았습니다.';
-      impactText = '기사 작성 성과 +30P (모든 지망 부서의 실무 적합도 보너스 가산!)';
+      dialogueText = '[데스크 단체방 공지] 정기인사 앞두고 다들 어수선한데, 이번 기획 단독기사처럼 묵묵히 취재에 집중하는 자세가 모범적입니다. 1지망 부서장도 큰 호감을 보였습니다.';
+      updatedState.metrics.articleScore = Math.min(100, updatedState.metrics.articleScore + 35);
+      // 실력파 기자 스토리 연계: 1지망 부서장의 관심도 함께 상승!
+      updatedState.metrics.bossInterest.first = Math.min(100, updatedState.metrics.bossInterest.first + 15);
+      outcomeText = '정치적 행동 대신 고품질 특종을 완성하여 1지망 부서장과 데스크진의 주목을 받았습니다.';
+      impactText = '기사 작성 성과 +35P (실무 적합도 보너스), 1지망 부서장 관심도 +15P 연계!';
 
       popupDialogue = {
         speaker: '편집국 데스크 단체 메신저',
         text: dialogueText,
-        note: '취재 성과 인정'
+        note: '특종 보도 성과 인정'
       };
       break;
     }

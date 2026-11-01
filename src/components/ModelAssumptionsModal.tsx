@@ -36,10 +36,13 @@ export const ModelAssumptionsModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <div className="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-1.5">
             <div className="font-pixel text-slate-200 font-bold flex items-center gap-1.5 text-sm text-rose-300">
               <AlertCircle className="w-4 h-4 text-rose-400" />
-              <span>1. 확정 TO 0명 부서의 배치 확률은 절대적 0%</span>
+              <span>1. 확정 TO 0명 부서의 배치 확률은 원칙적 0%</span>
             </div>
             <p>
               부서장과 사적 친분이 아무리 두텁거나 영입 의사가 적극적이라도, 부서에 확정된 결원(TO)이 0명인 경우 해당 부서로의 배치 확률은 0%로 엄격히 고정됩니다.
+            </p>
+            <p className="text-[11px] text-amber-300/90 pt-1 border-t border-slate-850">
+              * 단, '1지망 부서 긴급 결원 발생' 돌발 이벤트가 발동한 경우에 한해, 예외적으로 단독 공석이 신설되어 0% 제약이 해제되고 진입 확률이 발생합니다.
             </p>
           </div>
 
@@ -72,6 +75,16 @@ export const ModelAssumptionsModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
             <p>
               1만 회의 무작위 표본 추출을 통해 가중치 분포를 수렴시키며, 기피 부서 유입 위험과 현 부서 잔류 확률을 독립 분리하여 합계가 정확히 100.0%가 되도록 정규화합니다. 단, 난수 시뮬레이션 횟수가 많다고 해서 실제 언론사 인사의 현실적 예측 정확도가 높아지는 것은 아님을 밝힙니다.
+            </p>
+          </div>
+
+          {/* 원칙 5: 경쟁자 모델 */}
+          <div className="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-1.5">
+            <div className="font-pixel text-slate-200 font-bold flex items-center gap-1.5 text-sm text-cyan-300">
+              <span>👥 5. TO 대비 지원 경쟁자 수 연동 모델</span>
+            </div>
+            <p>
+              TO가 1명이라도 단독 지원자인 경우 무혈입성 우대 가중치(1.25배)를 받으며, 반대로 지원 경쟁자가 3~5명 이상 몰리는 격전지인 경우 실질 진입 확률이 0.40~0.65배로 급격히 감소하도록 수학적 경쟁률을 정밀 반영합니다.
             </p>
           </div>
         </div>

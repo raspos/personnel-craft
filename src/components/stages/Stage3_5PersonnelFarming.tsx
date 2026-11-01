@@ -60,9 +60,9 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const isSecondHalf = profile.currentHalf === '하반기';
 
-  // 인사 농사 전 기준 확률 기록 (최초 1회 저장 - 농사 영향 없는 순수 확률)
+  // 인사 농사 전 기준 확률 기록 (농사 전후 일관된 동일 초기 상태 기반)
   if (!farmingState.initialProbabilities) {
-    const initialSim = runSimulation(careers, wishes, null, 5000, undefined, currentDeptName);
+    const initialSim = runSimulation(careers, wishes, null, 5000, farmingState, currentDeptName);
     farmingState.initialProbabilities = initialSim.probabilities;
   }
 
@@ -266,88 +266,123 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
         </div>
 
         {/* 5대 지표 게이지 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-          {/* ① 희망 부서장 관심도 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">① 희망 부서장 관심도</span>
-              <span className="font-pixel text-amber-400 font-bold">{farmingState.metrics.bossInterest}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-amber-400 transition-all duration-300" style={{ width: `${farmingState.metrics.bossInterest}%` }} />
-            </div>
-          </div>
+        {(() => {
+          const rawBi = farmingState.metrics.bossInterest;
+          const currentBossInterest = typeof rawBi === 'number'
+            ? rawBi
+            : (selectedTargetWish === 1 ? rawBi.first : selectedTargetWish === 2 ? rawBi.second : rawBi.third) || 0;
 
-          {/* ② 희망 부서 내 인지도 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">② 희망 부서 내 인지도</span>
-              <span className="font-pixel text-blue-400 font-bold">{farmingState.metrics.deptAwareness}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-400 transition-all duration-300" style={{ width: `${farmingState.metrics.deptAwareness}%` }} />
-            </div>
-          </div>
+          const rawAw = farmingState.metrics.deptAwareness;
+          const currentAwareness = typeof rawAw === 'number'
+            ? rawAw
+            : (selectedTargetWish === 1 ? rawAw.first : selectedTargetWish === 2 ? rawAw.second : rawAw.third) || 0;
 
-          {/* ③ 소문 확산도 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">③ 소문 확산도</span>
-              <span className="font-pixel text-purple-400 font-bold">{farmingState.metrics.rumorSpread}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-400 transition-all duration-300" style={{ width: `${farmingState.metrics.rumorSpread}%` }} />
-            </div>
-          </div>
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              {/* ① 희망 부서장 관심도 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">① {selectedTargetWish}지망 부서장 관심도</span>
+                  <span className="font-pixel text-amber-400 font-bold">{currentBossInterest}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-400 transition-all duration-300" style={{ width: `${currentBossInterest}%` }} />
+                </div>
+              </div>
 
-          {/* ④ 현재 부서 잔류 압력 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">④ 현 부서 잔류 압력</span>
-              <span className="font-pixel text-rose-400 font-bold">{farmingState.metrics.stayPressure}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-rose-400 transition-all duration-300" style={{ width: `${farmingState.metrics.stayPressure}%` }} />
-            </div>
-          </div>
+              {/* ② 희망 부서 내 인지도 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">② {selectedTargetWish}지망 부서 내 인지도</span>
+                  <span className="font-pixel text-blue-400 font-bold">{currentAwareness}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-400 transition-all duration-300" style={{ width: `${currentAwareness}%` }} />
+                </div>
+              </div>
 
-          {/* ⑤ 인사 정보 신뢰도 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">⑤ 정보 신뢰도 (TO 파악)</span>
-              <span className="font-pixel text-cyan-400 font-bold">{farmingState.metrics.infoConfidence}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-cyan-400 transition-all duration-300" style={{ width: `${farmingState.metrics.infoConfidence}%` }} />
-            </div>
-          </div>
+              {/* ③ 소문 확산도 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">③ 편집국 소문 확산도</span>
+                  <span className="font-pixel text-purple-400 font-bold">{farmingState.metrics.rumorSpread}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-400 transition-all duration-300" style={{ width: `${farmingState.metrics.rumorSpread}%` }} />
+                </div>
+              </div>
 
-          {/* 기사 작성 성과 점수 */}
-          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">⑥ 기사 성과 (묵묵한 실적)</span>
-              <span className="font-pixel text-emerald-400 font-bold">{farmingState.metrics.articleScore} P</span>
+              {/* ④ 현재 부서 잔류 압력 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">④ 현 부서 잔류 압력</span>
+                  <span className="font-pixel text-rose-400 font-bold">{farmingState.metrics.stayPressure}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-rose-400 transition-all duration-300" style={{ width: `${farmingState.metrics.stayPressure}%` }} />
+                </div>
+              </div>
+
+              {/* ⑤ 인사 정보 신뢰도 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">⑤ 정보 신뢰도 (TO 파악)</span>
+                  <span className="font-pixel text-cyan-400 font-bold">{farmingState.metrics.infoConfidence}%</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyan-400 transition-all duration-300" style={{ width: `${farmingState.metrics.infoConfidence}%` }} />
+                </div>
+              </div>
+
+              {/* 기사 작성 성과 점수 */}
+              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-400">⑥ 기사 성과 (묵묵한 실적)</span>
+                  <span className="font-pixel text-emerald-400 font-bold">{farmingState.metrics.articleScore} P</span>
+                </div>
+                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-400 transition-all duration-300" style={{ width: `${farmingState.metrics.articleScore}%` }} />
+                </div>
+              </div>
             </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-400 transition-all duration-300" style={{ width: `${farmingState.metrics.articleScore}%` }} />
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* 희망 부서 3곳의 미니 블록 밭 상태 */}
         <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-xs">
           <div className="text-slate-300 mb-2.5 flex items-center justify-between font-pixel">
             <span className="flex items-center gap-1.5 text-emerald-300">
               <Sprout className="w-4 h-4 text-emerald-400" />
-              희망 부서 3곳의 복셀 밭 재배 현황:
+              희망 부서 3곳의 개별 복셀 밭 재배 현황:
             </span>
-            <span className="text-[11px] text-slate-500 font-sans">“밭을 정성스레 갈아도 수확은 편집국장의 몫입니다.”</span>
+            <span className="text-[11px] text-slate-500 font-sans">“각 부서에 들인 정성이 개별 밭에 분리되어 누적됩니다.”</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { num: 1, name: wishes.first.deptName, stage: farmingState.metrics.sproutStage.first, to: wishes.first.expectedTO },
-              { num: 2, name: wishes.second.deptName, stage: farmingState.metrics.sproutStage.second, to: wishes.second.expectedTO },
-              { num: 3, name: wishes.third.deptName, stage: farmingState.metrics.sproutStage.third, to: wishes.third.expectedTO }
+              {
+                num: 1,
+                name: wishes.first.deptName,
+                stage: farmingState.metrics.sproutStage.first,
+                to: wishes.first.expectedTO,
+                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.first,
+                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.first
+              },
+              {
+                num: 2,
+                name: wishes.second.deptName,
+                stage: farmingState.metrics.sproutStage.second,
+                to: wishes.second.expectedTO,
+                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.second,
+                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.second
+              },
+              {
+                num: 3,
+                name: wishes.third.deptName,
+                stage: farmingState.metrics.sproutStage.third,
+                to: wishes.third.expectedTO,
+                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.third,
+                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.third
+              }
             ].map((f) => {
               const isNone = f.name === '없음' || f.name === '선택 안 함';
               return (
@@ -366,13 +401,19 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
                   <div className={`font-pixel font-bold text-sm my-1 ${isNone ? 'text-slate-500 line-through' : 'text-slate-100'}`}>
                     {isNone ? '미지원' : `${f.name} 밭`}
                   </div>
-                  <div className="my-1.5 px-3 py-1 bg-slate-950 rounded-full border border-slate-800 text-xs font-pixel flex items-center gap-1">
+                  <div className="my-1 px-2.5 py-1 bg-slate-950 rounded-full border border-slate-800 text-[11px] font-pixel flex items-center gap-1">
                     {isNone ? (
                       <span className="text-slate-500">📭 (미지원)</span>
                     ) : (
                       <span className="text-emerald-300">{getSproutEmoji(f.stage)}</span>
                     )}
                   </div>
+                  {!isNone && (
+                    <div className="flex justify-between w-full text-[10px] text-slate-400 px-1 my-0.5 font-pixel">
+                      <span>부장관심: <strong className="text-amber-400">{f.bi}%</strong></span>
+                      <span>인지도: <strong className="text-blue-400">{f.aw}%</strong></span>
+                    </div>
+                  )}
                   <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
                     <div
                       className={`h-full transition-all duration-300 ${isNone ? 'bg-slate-700' : 'bg-emerald-400'}`}

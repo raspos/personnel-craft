@@ -10,6 +10,7 @@ import {
 import { drawFinalAppointment } from '../../utils/simulationEngine';
 import { analyzeCareer } from '../../utils/careerAnalysis';
 import { sound } from '../../utils/sound';
+import { recordCompletedRun } from '../VisitorCounter';
 import confetti from 'canvas-confetti';
 import {
   RotateCcw,
@@ -66,6 +67,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
     }
     setIsOpening(true);
     sound.playPaperDesk();
+    recordCompletedRun(); // 정직한 실제 완주 횟수 집계
     const finalOutcome = drawFinalAppointment(probabilities, wishes, currentDeptName);
     setResult(finalOutcome);
 
@@ -286,8 +288,12 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 </div>
               </div>
               <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">희망부서 인지도</div>
-                <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">{farmingState.metrics.deptAwareness}%</div>
+                <div className="text-slate-400 text-[11px]">1지망 부서 인지도</div>
+                <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">
+                  {typeof farmingState.metrics.deptAwareness === 'number'
+                    ? farmingState.metrics.deptAwareness
+                    : farmingState.metrics.deptAwareness.first}%
+                </div>
               </div>
               <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                 <div className="text-slate-400 text-[11px]">현 부서 잔류 압력</div>
