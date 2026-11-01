@@ -367,8 +367,10 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
     }
   }, [stage, careers, wishes, farmingSprouts]);
 
-  // 마우스/터치 드래그로 3D 시점 둘러보기
+  // 마우스 드래그로 3D 시점 둘러보기 (모바일 터치 세로 스크롤 완전 허용)
   const handlePointerDown = (e: React.PointerEvent) => {
+    // 터치 기기는 브라우저 네이티브 세로 스크롤이 자연스럽게 올라가도록 회전 이벤트 패스
+    if (e.pointerType === 'touch') return;
     isDraggingRef.current = true;
     prevMousePosRef.current = { x: e.clientX, y: e.clientY };
   };
@@ -391,10 +393,11 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
-      className="relative w-full h-full min-h-[340px] md:min-h-[460px] overflow-hidden rounded-xl border border-slate-700 bg-slate-950 shadow-2xl cursor-grab active:cursor-grabbing select-none"
+      style={{ touchAction: 'pan-y' }}
+      className="relative w-full h-full min-h-[240px] sm:min-h-[320px] md:min-h-[460px] overflow-hidden rounded-xl border border-slate-700 bg-slate-950 shadow-2xl select-none"
     >
       {!webGLFailed ? (
-        <canvas ref={canvasRef} className="w-full h-full block" />
+        <canvas ref={canvasRef} style={{ touchAction: 'pan-y' }} className="w-full h-full block" />
       ) : (
         // 2D 복셀 그래픽 대체 모드 (저사양/WebGL 미지원 시)
         <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 p-6 text-center">

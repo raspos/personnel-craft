@@ -134,9 +134,9 @@ export const App: React.FC = () => {
       {/* 메인 게임 영역 (3D 뷰어 + 스테이지 컨트롤) */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* 좌측(데스크톱) / 상단(모바일): 3D 복셀 월드 캔버스 - 모바일에서는 스크롤 시 함께 위로 올라가도록 relative 적용 */}
-          <div className="lg:col-span-5 xl:col-span-5 relative lg:sticky lg:top-20 z-10">
-            <div className="h-[280px] sm:h-[380px] lg:h-[580px] w-full">
+          {/* 좌측(데스크톱: 고정) / 상단(모바일: 스크롤 시 함께 위로 훌쩍 올라감) */}
+          <div className="lg:col-span-5 xl:col-span-5 relative lg:sticky lg:top-24 z-10 w-full">
+            <div className="h-[250px] sm:h-[340px] lg:h-[580px] w-full">
               <VoxelWorldCanvas
                 stage={stage}
                 profile={profile}

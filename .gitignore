@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.exe
+OgGen.exe
+OgGenerator.cs
+generate_og.ps1
