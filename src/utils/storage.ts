@@ -1,5 +1,6 @@
-import { CharacterProfile, CareerRecord, WishSelection, FarmingState } from '../types/game';
+import { Stage, CharacterProfile, CareerRecord, WishSelection, FarmingState } from '../types/game';
 
+const STORAGE_KEY_STAGE = 'personnel_craft_stage_v1';
 const STORAGE_KEY_PROFILE = 'personnel_craft_profile_v1';
 const STORAGE_KEY_CAREERS = 'personnel_craft_careers_v1';
 const STORAGE_KEY_WISHES = 'personnel_craft_wishes_v1';
@@ -27,31 +28,31 @@ export const DEFAULT_CAREERS: CareerRecord[] = [];
 export const DEFAULT_WISHES: WishSelection = {
   first: {
     deptName: '정치부',
-    expectedTO: '2명',
-    longTermWorkers: '2명',
-    bossRelation: '과거 같은 부서에서 근무한 동료',
-    relationTemp: '좋은 관계',
-    recruitIntent: '관심은 있어 보임'
+    expectedTO: '모름',
+    longTermWorkers: '모름',
+    bossRelation: '잘 모름',
+    relationTemp: '보통',
+    recruitIntent: '전혀 모름'
   },
   second: {
-    deptName: '국제부',
-    expectedTO: '1명',
-    longTermWorkers: '1명',
-    bossRelation: '인사만 하는 사이',
+    deptName: '경제부',
+    expectedTO: '모름',
+    longTermWorkers: '모름',
+    bossRelation: '잘 모름',
     relationTemp: '보통',
-    recruitIntent: '특별한 의사 표현 없음'
+    recruitIntent: '전혀 모름'
   },
   third: {
-    deptName: '증권부',
-    expectedTO: '1명',
-    longTermWorkers: '없음',
-    bossRelation: '대학 선후배',
-    relationTemp: '좋은 관계',
-    recruitIntent: '긍정적 의사 표현'
+    deptName: '산업부',
+    expectedTO: '모름',
+    longTermWorkers: '모름',
+    bossRelation: '잘 모름',
+    relationTemp: '보통',
+    recruitIntent: '전혀 모름'
   },
-  avoidDept: '편집부',
-  currentBossIntent: '이동을 허용할 가능성이 높다',
-  applyBossRelation: true
+  avoidDept: '',
+  currentBossIntent: '잘 모르겠다',
+  applyBossRelation: false // 기본은 객관적 역량 중심 (OFF)
 };
 
 export const DEFAULT_FARMING_STATE: FarmingState = {
@@ -162,7 +163,31 @@ export function resetFarmingStorage(): FarmingState {
   return createFreshFarmingState();
 }
 
+export function loadStage(): Stage {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_STAGE);
+    if (raw) {
+      const parsed = parseFloat(raw);
+      if ([1, 2, 3, 3.5, 4, 5].includes(parsed)) {
+        return parsed as Stage;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load stage', e);
+  }
+  return 1;
+}
+
+export function saveStage(stage: Stage) {
+  try {
+    localStorage.setItem(STORAGE_KEY_STAGE, String(stage));
+  } catch (e) {
+    console.error('Failed to save stage', e);
+  }
+}
+
 export function resetAllData() {
+  localStorage.removeItem(STORAGE_KEY_STAGE);
   localStorage.removeItem(STORAGE_KEY_PROFILE);
   localStorage.removeItem(STORAGE_KEY_CAREERS);
   localStorage.removeItem(STORAGE_KEY_WISHES);

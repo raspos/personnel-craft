@@ -62,7 +62,7 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
       });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
       rendererRef.current = renderer;
     } catch (err) {
       console.warn('WebGL is not supported or failed, falling back to 2D view', err);
@@ -140,12 +140,12 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
     handleResize();
     window.addEventListener('resize', handleResize);
 
-    // 애니메이션 렌더 루프
+    // 애니메이션 렌더 루프 (표준 고해상도 타이머 사용으로 Three.js Clock deprecation 경고 제거)
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const startTime = performance.now();
 
     const renderLoop = () => {
-      const elapsedTime = clock.getElapsedTime() * 1000;
+      const elapsedTime = performance.now() - startTime;
       if (characterRef.current) {
         characterRef.current.animate(elapsedTime);
       }

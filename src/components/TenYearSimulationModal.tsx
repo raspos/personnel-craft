@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CareerRecord, WishSelection } from '../types/game';
 import { runSimulation, drawFinalAppointment } from '../utils/simulationEngine';
+import { DEFAULT_DEPARTMENTS } from '../data/departments';
 import { X, Play, Clock, Award, Shield, Sparkles } from 'lucide-react';
 import { sound } from '../utils/sound';
 
@@ -39,15 +40,36 @@ export const TenYearSimulationModal: React.FC<Props> = ({
     const steps: TenYearStep[] = [];
 
     let currentDept = careers.length > 0 ? careers[careers.length - 1].deptName : '사회부';
-    let simCareers = [...careers];
+    let simCareers: CareerRecord[] = JSON.parse(JSON.stringify(careers));
+    let simWishes: WishSelection = JSON.parse(JSON.stringify(wishes));
     const baseYear = hireYear + Math.floor(careers.reduce((s, c) => s + c.periodMonths, 0) / 12);
 
     for (let i = 1; i <= 20; i++) {
       const year = baseYear + Math.floor((i - 1) / 2);
       const half = i % 2 === 1 ? '상반기' : '하반기';
 
-      const simRes = runSimulation(simCareers, wishes, null, 1000);
-      const outcome = drawFinalAppointment(simRes.probabilities, wishes, currentDept);
+      // 1지망 부서에 이미 안착한 경우, 차기 희망 부서로 동적 리밸런싱 (현 소속 부서를 또 지망하지 않음)
+      if (simWishes.first.deptName === currentDept) {
+        const used = new Set([currentDept, simWishes.second.deptName, simWishes.third.deptName, simWishes.avoidDept]);
+        const nextCand = DEFAULT_DEPARTMENTS.find(d => !used.has(d.name))?.name || '기획취재부';
+        simWishes = {
+          ...simWishes,
+          first: { ...simWishes.second },
+          second: { ...simWishes.third },
+          third: {
+            ...simWishes.third,
+            deptName: nextCand,
+            expectedTO: '1명',
+            bossRelation: '인사만 하는 사이',
+            relationTemp: '보통',
+            recruitIntent: '특별한 의사 표현 없음'
+          }
+        };
+      }
+
+      // 시뮬레이션 실행 (해석해 닫힌 해 기반)
+      const simRes = runSimulation(simCareers, simWishes, null, 1000, undefined, currentDept);
+      const outcome = drawFinalAppointment(simRes.probabilities, simWishes, currentDept);
 
       steps.push({
         index: i,
@@ -57,14 +79,21 @@ export const TenYearSimulationModal: React.FC<Props> = ({
         resultType: outcome.resultType
       });
 
+      const isSameDept = outcome.assignedDept === currentDept;
       currentDept = outcome.assignedDept;
-      // 가상 경력에 추가 누적
-      simCareers.push({
-        id: `ten_${i}`,
-        deptName: outcome.assignedDept,
-        periodMonths: 6,
-        subFields: [{ name: '취재', months: 6 }]
-      });
+
+      if (isSameDept && simCareers.length > 0) {
+        // 동일 부서 잔류 시 해당 부서 근속을 6개월 연장 (근속 누적으로 다음 턴 이동 압력 자연스럽게 상승)
+        simCareers[simCareers.length - 1].periodMonths += 6;
+      } else {
+        // 새 부서로 이동 시 신규 6개월 블록 추가
+        simCareers.push({
+          id: `ten_${i}`,
+          deptName: outcome.assignedDept,
+          periodMonths: 6,
+          subFields: [{ name: '취재', months: 6 }]
+        });
+      }
     }
 
     // 최종 타이틀 도출

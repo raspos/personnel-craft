@@ -184,7 +184,7 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     catalogKey = '더그아웃의 하이에나·스포츠 현장 승부사';
   } else if (cultureMonths / totalMonths >= 0.35) {
     catalogKey = '시사회 단골·대중문화 비평가';
-  } else if ((deptMonths['증권부'] || 0) >= 24 || (deptMonths['증권부'] || 0) / totalMonths >= 0.4) {
+  } else if ((deptMonths['증권부'] || 0) / totalMonths >= 0.40 || ((deptMonths['증권부'] || 0) >= 24 && (deptMonths['증권부'] || 0) > (deptMonths['경제부'] || 0))) {
     catalogKey = '여의도 자본시장 파수꾼 (개미들의 구원투수)';
   } else if (investDataMonths / totalMonths >= 0.25) {
     catalogKey = '상복 터진 탐사보도 헌터';
@@ -228,10 +228,13 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
   const detailedSpecialty = matchedTemplate.detailedSpecialty;
   const description = matchedTemplate.description;
 
-  // 2. 스킬트리 계산 (0 ~ 100 상대적 경험 축적치)
+  // 2. 스킬트리 계산 (완만한 로그 성장 곡선 적용: 3년에 95점 포화 버그 완전 해결)
+  // 1년(12개월): 약 40점, 3년(36개월): 약 60점, 5년(60개월): 약 70점, 10년(120개월): 약 85점, 20년(240개월): 98점
   const calcScore = (rawMonths: number, baseWeight: number = 1.0) => {
-    const score = Math.min(95, Math.round(15 + (rawMonths * 2.2 * baseWeight)));
-    return Math.max(15, score);
+    if (rawMonths <= 0) return 15;
+    const effectiveMonths = rawMonths * baseWeight;
+    const curve = Math.round(15 + 23 * Math.log(1 + effectiveMonths / 6));
+    return Math.max(15, Math.min(98, curve));
   };
 
   const skillTree: Record<string, number> = {

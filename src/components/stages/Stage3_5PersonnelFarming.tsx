@@ -8,7 +8,7 @@ import {
   SimulationProbabilities
 } from '../../types/game';
 import { executeFarmingAction } from '../../utils/farmingEngine';
-import { runSimulation } from '../../utils/simulationEngine';
+import { runSimulation, getConsecutiveTenureMonths } from '../../utils/simulationEngine';
 import { sound } from '../../utils/sound';
 import {
   Sprout,
@@ -101,13 +101,15 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
       onActionChange('idle');
     }
 
+    const currentDeptMonths = getConsecutiveTenureMonths(careers, currentDeptName);
     const result = executeFarmingAction(
       farmingState,
       wishes,
       actionType,
       selectedTargetWish,
       profile.currentHalf,
-      currentDeptName
+      currentDeptName,
+      currentDeptMonths
     );
 
     setFarmingState(result.nextState);
@@ -377,7 +379,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
                   )}
                 </div>
                 <p className="text-sm text-slate-100 font-medium leading-relaxed italic bg-slate-950/60 p-2.5 rounded border border-slate-800">
-                  “{activeDialogue.text}”
+                  “{activeDialogue.text.replace(/^[“”"']+|[“”"']+$/g, '')}”
                 </p>
               </div>
             </div>

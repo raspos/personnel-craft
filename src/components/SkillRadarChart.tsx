@@ -18,25 +18,31 @@ export const SkillRadarChart: React.FC<SkillRadarChartProps> = ({
   const center = size / 2;
   const radius = size * 0.36; // 라벨 공간 확보
 
-  // 최고 스탯 및 평균 점수 계산 (등급 산출)
+  // 최고 전문성 및 전문 역량 종합 등급 산출 (전문성을 벌주는 9개 축 단순평균 폐지 -> 상위 전문 축 가중합)
   const { maxStatName, avgScore, tier } = useMemo(() => {
     let max = -1;
     let maxName = '';
-    let sum = 0;
     entries.forEach(([name, val]) => {
-      sum += val;
       if (val > max) {
         max = val;
         maxName = name;
       }
     });
-    const avg = entries.length ? Math.round(sum / entries.length) : 0;
-    let t = 'B';
-    if (avg >= 75) t = 'S';
-    else if (avg >= 55) t = 'A';
-    else if (avg >= 35) t = 'B';
+
+    const sortedVals = [...entries].map(e => e[1]).sort((a, b) => b - a);
+    const top1 = sortedVals[0] || 0;
+    const top2 = sortedVals[1] || 0;
+    const top3 = sortedVals[2] || 0;
+    
+    // 전문성을 온전히 인정하는 종합 역량 산식: 1위 전문 축 50% + 2위 30% + 3위 20%
+    const compositeScore = Math.round(top1 * 0.50 + top2 * 0.30 + top3 * 0.20);
+    let t = 'C';
+    if (compositeScore >= 75) t = 'S';
+    else if (compositeScore >= 60) t = 'A';
+    else if (compositeScore >= 40) t = 'B';
     else t = 'C';
-    return { maxStatName: maxName, avgScore: avg, tier: t };
+
+    return { maxStatName: maxName, avgScore: compositeScore, tier: t };
   }, [entries]);
 
   // 각 축의 각도 계산 (12시 방향부터 시계방향)

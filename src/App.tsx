@@ -9,6 +9,8 @@ import {
   FarmingState
 } from './types/game';
 import {
+  loadStage,
+  saveStage,
   loadProfile,
   saveProfile,
   loadCareers,
@@ -44,8 +46,8 @@ import { TenYearSimulationModal } from './components/TenYearSimulationModal';
 import { VisitorCounter } from './components/VisitorCounter';
 
 export const App: React.FC = () => {
-  // 1. 상태 선언
-  const [stage, setStage] = useState<Stage>(1);
+  // 1. 상태 선언 (새로고침 시 진행 단계까지 복원)
+  const [stage, setStage] = useState<Stage>(loadStage());
   const [profile, setProfileState] = useState<CharacterProfile>(loadProfile());
   const [careers, setCareersState] = useState<CareerRecord[]>(loadCareers());
   const [wishes, setWishesState] = useState<WishSelection>(loadWishes());
@@ -103,9 +105,10 @@ export const App: React.FC = () => {
     saveFarmingState(fresh);
   };
 
-  // 3. 스테이지 변경 시 캐릭터 기본 액션 세팅
+  // 3. 스테이지 변경 시 캐릭터 기본 액션 세팅 및 단계 저장
   const handleStageChange = (newStage: Stage) => {
     setStage(newStage);
+    saveStage(newStage);
     if (newStage === 1) setAction('idle');
     else if (newStage === 2) setAction('walk');
     else if (newStage === 3) setAction('idle');
