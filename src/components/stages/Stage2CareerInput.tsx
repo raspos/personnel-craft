@@ -98,13 +98,22 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     setDragOverIdx(null);
   };
 
-  // 근무 기간 변경 (6개월 단위)
-  const handlePeriodChange = (id: string, newMonths: number) => {
+  // 기간 텍스트 포맷 (예: 6개월, 1년, 1년 6개월)
+  const formatPeriod = (months: number) => {
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    if (years === 0) return `${rem}개월`;
+    if (rem === 0) return `${years}년`;
+    return `${years}년 ${rem}개월`;
+  };
+
+  // 근무 기간 변경 (6개월 단위 delta: -6 또는 +6)
+  const handlePeriodChange = (id: string, delta: number) => {
     sound.playBlip();
-    if (newMonths < 6) return;
     setCareers(
       careers.map(c => {
         if (c.id !== id) return c;
+        const newMonths = Math.max(6, Math.min(120, c.periodMonths + delta)); // 최소 6개월, 최대 10년
         const updatedSubFields = c.subFields.map(sf => ({
           ...sf,
           months: Math.max(6, Math.floor(newMonths / Math.max(1, c.subFields.length)))
@@ -270,25 +279,27 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                         최근 부서
                       </span>
                     )}
-                    <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                      {career.periodMonths / 12}년 ({career.periodMonths}개월)
+                    <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-pixel">
+                      {formatPeriod(career.periodMonths)}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     {/* 근무 기간 조절 버튼 */}
-                    <div className="flex items-center bg-slate-800 rounded border border-slate-700 text-xs">
+                    <div className="flex items-center bg-slate-800 rounded-lg border border-slate-700 text-xs shadow-inner">
                       <button
                         onClick={() => handlePeriodChange(career.id, -6)}
-                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold"
+                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
                         title="6개월 감소"
                       >
                         -
                       </button>
-                      <span className="px-2 font-pixel text-amber-300">{career.periodMonths / 12}년</span>
+                      <span className="px-2.5 font-pixel text-amber-300 font-bold min-w-[70px] text-center">
+                        {formatPeriod(career.periodMonths)}
+                      </span>
                       <button
                         onClick={() => handlePeriodChange(career.id, 6)}
-                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold"
+                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
                         title="6개월 증가"
                       >
                         +

@@ -53,10 +53,20 @@ const REPORTER_PROFILE_CATALOG: Record<string, ReporterProfileTemplate> = {
     detailedSpecialty: 'AI 혁명과 플랫폼 생태계를 선도적으로 해설하는 테크 저널리스트',
     description: '빅테크 플랫폼, 생성형 AI, 스타트업 생태계의 패러다임 변화를 발 빠르게 추적했습니다. 난해한 기술 용어를 독자의 눈높이로 풀어내고 기술이 바꿀 사회적 파급력을 통찰합니다.'
   },
+  '스포츠 전문·현장 분석형': {
+    reporterType: '스포츠 전문·현장 분석형',
+    detailedSpecialty: '그라운드의 승부와 스포츠 산업의 생리를 꿰뚫는 현장 승부사',
+    description: '프로야구·축구 등 프로 리그와 국가대표 경기, 선수단과 프런트를 밀착 취재하며 승부의 박진감과 스포츠 비즈니스의 이면을 날카롭게 포착했습니다. 경기장의 뜨거운 호흡을 박진감 넘치는 필력으로 전하는 정통 스포츠 저널리스트입니다.'
+  },
+  '문화·대중예술 전문형': {
+    reporterType: '문화·대중예술 전문형',
+    detailedSpecialty: 'K-콘텐츠와 문화예술 생태계의 흐름을 읽는 문화 저널리스트',
+    description: '영화, 미술, 공연, 출판, 방송·OTT 등 문화예술 생태계와 K-컬처 산업을 깊이 있게 조망하며 시대적 감수성과 문화 담론을 독자들에게 전해 왔습니다. 깊이 있는 비평과 감각적인 문장력을 갖추고 있습니다.'
+  },
   '문화·트렌드 분석형': {
     reporterType: '문화·트렌드 분석형',
-    detailedSpecialty: '대중문화 산업과 시대적 감수성을 포착하는 문화 저널리스트',
-    description: 'K-콘텐츠, 영화·OTT, 스포츠 현장을 밀착 취재하며 대중의 소비 트렌드와 시대정신을 감각적으로 담아냈습니다. 깊이 있는 비평과 독자의 시선을 사로잡는 필력을 겸비하고 있습니다.'
+    detailedSpecialty: '대중문화 산업과 시대적 라이프스타일을 포착하는 트렌드 저널리스트',
+    description: '콘텐츠, 라이프스타일, 여가 트렌드를 두루 취재하며 대중의 소비 트렌드와 시대정신을 감각적으로 담아냈습니다. 독자의 시선을 사로잡는 대중적 기획력이 돋보입니다.'
   },
   '디지털·인터랙티브형': {
     reporterType: '디지털·인터랙티브형',
@@ -195,6 +205,10 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     } else {
       catalogKey = '디지털·인터랙티브형';
     }
+  } else if ((deptMonths['스포츠부'] || 0) / totalMonths >= 0.35) {
+    catalogKey = '스포츠 전문·현장 분석형';
+  } else if ((deptMonths['문화부'] || 0) / totalMonths >= 0.35) {
+    catalogKey = '문화·대중예술 전문형';
   } else if (cultureSportMonths / totalMonths >= 0.4) {
     catalogKey = '문화·트렌드 분석형';
   } else if (careers.length >= 3) {
