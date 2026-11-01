@@ -61,7 +61,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
-  const analysis = analyzeCareer(careers);
+  const analysis = analyzeCareer(careers, isEn);
 
   // 결과 개봉 함수 (타이머 중복 실행 완벽 방지)
   const revealResult = () => {
@@ -72,7 +72,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
     setIsOpening(true);
     sound.playPaperDesk();
     recordCompletedRun(); // 정직한 실제 완주 횟수 집계
-    const finalOutcome = drawFinalAppointment(probabilities, wishes, currentDeptName);
+    const finalOutcome = drawFinalAppointment(probabilities, wishes, currentDeptName, isEn);
     setResult(finalOutcome);
 
     setTimeout(() => {

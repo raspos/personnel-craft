@@ -96,6 +96,34 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
       : '“원하는 부서에 꼭 배치되길 바라네. 인사위원회 결과를 지켜보자고.”';
   };
 
+  const translateRelation = (rel: string): string => {
+    if (!isEn) return rel;
+    const map: Record<string, string> = {
+      '과거 직속 부장·데스크': 'Former Direct Chief',
+      '과거 같은 부서에서 근무한 동료': 'Former Colleague',
+      '다른 부서에서 업무상 협업': 'Cross-Desk Collaborator',
+      '대학 선후배': 'University Alumni',
+      '술자리 친구·사적 친분': 'Close Friend',
+      '인사만 하는 사이': 'Casual Acquaintance',
+      '얼굴만 아는 사이': 'Known by Face Only',
+      '안면이 전혀 없는 사이': 'Complete Stranger'
+    };
+    return map[rel] || rel;
+  };
+
+  const translateTemp = (tmp: string): string => {
+    if (!isEn) return tmp;
+    const map: Record<string, string> = {
+      '매우 좋은 관계': 'Excellent',
+      '좋은 관계': 'Good',
+      '보통': 'Neutral',
+      '잘 모름': 'Unknown',
+      '다소 껄끄러움': 'Awkward',
+      '좋지 않은 관계': 'Strained'
+    };
+    return map[tmp] || tmp;
+  };
+
   const currentWishConfig = activeTab === 1 ? wishes.first : activeTab === 2 ? wishes.second : wishes.third;
   const isCurrentWishNone = currentWishConfig.deptName === '없음' || currentWishConfig.deptName === '선택 안 함';
   const isStayWish = activeTab === 1 && currentWishConfig.deptName === currentDeptName;
@@ -264,17 +292,19 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             >
               {activeTab === 1 && currentDeptName && (
                 <option value={currentDeptName}>
-                  📌 현 부서 잔류 ({currentDeptName})
+                  {isEn ? `📌 Stay on Current Beat (${getDepartmentByName(currentDeptName)?.nameEn || currentDeptName})` : `📌 현 부서 잔류 (${currentDeptName})`}
                 </option>
               )}
               {activeTab !== 1 && (
                 <option value="없음">
-                  {activeTab === 2 ? '없음 (1지망 올인 / 미지원)' : '없음 (선택 안 함 / 미지원)'}
+                  {activeTab === 2
+                    ? (isEn ? 'None (All-in on 1st / Unfilled)' : '없음 (1지망 올인 / 미지원)')
+                    : (isEn ? 'None (Unfilled / Leave Blank)' : '없음 (선택 안 함 / 미지원)')}
                 </option>
               )}
               {DEFAULT_DEPARTMENTS.filter(d => activeTab === 1 || d.name !== currentDeptName).map((d) => (
                 <option key={d.id} value={d.name}>
-                  {d.name} {activeTab === 1 && d.name === currentDeptName ? '(현재 소속 부서)' : ''}
+                  {isEn ? (d.nameEn || d.name) : d.name} {activeTab === 1 && d.name === currentDeptName ? (isEn ? '(Current Beat)' : '(현재 소속 부서)') : ''}
                 </option>
               ))}
             </select>
@@ -286,15 +316,19 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           <div className="p-8 text-center bg-slate-950/80 rounded-xl border border-slate-800 space-y-3">
             <div className="text-4xl">📭</div>
             <div className="font-pixel text-slate-200 text-base font-bold">
-              {activeTab}지망을 선택하지 않았습니다 (공란 접수)
+              {isEn ? `${activeTab === 1 ? '1st' : activeTab === 2 ? '2nd' : '3rd'} Wish Left Unfilled` : `${activeTab}지망을 선택하지 않았습니다 (공란 접수)`}
             </div>
             <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
               {activeTab === 2
-                ? '2지망과 3지망을 모두 비워두고 1지망에 올인합니다. 1지망에 배치되지 않을 경우 현재 부서 잔류 또는 기타 부서 발령을 감수합니다.'
-                : '3지망을 비워둡니다. 1지망 및 2지망 내에서 승부를 보며, 3지망으로의 분산 이동을 원하지 않습니다.'}
+                ? (isEn
+                    ? 'Leaving 2nd and 3rd wishes empty to gamble all-in on your 1st wish. If not placed, you will accept retention or random transfer.'
+                    : '2지망과 3지망을 모두 비워두고 1지망에 올인합니다. 1지망에 배치되지 않을 경우 현재 부서 잔류 또는 기타 부서 발령을 감수합니다.')
+                : (isEn
+                    ? 'Leaving 3rd wish empty to focus purely within 1st and 2nd choices without being diverted elsewhere.'
+                    : '3지망을 비워둡니다. 1지망 및 2지망 내에서 승부를 보며, 3지망으로의 분산 이동을 원하지 않습니다.')}
             </p>
             <div className="inline-block px-3 py-1 bg-blue-950/70 text-blue-300 border border-blue-800 rounded text-[11px] font-pixel">
-              * 해당 지망의 발령 확률 및 가중치는 0%로 고정됩니다.
+              {isEn ? '* Placement probability and weight for this choice are locked at 0%.' : '* 해당 지망의 발령 확률 및 가중치는 0%로 고정됩니다.'}
             </div>
           </div>
         ) : (
@@ -318,8 +352,8 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                     </span>
                     <span className="text-[10px] text-amber-300 ml-auto font-pixel">
                       {isStayWish
-                        ? (isEn ? `Current Boss Ties: ${currentWishConfig.bossRelation}` : `현 부서장과의 관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)
-                        : (isEn ? `Chief Ties: ${currentWishConfig.bossRelation}` : `관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)}
+                        ? (isEn ? `Current Boss Ties: ${translateRelation(currentWishConfig.bossRelation)} (${translateTemp(currentWishConfig.relationTemp)})` : `현 부서장과의 관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)
+                        : (isEn ? `Chief Ties: ${translateRelation(currentWishConfig.bossRelation)} (${translateTemp(currentWishConfig.relationTemp)})` : `관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)}
                     </span>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-slate-100 text-sm font-medium leading-relaxed italic relative">

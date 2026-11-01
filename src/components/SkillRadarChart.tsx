@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface SkillRadarChartProps {
   skills: Record<string, number>; // { '정치·정책': 85, '경제·금융': 60, ... }
@@ -11,6 +12,25 @@ export const SkillRadarChart: React.FC<SkillRadarChartProps> = ({
   size = 320,
   showLabels = true
 }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+
+  const translateSkill = (name: string): string => {
+    if (!isEn) return name;
+    const map: Record<string, string> = {
+      '정치·정책': 'Politics',
+      '경제·금융': 'Economy',
+      '기업·산업': 'Industry',
+      '외교·국제': 'Diplomacy',
+      '현장취재': 'Field Beat',
+      '탐사·기획': 'Investigative',
+      '데이터 분석': 'Data Analysis',
+      '기술·디지털': 'Tech & Digital',
+      '콘텐츠·편집': 'Editing'
+    };
+    return map[name] || name;
+  };
+
   const entries = useMemo(() => Object.entries(skills), [skills]);
   const count = entries.length;
   if (count < 3) return null;
@@ -204,7 +224,7 @@ export const SkillRadarChart: React.FC<SkillRadarChartProps> = ({
                   }`}
                   style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}
                 >
-                  {name}
+                  {translateSkill(name)}
                 </text>
                 <text
                   textAnchor={anchor}
@@ -224,10 +244,10 @@ export const SkillRadarChart: React.FC<SkillRadarChartProps> = ({
       <div className="flex items-center gap-3 mt-1 px-3 py-1 bg-slate-900/80 border border-slate-700/60 rounded-full text-xs text-slate-300">
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          주력 전문성: <strong className="text-amber-300">{maxStatName}</strong>
+          {isEn ? 'Primary Specialty: ' : '주력 전문성: '}<strong className="text-amber-300">{translateSkill(maxStatName)}</strong>
         </span>
         <span className="text-slate-600">|</span>
-        <span className="text-slate-400">종합 등급: <strong className="text-sky-300 font-pixel">{tier} CLASS</strong></span>
+        <span className="text-slate-400">{isEn ? 'Rating Tier: ' : '종합 등급: '}<strong className="text-sky-300 font-pixel">{tier} CLASS</strong></span>
       </div>
     </div>
   );

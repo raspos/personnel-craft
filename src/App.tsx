@@ -28,6 +28,7 @@ import {
   DEFAULT_FARMING_STATE
 } from './utils/storage';
 import { SUDDEN_EVENTS } from './data/events';
+import { getDepartmentByName } from './data/departments';
 import { runSimulation } from './utils/simulationEngine';
 import { analyzeCareer } from './utils/careerAnalysis';
 import { CharacterAction } from './components/3d/VoxelCharacter';
@@ -141,7 +142,7 @@ export const App: React.FC = () => {
 
   // 4. 데이터 초기화
   const handleReset = () => {
-    if (confirm('모든 캐릭터 신상정보와 커리어 블록, 희망 부서, 인사 농사 데이터를 완전히 초기화하시겠습니까?')) {
+    if (confirm(isEn ? 'Are you sure you want to reset all character info, career blocks, department wishes, and reshuffle politicking data?' : '모든 캐릭터 신상정보와 커리어 블록, 희망 부서, 인사 농사 데이터를 완전히 초기화하시겠습니까?')) {
       resetAllData();
       setProfileState(DEFAULT_PROFILE);
       setCareersState([]);
@@ -157,7 +158,7 @@ export const App: React.FC = () => {
   const simulation = useMemo(() => {
     return runSimulation(careers, wishes, activeEvent, 10000, farmingState, currentDept);
   }, [careers, wishes, activeEvent, farmingState, currentDept]);
-  const analysis = useMemo(() => analyzeCareer(careers), [careers]);
+  const analysis = useMemo(() => analyzeCareer(careers, isEn), [careers, isEn]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
@@ -204,7 +205,7 @@ export const App: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-amber-300 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                  {isEn ? `Current Beat: ${currentDept}` : `현재 소속: ${currentDept}`}
+                  {isEn ? `Current Beat: ${getDepartmentByName(currentDept)?.nameEn || currentDept}` : `현재 소속: ${currentDept}`}
                 </div>
               </div>
             ) : (
@@ -308,9 +309,11 @@ export const App: React.FC = () => {
       {/* 푸터 */}
       <footer className="w-full bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-400 font-pixel space-y-3">
         <div>
-          <p className="font-bold text-slate-300">인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기</p>
+          <p className="font-bold text-slate-300">
+            {isEn ? 'PERSONNEL CRAFT — Newsroom Reshuffle Survival Simulator' : '인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기'}
+          </p>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            데이터저널리즘 가상 시뮬레이션 인터랙티브 프로젝트
+            {isEn ? 'Data Journalism Virtual Reshuffle Simulation Interactive Project' : '데이터저널리즘 가상 시뮬레이션 인터랙티브 프로젝트'}
           </p>
         </div>
 
@@ -327,7 +330,7 @@ export const App: React.FC = () => {
           </span>
           <span className="text-slate-700">|</span>
           <span className="text-slate-500 italic">
-            “인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.”
+            {isEn ? '“You sow the reshuffle seeds, but the Editor-in-Chief harvests the orders.”' : '“인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.”'}
           </span>
         </div>
       </footer>

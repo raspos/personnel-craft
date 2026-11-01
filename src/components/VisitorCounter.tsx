@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Award, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const STORAGE_TODAY_DATE = 'pcraft_run_date_v3';
 const STORAGE_TODAY_RUNS = 'pcraft_today_runs_v3';
@@ -53,6 +54,8 @@ export function getPersonalRuns(): { today: number; total: number } {
 
 // 5단계 결과 화면에 들어가는 정직한 나의 시뮬레이션 완주 배지
 export const PersonalRunBadge: React.FC = () => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [stats, setStats] = useState<{ today: number; total: number }>(getPersonalRuns());
 
   useEffect(() => {
@@ -67,16 +70,16 @@ export const PersonalRunBadge: React.FC = () => {
   return (
     <div 
       className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs font-pixel shadow-sm select-none"
-      title="기자님이 이 브라우저에서 인사발령 결과까지 완주한 총 시뮬레이션 횟수입니다."
+      title={isEn ? "Total number of completed reshuffle simulations in this browser." : "기자님이 이 브라우저에서 인사발령 결과까지 완주한 총 시뮬레이션 횟수입니다."}
     >
       <Award className="w-3.5 h-3.5 text-amber-400" />
-      <span className="text-slate-400">나의 시뮬레이션 도전 기록:</span>
+      <span className="text-slate-400">{isEn ? 'My Simulation Record:' : '나의 시뮬레이션 도전 기록:'}</span>
       <span className="font-bold text-amber-300">
-        제{stats.total}회차 완주
+        {isEn ? `Run #${stats.total} Completed` : `제${stats.total}회차 완주`}
       </span>
       {stats.today > 1 && (
         <span className="text-[10px] text-slate-500 font-normal">
-          (오늘 {stats.today}번째)
+          {isEn ? `(#${stats.today} today)` : `(오늘 ${stats.today}번째)`}
         </span>
       )}
     </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CareerRecord, SubFieldExperience } from '../../types/game';
 import { DEFAULT_DEPARTMENTS, getDepartmentByName } from '../../data/departments';
-import { analyzeCareer } from '../../utils/careerAnalysis';
+import { analyzeCareer, SUBFIELD_TRANSLATIONS } from '../../utils/careerAnalysis';
 import {
   Plus,
   Trash2,
@@ -42,7 +42,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
-  const analysis = analyzeCareer(careers);
+  const analysis = analyzeCareer(careers, isEn);
 
   // 부서 추가
   const handleAddCareer = () => {
@@ -101,10 +101,15 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     setDragOverIdx(null);
   };
 
-  // 기간 텍스트 포맷 (예: 6개월, 1년, 1년 6개월)
+  // 기간 텍스트 포맷 (예: 6개월, 1년, 1년 6개월 / 6 mos, 1 yr, 1 yr 6 mos)
   const formatPeriod = (months: number) => {
     const years = Math.floor(months / 12);
     const rem = months % 12;
+    if (isEn) {
+      if (years === 0) return `${rem} mos`;
+      if (rem === 0) return `${years} ${years > 1 ? 'yrs' : 'yr'}`;
+      return `${years} ${years > 1 ? 'yrs' : 'yr'} ${rem} mos`;
+    }
     if (years === 0) return `${rem}개월`;
     if (rem === 0) return `${years}년`;
     return `${years}년 ${rem}개월`;
@@ -171,15 +176,15 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
         <div>
           <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
             <Layers className="w-5 h-5 text-amber-400" />
-            <span>STAGE 2. 나의 기자 커리어 블록</span>
+            <span>{isEn ? 'STAGE 2. My Journalist Career Beat Blocks' : 'STAGE 2. 나의 기자 커리어 블록'}</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
             <ArrowUpDown className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-            <span>블록 좌측 핸들을 마우스나 터치로 끌어다 놓으면 순서가 바로 <strong>스와프(교체)</strong>됩니다.</span>
+            <span>{isEn ? 'Drag and drop the left handle to immediately swap beat blocks in chronological order.' : '블록 좌측 핸들을 마우스나 터치로 끌어다 놓으면 순서가 바로 스와프(교체)됩니다.'}</span>
           </p>
         </div>
         <div className="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 text-xs font-pixel text-slate-300 flex-shrink-0 shadow-[1px_1px_0_#000]">
-          총 경력: <span className="text-amber-400 font-bold text-sm">{analysis.totalYearsText}</span>
+          {isEn ? 'Total Experience:' : '총 경력:'} <span className="text-amber-400 font-bold text-sm">{analysis.totalYearsText}</span>
         </div>
       </div>
 
@@ -280,19 +285,21 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                     {/* 드래그 앤 드롭 스와프 핸들 */}
                     <div
                       className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg bg-slate-800/90 border border-slate-700 hover:border-sky-400 text-slate-400 hover:text-sky-300 transition-colors flex items-center gap-0.5"
-                      title="이 핸들을 끌어서 다른 블록 위치로 스와프(교체)하세요."
+                      title={isEn ? 'Drag this handle to swap position with another block.' : '이 핸들을 끌어서 다른 블록 위치로 스와프(교체)하세요.'}
                     >
                       <GripVertical className="w-4 h-4" />
-                      <span className="text-[10px] font-pixel text-slate-500 hidden sm:inline">스와프</span>
+                      <span className="text-[10px] font-pixel text-slate-500 hidden sm:inline">{isEn ? 'Swap' : '스와프'}</span>
                     </div>
 
                     <span className="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-pixel text-slate-300">
                       {idx + 1}
                     </span>
-                    <span className="font-pixel text-base text-slate-100 font-bold">{career.deptName}</span>
+                    <span className="font-pixel text-base text-slate-100 font-bold">
+                      {isEn ? (deptDef?.nameEn || career.deptName) : career.deptName}
+                    </span>
                     {idx === careers.length - 1 && (
                       <span className="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.2 rounded font-pixel">
-                        최근 부서
+                        {isEn ? 'Current Beat' : '최근 부서'}
                       </span>
                     )}
                     <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-pixel">
@@ -306,7 +313,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                       <button
                         onClick={() => handlePeriodChange(career.id, -6)}
                         className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
-                        title="6개월 감소"
+                        title={isEn ? 'Decrease 6 months' : '6개월 감소'}
                       >
                         -
                       </button>
@@ -316,7 +323,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                       <button
                         onClick={() => handlePeriodChange(career.id, 6)}
                         className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
-                        title="6개월 증가"
+                        title={isEn ? 'Increase 6 months' : '6개월 증가'}
                       >
                         +
                       </button>
@@ -326,7 +333,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                     <button
                       onClick={() => handleRemoveCareer(career.id)}
                       className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded"
-                      title="부서 삭제"
+                      title={isEn ? 'Delete Beat' : '부서 삭제'}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -336,9 +343,9 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                 {/* 세부 취재 분야 태그 (단순 클릭 토글형) */}
                 <div>
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                    <span className="font-pixel">취재 출입처·전문 분야 (클릭하여 켜기/끄기):</span>
+                    <span className="font-pixel">{isEn ? 'Covered Sub-beats / Specialties (Click to toggle):' : '취재 출입처·전문 분야 (클릭하여 켜기/끄기):'}</span>
                     <span className="text-[11px] text-slate-500 font-sans">
-                      * 기간은 전체 근무 기간에 균등 배분됩니다.
+                      {isEn ? '* Months are distributed equally across selected sub-beats.' : '* 기간은 전체 근무 기간에 균등 배분됩니다.'}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -356,7 +363,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                           }`}
                         >
                           <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-400' : 'bg-slate-600'}`} />
-                          <span>{field}</span>
+                          <span>{isEn ? (SUBFIELD_TRANSLATIONS[field] || field) : field}</span>
                         </button>
                       );
                     })}
@@ -373,7 +380,9 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
         <div className="flex items-center justify-between border-b-2 border-slate-950 pb-3">
           <div className="flex items-center gap-2">
             <Hexagon className="w-5 h-5 text-cyan-400" />
-            <h3 className="font-pixel text-base text-amber-300 font-bold">기자 역량 다각형 레이더 & 전문성 분석</h3>
+            <h3 className="font-pixel text-base text-amber-300 font-bold">
+              {isEn ? 'Journalist Competency Radar & Specialization' : '기자 역량 다각형 레이더 & 전문성 분석'}
+            </h3>
           </div>
           <button
             onClick={() => {
@@ -383,7 +392,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             className="pixel-btn-mc text-blue-100 text-xs py-1.5 px-3 rounded flex items-center gap-1 font-pixel"
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>스킬트리 & 커리어패스 상세</span>
+            <span>{isEn ? 'Skill Tree & Career Path Details' : '스킬트리 & 커리어패스 상세'}</span>
           </button>
         </div>
 
@@ -391,7 +400,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
           {/* 좌측: 텍스트 분석 */}
           <div className="md:col-span-7 space-y-2 text-sm">
             <div className="flex items-baseline gap-2">
-              <span className="text-xs text-slate-400">기자 유형:</span>
+              <span className="text-xs text-slate-400">{isEn ? 'Archetype:' : '기자 유형:'}</span>
               <span className="font-pixel text-amber-300 font-bold text-base">{analysis.reporterType}</span>
             </div>
             <div className="text-xs font-pixel text-sky-300">
@@ -401,7 +410,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
               {analysis.description}
             </p>
             <div className="text-[11px] text-slate-400 italic">
-              * 본 다각형 그래프와 평가는 부서 및 취재 분야에 기반한 가상 상대적 축적도입니다.
+              {isEn ? '* This radar chart and rating reflect relative experience accumulation based on beats and subfields.' : '* 본 다각형 그래프와 평가는 부서 및 취재 분야에 기반한 가상 상대적 축적도입니다.'}
             </div>
           </div>
 

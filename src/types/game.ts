@@ -133,9 +133,12 @@ export interface CareerAnalysisResult {
 export interface SuddenEvent {
   id: string;
   title: string;
+  titleEn?: string;
   type: 'scenario' | 'flavor';
   description: string;
+  descriptionEn?: string;
   effectDescription: string;
+  effectDescriptionEn?: string;
   affectedWish?: 1 | 2 | 3;
   toBonus?: number;
   intentBonus?: number;

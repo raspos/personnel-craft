@@ -459,8 +459,10 @@ export function runSimulation(
 export function drawFinalAppointment(
   probabilities: SimulationProbabilities,
   wishes: WishSelection,
-  currentDeptName: string
+  currentDeptName: string,
+  isEn: boolean = false
 ): FinalAppointmentResult {
+  const getDept = (name: string) => isEn ? (getDepartmentByName(name)?.nameEn || name) : name;
   const rand = Math.random() * 100;
   let acc = 0;
 
@@ -471,13 +473,23 @@ export function drawFinalAppointment(
     return {
       assignedDept: wishes.first.deptName,
       resultType: 'first',
-      messageHeadline: isFirstWishStay ? '1지망 달성! 현 부서 잔류 확정' : '대망의 1지망 입성!',
+      messageHeadline: isFirstWishStay
+        ? (isEn ? '1st Wish Achieved: Retention Confirmed!' : '1지망 달성! 현 부서 잔류 확정')
+        : (isEn ? 'Triumphant 1st Wish Placement!' : '대망의 1지망 입성!'),
       messageSubtitle: isFirstWishStay
-        ? `기자님의 뜻대로 [${wishes.first.deptName}] 잔류가 최종 확정되었습니다.`
-        : `축하합니다! ${wishes.first.deptName} 발령이 확정되었습니다.`,
+        ? (isEn
+            ? `Per your wish, retention at [${getDept(wishes.first.deptName)}] has been officially approved.`
+            : `기자님의 뜻대로 [${wishes.first.deptName}] 잔류가 최종 확정되었습니다.`)
+        : (isEn
+            ? `Congratulations! Transfer to ${getDept(wishes.first.deptName)} is officially confirmed.`
+            : `축하합니다! ${wishes.first.deptName} 발령이 확정되었습니다.`),
       flavorQuote: isFirstWishStay
-        ? '“자네가 남아줘서 천군만마를 얻었네. 지금 진행 중인 기획 취재에 전념해주게!”'
-        : '가슴 깊이 품어왔던 취재 계획서를 드디어 데스크에 올릴 때가 왔습니다.',
+        ? (isEn
+            ? '“Having you stay is like gaining an army. Lead our ongoing major investigation to victory!”'
+            : '“자네가 남아줘서 천군만마를 얻었네. 지금 진행 중인 기획 취재에 전념해주게!”')
+        : (isEn
+            ? 'The time has finally come to submit your cherished investigative pitches to the desk.'
+            : '가슴 깊이 품어왔던 취재 계획서를 드디어 데스크에 올릴 때가 왔습니다.'),
       probabilities,
       animationAction: 'celebrate'
     };
@@ -489,9 +501,13 @@ export function drawFinalAppointment(
     return {
       assignedDept: wishes.second.deptName,
       resultType: 'second',
-      messageHeadline: '뜻밖의 기회! 2지망 발령',
-      messageSubtitle: `${wishes.second.deptName}으로 배속되었습니다.`,
-      flavorQuote: '1지망은 아니지만, 새로운 전문성과 취재 네트워크를 구축할 절호의 무대입니다.',
+      messageHeadline: isEn ? 'Unexpected Opportunity: 2nd Wish Landed!' : '뜻밖의 기회! 2지망 발령',
+      messageSubtitle: isEn
+        ? `Officially assigned to ${getDept(wishes.second.deptName)}.`
+        : `${wishes.second.deptName}으로 배속되었습니다.`,
+      flavorQuote: isEn
+        ? 'Not your 1st choice, but a golden opportunity to forge a brand new reporting network.'
+        : '1지망은 아니지만, 새로운 전문성과 취재 네트워크를 구축할 절호의 무대입니다.',
       probabilities,
       animationAction: 'celebrate'
     };
@@ -503,9 +519,13 @@ export function drawFinalAppointment(
     return {
       assignedDept: wishes.third.deptName,
       resultType: 'third',
-      messageHeadline: '선방했다! 3지망 안착',
-      messageSubtitle: `${wishes.third.deptName} 배속 명단에 이름을 올렸습니다.`,
-      flavorQuote: '치열했던 눈치싸움 끝에 희망 부서 턱걸이에 성공했습니다. 이제 실력으로 보여줄 때입니다.',
+      messageHeadline: isEn ? 'Survivor! Squeaked into 3rd Wish' : '선방했다! 3지망 안착',
+      messageSubtitle: isEn
+        ? `Secured a seat on the roster for ${getDept(wishes.third.deptName)}.`
+        : `${wishes.third.deptName} 배속 명단에 이름을 올렸습니다.`,
+      flavorQuote: isEn
+        ? 'Squeaked into your preferences after intense backroom maneuvering. Now prove your worth with scoops.'
+        : '치열했던 눈치싸움 끝에 희망 부서 턱걸이에 성공했습니다. 이제 실력으로 보여줄 때입니다.',
       probabilities,
       animationAction: 'celebrate'
     };
@@ -517,9 +537,13 @@ export function drawFinalAppointment(
     return {
       assignedDept: wishes.avoidDept,
       resultType: 'avoid',
-      messageHeadline: '비상! 기피 부서 전격 발령',
-      messageSubtitle: `피하고 싶었던 [${wishes.avoidDept}] 발령 명단에 적혔습니다...`,
-      flavorQuote: '편집국의 인사 폭풍은 언제나 예측을 비껴갑니다. 굵고 긴 생존 게임이 시작됩니다.',
+      messageHeadline: isEn ? 'Red Alert! Exiled to Blacklist Beat' : '비상! 기피 부서 전격 발령',
+      messageSubtitle: isEn
+        ? `Posted to the dreaded [${getDept(wishes.avoidDept)}] roster...`
+        : `피하고 싶었던 [${wishes.avoidDept}] 발령 명단에 적혔습니다...`,
+      flavorQuote: isEn
+        ? 'Newsroom reshuffle typhoons always defy predictions. A long, gruelling survival game begins.'
+        : '편집국의 인사 폭풍은 언제나 예측을 비껴갑니다. 굵고 긴 생존 게임이 시작됩니다.',
       probabilities,
       animationAction: 'frustrated'
     };
@@ -531,9 +555,13 @@ export function drawFinalAppointment(
     return {
       assignedDept: currentDeptName,
       resultType: 'stay',
-      messageHeadline: '자리 이동 없음 (현 부서 잔류)',
-      messageSubtitle: `이번 인사에서도 [${currentDeptName}]을(를) 굳건히 지킵니다.`,
-      flavorQuote: '올해도 같은 책상에서 뵙겠습니다. "선배, 다음 인사 땐 진짜 보내주시는 거죠?"',
+      messageHeadline: isEn ? 'No Movement: Retained on Current Beat' : '자리 이동 없음 (현 부서 잔류)',
+      messageSubtitle: isEn
+        ? `Guarding [${getDept(currentDeptName)}] through another cycle.`
+        : `이번 인사에서도 [${currentDeptName}]을(를) 굳건히 지킵니다.`,
+      flavorQuote: isEn
+        ? '“See you at the same desk this year, Senior. You will really let me transfer next time, right?”'
+        : '올해도 같은 책상에서 뵙겠습니다. "선배, 다음 인사 땐 진짜 보내주시는 거죠?"',
       probabilities,
       animationAction: 'stay_desk'
     };
@@ -556,9 +584,13 @@ export function drawFinalAppointment(
   return {
     assignedDept: alternativeDept,
     resultType: 'other',
-    messageHeadline: '인사위원회의 반전 카드!',
-    messageSubtitle: `예상치 못한 [${alternativeDept}]으로 깜짝 전격 배치되었습니다.`,
-    flavorQuote: '인생은 기사처럼 계획대로 써지지 않는 법. 새로운 미지의 영역을 개척합니다.',
+    messageHeadline: isEn ? 'Wildcard Decree from the Committee!' : '인사위원회의 반전 카드!',
+    messageSubtitle: isEn
+      ? `Surprise assignment to unexpected [${getDept(alternativeDept)}].`
+      : `예상치 못한 [${alternativeDept}]으로 깜짝 전격 배치되었습니다.`,
+    flavorQuote: isEn
+      ? 'Life, like headlines, rarely writes itself as planned. Pioneer this uncharted territory.'
+      : '인생은 기사처럼 계획대로 써지지 않는 법. 새로운 미지의 영역을 개척합니다.',
     probabilities,
     animationAction: 'stay_desk'
   };

@@ -135,10 +135,14 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
         </div>
 
         <div className="space-y-1">
-          <div className="font-pixel text-base text-slate-100 font-bold">{activeEvent.title}</div>
-          <p className="text-xs text-slate-300">{activeEvent.description}</p>
+          <div className="font-pixel text-base text-slate-100 font-bold">
+            {isEn ? (activeEvent.titleEn || activeEvent.title) : activeEvent.title}
+          </div>
+          <p className="text-xs text-slate-300">
+            {isEn ? (activeEvent.descriptionEn || activeEvent.description) : activeEvent.description}
+          </p>
           <div className="text-xs text-amber-300 font-medium pt-1 font-pixel">
-            ▶ {isEn ? 'Impact Effect: ' : '반영 효과: '}{activeEvent.effectDescription}
+            ▶ {isEn ? 'Impact Effect: ' : '반영 효과: '}{isEn ? (activeEvent.effectDescriptionEn || activeEvent.effectDescription) : activeEvent.effectDescription}
           </div>
         </div>
       </div>

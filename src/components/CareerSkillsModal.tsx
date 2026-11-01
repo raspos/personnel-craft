@@ -15,6 +15,22 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
   const { language } = useLanguage();
   const isEn = language === 'en';
 
+  const translateSkill = (name: string): string => {
+    if (!isEn) return name;
+    const map: Record<string, string> = {
+      '정치·정책': 'Politics',
+      '경제·금융': 'Economy',
+      '기업·산업': 'Industry',
+      '외교·국제': 'Diplomacy',
+      '현장취재': 'Field Beat',
+      '탐사·기획': 'Investigative',
+      '데이터 분석': 'Data Analysis',
+      '기술·디지털': 'Tech & Digital',
+      '콘텐츠·편집': 'Editing'
+    };
+    return map[name] || name;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -93,7 +109,7 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
             {Object.entries(analysis.skillTree).map(([skill, val]) => (
               <div key={skill} className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/80">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-300 font-medium">{skill}</span>
+                  <span className="text-slate-300 font-medium">{translateSkill(skill)}</span>
                   <span className="font-pixel text-amber-400 font-bold">{val} P</span>
                 </div>
                 <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">

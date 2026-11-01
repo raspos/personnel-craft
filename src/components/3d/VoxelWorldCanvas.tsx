@@ -460,9 +460,9 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 rounded-2xl border-4 border-slate-800 text-slate-300 font-pixel p-6 text-center shadow-[4px_4px_0_#000]">
         <div className="text-3xl mb-2">🎮</div>
-        <p className="font-bold text-amber-300">3D 복셀 편집국</p>
+        <p className="font-bold text-amber-300">{isEn ? '3D Voxel Newsroom' : '3D 복셀 편집국'}</p>
         <p className="text-xs text-slate-400 mt-2">
-          (브라우저 WebGL 가속 제한으로 인해 심플 모드로 실행 중입니다)
+          {isEn ? '(Running in simple mode due to browser WebGL limitations)' : '(브라우저 WebGL 가속 제한으로 인해 심플 모드로 실행 중입니다)'}
         </p>
       </div>
     );
@@ -482,7 +482,7 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
       {/* 조작 힌트 뱃지 (마인크래프트 스타일) */}
       <div className="absolute top-3 left-3 bg-slate-950/85 px-3 py-1.5 rounded-lg border-2 border-slate-800 text-[11px] font-pixel text-slate-300 shadow flex items-center gap-1.5 backdrop-blur-sm pointer-events-none">
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>화면 드래그로 360° 둘러보기</span>
+        <span>{isEn ? 'Drag to rotate 360°' : '화면 드래그로 360° 둘러보기'}</span>
       </div>
     </div>
   );

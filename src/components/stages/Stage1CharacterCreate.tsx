@@ -259,28 +259,28 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       <div className="pixel-card p-5 space-y-4">
         <h3 className="font-pixel text-base text-amber-300 border-b-2 border-slate-950 pb-2 flex items-center gap-2">
           <span>🎨</span>
-          <span>3D 블록 외형 커스터마이징</span>
+          <span>{isEn ? '3D Voxel Appearance Customization' : '3D 블록 외형 커스터마이징'}</span>
         </h3>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {/* 머리 스타일 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 font-pixel">머리 모양</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">{isEn ? 'Hair Style' : '머리 모양'}</label>
             <select
               value={profile.appearance.hairStyle}
               onChange={(e) => updateApp({ hairStyle: e.target.value as any })}
               className="voxel-input w-full text-xs"
             >
-              <option value="neat">단정한 스타일</option>
-              <option value="short">숏컷 / 깔끔형</option>
-              <option value="parted">가르마 스타일</option>
-              <option value="messy">마감 철야 헝클어짐</option>
+              <option value="neat">{isEn ? 'Neat / Tidy' : '단정한 스타일'}</option>
+              <option value="short">{isEn ? 'Short Cut' : '숏컷 / 깔끔형'}</option>
+              <option value="parted">{isEn ? 'Side Parted' : '가르마 스타일'}</option>
+              <option value="messy">{isEn ? 'All-nighter Messy' : '마감 철야 헝클어짐'}</option>
             </select>
           </div>
 
           {/* 머리 색상 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 font-pixel">머리 색상</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">{isEn ? 'Hair Color' : '머리 색상'}</label>
             <div className="flex gap-2 items-center">
               {['#0f172a', '#451a03', '#475569', '#b45309'].map((c) => (
                 <button
@@ -297,7 +297,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 
           {/* 상의 색상 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 font-pixel">옷(셔츠) 색상</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">{isEn ? 'Shirt Color' : '옷(셔츠) 색상'}</label>
             <div className="flex gap-2 items-center">
               {['#2563eb', '#dc2626', '#16a34a', '#475569', '#0f172a'].map((c) => (
                 <button
@@ -316,7 +316,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           <div>
             <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1 font-pixel">
               <Award className="w-3.5 h-3.5 text-blue-400" />
-              <span>기자증 색상</span>
+              <span>{isEn ? 'Press Pass Lanyard' : '기자증 색상'}</span>
             </label>
             <div className="flex gap-2 items-center">
               {['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'].map((c) => (

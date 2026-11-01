@@ -32,8 +32,9 @@ export const ShareCardModal: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const analysis = analyzeCareer(careers);
+  const analysis = analyzeCareer(careers, isEn);
   const topField = analysis.topFields[0]?.field || (isEn ? 'Field Reporting' : '현장 취재');
+  const getDeptLabel = (name: string) => isEn ? (getDepartmentByName(name)?.nameEn || name) : name;
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -126,9 +127,9 @@ export const ShareCardModal: React.FC<Props> = ({
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-center">
               <span className="text-slate-400">{isEn ? 'Wishes:' : '희망 지망 부서:'}</span>
               <span className="font-pixel text-slate-200">
-                1: {wishes.first.deptName === profile.currentDept ? (isEn ? `${wishes.first.deptName} (Stay)` : `${wishes.first.deptName}(잔류)`) : wishes.first.deptName}
-                {wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함' ? ` · 2: ${wishes.second.deptName}` : (isEn ? ' · 2: None' : ' · 2지망 없음')}
-                {wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함' ? ` · 3: ${wishes.third.deptName}` : (isEn ? ' · 3: None' : ' · 3지망 없음')}
+                1: {wishes.first.deptName === profile.currentDept ? (isEn ? `${getDeptLabel(wishes.first.deptName)} (Stay)` : `${wishes.first.deptName}(잔류)`) : getDeptLabel(wishes.first.deptName)}
+                {wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함' ? ` · 2: ${getDeptLabel(wishes.second.deptName)}` : (isEn ? ' · 2: None' : ' · 2지망 없음')}
+                {wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함' ? ` · 3: ${getDeptLabel(wishes.third.deptName)}` : (isEn ? ' · 3: None' : ' · 3지망 없음')}
               </span>
             </div>
 

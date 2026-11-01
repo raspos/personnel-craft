@@ -66,6 +66,18 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const isSecondHalf = profile.currentHalf === '하반기';
 
+  const formatBossIntent = (intent: string) => {
+    if (!isEn) return intent;
+    const map: Record<string, string> = {
+      '적극적으로 보내주려 한다': 'Supports Release',
+      '이동을 허용할 가능성이 높다': 'Likely to Allow',
+      '잘 모르겠다': 'Unclear / Neutral',
+      '잔류를 원하는 분위기다': 'Wants You to Stay',
+      '반드시 남기려고 한다': 'Defends Retention'
+    };
+    return map[intent] || intent;
+  };
+
   // 현재 농사 상태가 실시간 반영된 시뮬레이션 확률
   const currentSim = useMemo(() => {
     return runSimulation(careers, wishes, null, 5000, farmingState, currentDeptName);
@@ -140,7 +152,8 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
       selectedTargetWish,
       profile.currentHalf,
       currentDeptName,
-      currentDeptMonths
+      currentDeptMonths,
+      isEn
     );
 
     setFarmingState(result.nextState);
@@ -469,7 +482,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
               </div>
               <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
                 <div className="text-slate-400 text-[11px] mb-1">{isEn ? 'Current Boss Stance' : '부서장 의사'}</div>
-                <div className="font-pixel text-amber-300 font-bold text-sm truncate">{wishes.currentBossIntent}</div>
+                <div className="font-pixel text-amber-300 font-bold text-sm truncate">{formatBossIntent(wishes.currentBossIntent)}</div>
               </div>
             </div>
           )}
