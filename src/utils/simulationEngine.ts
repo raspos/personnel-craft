@@ -132,6 +132,21 @@ export function runSimulation(
     wish: WishDeptConfig,
     wishRank: 1 | 2 | 3
   ): DeptScoreBreakdown => {
+    // 2지망, 3지망이 '없음' (선택 안 함)인 경우: 가중치 0 처리 (완전 제외)
+    if (!wish.deptName || wish.deptName === '없음' || wish.deptName === '선택 안 함') {
+      return {
+        careerFit: 0,
+        subFieldFit: 0,
+        tenureFactor: 0,
+        toScore: 0,
+        relationScore: 0,
+        farmingBonus: 0,
+        totalWeight: 0,
+        isZeroTO: true,
+        competitorPenalty: 1
+      };
+    }
+
     // 이벤트 보너스
     const eventTOBonus = (activeEvent?.affectedWish === wishRank) ? (activeEvent.toBonus || 0) : 0;
     let eventIntentBonus = (activeEvent?.affectedWish === wishRank) ? (activeEvent.intentBonus || 0) : 0;
@@ -386,7 +401,7 @@ export function drawFinalAppointment(
 
   // 2지망
   acc += probabilities.secondWish;
-  if (rand <= acc && probabilities.secondWish > 0) {
+  if (rand <= acc && probabilities.secondWish > 0 && wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함') {
     return {
       assignedDept: wishes.second.deptName,
       resultType: 'second',
@@ -400,7 +415,7 @@ export function drawFinalAppointment(
 
   // 3지망
   acc += probabilities.thirdWish;
-  if (rand <= acc && probabilities.thirdWish > 0) {
+  if (rand <= acc && probabilities.thirdWish > 0 && wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함') {
     return {
       assignedDept: wishes.third.deptName,
       resultType: 'third',
@@ -448,6 +463,8 @@ export function drawFinalAppointment(
     wishes.avoidDept,
     currentDeptName
   ]);
+  excluded.delete('없음');
+  excluded.delete('선택 안 함');
   const candidates = DEFAULT_DEPARTMENTS.filter(d => !excluded.has(d.name)).map(d => d.name);
   const alternativeDept = candidates.length > 0
     ? candidates[Math.floor(Math.random() * candidates.length)]

@@ -217,62 +217,76 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           </div>
 
           {/* 2지망 */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-medium">
-              <span className="font-pixel text-slate-200 flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded bg-slate-700 text-white flex items-center justify-center text-[10px]">2</span>
-                2지망: {wishes.second.deptName}
-                {wishes.second.expectedTO === '0명' && (
-                  <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
-                    확정 TO 0명 (0% 고정)
+          {(() => {
+            const isNone2 = wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함';
+            return (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className={`font-pixel flex items-center gap-1.5 ${isNone2 ? 'text-slate-500' : 'text-slate-200'}`}>
+                    <span className="w-4 h-4 rounded bg-slate-700 text-white flex items-center justify-center text-[10px]">2</span>
+                    2지망: {isNone2 ? '없음 (미지원)' : wishes.second.deptName}
+                    {!isNone2 && wishes.second.expectedTO === '0명' && (
+                      <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
+                        확정 TO 0명 (0% 고정)
+                      </span>
+                    )}
                   </span>
-                )}
-              </span>
-              <div className="flex items-center gap-2 font-pixel">
-                {wishes.applyBossRelation && (
-                  <span className="text-[11px] text-slate-500 line-through">
-                    {probPure.secondWish}%
-                  </span>
-                )}
-                <span className="text-slate-200 font-bold text-sm">{prob.secondWish}%</span>
+                  <div className="flex items-center gap-2 font-pixel">
+                    {!isNone2 && wishes.applyBossRelation && (
+                      <span className="text-[11px] text-slate-500 line-through">
+                        {probPure.secondWish}%
+                      </span>
+                    )}
+                    <span className={`font-bold text-sm ${isNone2 ? 'text-slate-500' : 'text-slate-200'}`}>
+                      {isNone2 ? '0.0%' : `${prob.secondWish}%`}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                  <div
+                    className={`h-full transition-all duration-500 ${isNone2 ? 'bg-slate-700' : 'bg-slate-400'}`}
+                    style={{ width: `${isNone2 ? 0 : Math.min(100, prob.secondWish)}%` }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-              <div
-                className="h-full bg-slate-400 transition-all duration-500"
-                style={{ width: `${Math.min(100, prob.secondWish)}%` }}
-              />
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 3지망 */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-medium">
-              <span className="font-pixel text-slate-300 flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded bg-slate-700 text-white flex items-center justify-center text-[10px]">3</span>
-                3지망: {wishes.third.deptName}
-                {wishes.third.expectedTO === '0명' && (
-                  <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
-                    확정 TO 0명 (0% 고정)
+          {(() => {
+            const isNone3 = wishes.third.deptName === '없음' || wishes.third.deptName === '선택 안 함';
+            return (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className={`font-pixel flex items-center gap-1.5 ${isNone3 ? 'text-slate-500' : 'text-slate-300'}`}>
+                    <span className="w-4 h-4 rounded bg-slate-700 text-white flex items-center justify-center text-[10px]">3</span>
+                    3지망: {isNone3 ? '없음 (미지원)' : wishes.third.deptName}
+                    {!isNone3 && wishes.third.expectedTO === '0명' && (
+                      <span className="text-rose-400 text-[10px] bg-rose-950 px-1 rounded border border-rose-800">
+                        확정 TO 0명 (0% 고정)
+                      </span>
+                    )}
                   </span>
-                )}
-              </span>
-              <div className="flex items-center gap-2 font-pixel">
-                {wishes.applyBossRelation && (
-                  <span className="text-[11px] text-slate-500 line-through">
-                    {probPure.thirdWish}%
-                  </span>
-                )}
-                <span className="text-slate-300 font-bold text-sm">{prob.thirdWish}%</span>
+                  <div className="flex items-center gap-2 font-pixel">
+                    {!isNone3 && wishes.applyBossRelation && (
+                      <span className="text-[11px] text-slate-500 line-through">
+                        {probPure.thirdWish}%
+                      </span>
+                    )}
+                    <span className={`font-bold text-sm ${isNone3 ? 'text-slate-500' : 'text-slate-300'}`}>
+                      {isNone3 ? '0.0%' : `${prob.thirdWish}%`}
+                    </span>
+                  </div>
+                </div>
+                <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                  <div
+                    className={`h-full transition-all duration-500 ${isNone3 ? 'bg-slate-700' : 'bg-indigo-500'}`}
+                    style={{ width: `${isNone3 ? 0 : Math.min(100, prob.thirdWish)}%` }}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
-              <div
-                className="h-full bg-indigo-500 transition-all duration-500"
-                style={{ width: `${Math.min(100, prob.thirdWish)}%` }}
-              />
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 기피 부서 (위험도) */}
           <div className="space-y-1">

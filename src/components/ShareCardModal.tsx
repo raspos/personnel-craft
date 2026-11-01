@@ -120,7 +120,9 @@ export const ShareCardModal: React.FC<Props> = ({
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-center">
               <span className="text-slate-400">희망 지망 부서:</span>
               <span className="font-pixel text-slate-200">
-                1지망 {wishes.first.deptName} · 2지망 {wishes.second.deptName} · 3지망 {wishes.third.deptName}
+                1지망 {wishes.first.deptName}
+                {wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함' ? ` · 2지망 ${wishes.second.deptName}` : ' · 2지망 없음'}
+                {wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함' ? ` · 3지망 ${wishes.third.deptName}` : ' · 3지망 없음'}
               </span>
             </div>
 

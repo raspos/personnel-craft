@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   CharacterProfile,
   CareerRecord,
@@ -82,6 +82,18 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
 
   // 부서장/동료 면담 시 타겟 부서 선택
   const [selectedTargetWish, setSelectedTargetWish] = useState<1 | 2 | 3>(1);
+
+  // 선택된 접촉 대상이 '없음'인 경우 1지망으로 자동 복귀
+  useEffect(() => {
+    const curDept = selectedTargetWish === 1
+      ? wishes.first.deptName
+      : selectedTargetWish === 2
+      ? wishes.second.deptName
+      : wishes.third.deptName;
+    if (curDept === '없음' || curDept === '선택 안 함') {
+      setSelectedTargetWish(1);
+    }
+  }, [wishes, selectedTargetWish]);
 
   // 행동 실행 핸들러 (선택한 행동에 따라 3D 캐릭터 실시간 모션 연동)
   const handleAction = (actionType: FarmingActionType) => {
@@ -336,27 +348,40 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
               { num: 1, name: wishes.first.deptName, stage: farmingState.metrics.sproutStage.first, to: wishes.first.expectedTO },
               { num: 2, name: wishes.second.deptName, stage: farmingState.metrics.sproutStage.second, to: wishes.second.expectedTO },
               { num: 3, name: wishes.third.deptName, stage: farmingState.metrics.sproutStage.third, to: wishes.third.expectedTO }
-            ].map((f) => (
-              <div
-                key={f.num}
-                className="bg-gradient-to-b from-slate-900 to-slate-950 p-3 rounded-lg border-2 border-slate-800 hover:border-emerald-500/50 transition-all text-center flex flex-col items-center justify-between shadow-md"
-              >
-                <div className="w-full flex justify-between items-center text-[10px] text-slate-400 font-pixel mb-1">
-                  <span className="bg-slate-800 px-1.5 py-0.5 rounded text-sky-300 font-bold">{f.num}지망</span>
-                  <span>TO: {f.to}</span>
+            ].map((f) => {
+              const isNone = f.name === '없음' || f.name === '선택 안 함';
+              return (
+                <div
+                  key={f.num}
+                  className={`p-3 rounded-lg border-2 transition-all text-center flex flex-col items-center justify-between shadow-md ${
+                    isNone
+                      ? 'bg-slate-950/60 border-slate-850 opacity-60'
+                      : 'bg-gradient-to-b from-slate-900 to-slate-950 border-slate-800 hover:border-emerald-500/50'
+                  }`}
+                >
+                  <div className="w-full flex justify-between items-center text-[10px] text-slate-400 font-pixel mb-1">
+                    <span className="bg-slate-800 px-1.5 py-0.5 rounded text-sky-300 font-bold">{f.num}지망</span>
+                    <span>TO: {isNone ? '-' : f.to}</span>
+                  </div>
+                  <div className={`font-pixel font-bold text-sm my-1 ${isNone ? 'text-slate-500 line-through' : 'text-slate-100'}`}>
+                    {isNone ? '미지원' : `${f.name} 밭`}
+                  </div>
+                  <div className="my-1.5 px-3 py-1 bg-slate-950 rounded-full border border-slate-800 text-xs font-pixel flex items-center gap-1">
+                    {isNone ? (
+                      <span className="text-slate-500">📭 (미지원)</span>
+                    ) : (
+                      <span className="text-emerald-300">{getSproutEmoji(f.stage)}</span>
+                    )}
+                  </div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
+                    <div
+                      className={`h-full transition-all duration-300 ${isNone ? 'bg-slate-700' : 'bg-emerald-400'}`}
+                      style={{ width: `${isNone ? 0 : (f.stage / 3) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="font-pixel text-slate-100 font-bold text-sm my-1">{f.name} 밭</div>
-                <div className="my-1.5 px-3 py-1 bg-slate-950 rounded-full border border-slate-800 text-xs font-pixel text-emerald-300 flex items-center gap-1">
-                  <span>{getSproutEmoji(f.stage)}</span>
-                </div>
-                <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-                  <div
-                    className="bg-emerald-400 h-full transition-all duration-300"
-                    style={{ width: `${(f.stage / 3) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -405,17 +430,21 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
             <span className="text-slate-400">접촉 대상:</span>
             {[1, 2, 3].map((num) => {
               const deptName = num === 1 ? wishes.first.deptName : num === 2 ? wishes.second.deptName : wishes.third.deptName;
+              const isNone = deptName === '없음' || deptName === '선택 안 함';
               return (
                 <button
                   key={num}
+                  disabled={isNone}
                   onClick={() => setSelectedTargetWish(num as 1 | 2 | 3)}
                   className={`px-2 py-0.5 rounded text-xs font-pixel transition-all ${
-                    selectedTargetWish === num
+                    isNone
+                      ? 'bg-slate-900 text-slate-600 line-through cursor-not-allowed border border-slate-800'
+                      : selectedTargetWish === num
                       ? 'bg-blue-600 text-white font-bold'
                       : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  {num}지망 ({deptName})
+                  {num}지망 ({isNone ? '없음' : deptName})
                 </button>
               );
             })}

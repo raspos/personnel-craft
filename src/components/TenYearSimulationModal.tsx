@@ -49,20 +49,37 @@ export const TenYearSimulationModal: React.FC<Props> = ({
       const half = i % 2 === 1 ? '상반기' : '하반기';
 
       // 1지망 부서에 이미 안착한 경우, 차기 희망 부서로 동적 리밸런싱 (현 소속 부서를 또 지망하지 않음)
-      if (simWishes.first.deptName === currentDept) {
-        const used = new Set([currentDept, simWishes.second.deptName, simWishes.third.deptName, simWishes.avoidDept]);
+      if (simWishes.first.deptName === currentDept || simWishes.first.deptName === '없음') {
+        const used = new Set([
+          currentDept,
+          simWishes.second.deptName,
+          simWishes.third.deptName,
+          simWishes.avoidDept,
+          '없음',
+          '선택 안 함'
+        ]);
         const nextCand = DEFAULT_DEPARTMENTS.find(d => !used.has(d.name))?.name || '기획취재부';
+        const nextFirstDept = (simWishes.second.deptName && simWishes.second.deptName !== '없음')
+          ? simWishes.second.deptName
+          : nextCand;
+
         simWishes = {
           ...simWishes,
-          first: { ...simWishes.second },
-          second: { ...simWishes.third },
-          third: {
-            ...simWishes.third,
-            deptName: nextCand,
+          first: {
+            ...simWishes.first,
+            deptName: nextFirstDept,
             expectedTO: '1명',
             bossRelation: '인사만 하는 사이',
             relationTemp: '보통',
             recruitIntent: '특별한 의사 표현 없음'
+          },
+          second: {
+            ...simWishes.second,
+            deptName: (simWishes.third.deptName && simWishes.third.deptName !== '없음') ? simWishes.third.deptName : '없음'
+          },
+          third: {
+            ...simWishes.third,
+            deptName: '없음'
           }
         };
       }

@@ -301,10 +301,18 @@ export const Stage5Result: React.FC<Stage5Props> = ({
 
             {/* 농사 최종 유머 평가 문구 */}
             <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-200 text-xs italic font-pixel leading-relaxed">
-              {result.resultType === 'first' && '“밭을 갈았더니 정말 탐스러운 싹이 났습니다! 당신의 물밑 노력과 편집국의 뜻이 완벽히 맞아떨어졌습니다.”'}
+              {result.resultType === 'first' && (
+                wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
+                  ? '“2·3지망 없이 1지망에 승부수를 던진 당신의 배포가 통했습니다! 편집국에 확실한 존재감을 각인시켰습니다.”'
+                  : '“밭을 갈았더니 정말 탐스러운 싹이 났습니다! 당신의 물밑 노력과 편집국의 뜻이 완벽히 맞아떨어졌습니다.”'
+              )}
               {result.resultType === 'second' && '“1지망 밭은 아쉽게 비껴갔지만, 2지망 밭에서 뜻밖의 풍성한 수확을 거두었습니다!”'}
               {result.resultType === 'third' && '“치열한 인사 가뭄 속에서도 턱걸이 수확에 성공했습니다. 생존력 만점입니다!”'}
-              {result.resultType === 'stay' && '“밭은 열심히 갈았는데… 결국 현 부서의 잔류 벽을 넘지 못했습니다. 내년 봄 인사를 기약합니다.”'}
+              {result.resultType === 'stay' && (
+                wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
+                  ? '“1지망 올인이 불발되어 현 부서에 잔류합니다. 배수의 진을 쳤던 만큼 다음 인사의 이동 명분이 더욱 강력해졌습니다.”'
+                  : '“밭은 열심히 갈았는데… 결국 현 부서의 잔류 벽을 넘지 못했습니다. 내년 봄 인사를 기약합니다.”'
+              )}
               {result.resultType === 'avoid' && '“인사 농사보다 무서운 건 편집국의 돌발 태풍이었습니다. 기피 부서에서 진정한 대기자(大記者)로 거듭납니다.”'}
               {result.resultType === 'other' && '“예상하지 못한 곳에서 싹이 틉니다. 인생도 인사도 언제나 미지의 연속입니다.”'}
             </div>

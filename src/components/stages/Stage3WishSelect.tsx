@@ -60,19 +60,35 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
   };
 
   const currentWishConfig = activeTab === 1 ? wishes.first : activeTab === 2 ? wishes.second : wishes.third;
+  const isCurrentWishNone = currentWishConfig.deptName === '없음' || currentWishConfig.deptName === '선택 안 함';
 
   const updateCurrentWish = (patch: Partial<WishDeptConfig>) => {
     sound.playBlip();
     const updated = { ...currentWishConfig, ...patch };
-    if (activeTab === 1) setWishes({ ...wishes, first: updated });
-    else if (activeTab === 2) setWishes({ ...wishes, second: updated });
-    else setWishes({ ...wishes, third: updated });
+    if (activeTab === 1) {
+      setWishes({ ...wishes, first: updated });
+    } else if (activeTab === 2) {
+      // 2지망을 '없음'으로 하면 3지망도 자동으로 '없음' 처리
+      if (patch.deptName === '없음') {
+        setWishes({
+          ...wishes,
+          second: updated,
+          third: { ...wishes.third, deptName: '없음' }
+        });
+      } else {
+        setWishes({ ...wishes, second: updated });
+      }
+    } else {
+      setWishes({ ...wishes, third: updated });
+    }
   };
 
-  // 중복 부서 검증
-  const selectedDepartments = [wishes.first.deptName, wishes.second.deptName, wishes.third.deptName];
-  const hasDuplicateWish = new Set(selectedDepartments).size !== 3;
-  const hasAvoidConflict = selectedDepartments.includes(wishes.avoidDept);
+  // 중복 부서 검증 ('없음'은 제외)
+  const validDepartments = [wishes.first.deptName, wishes.second.deptName, wishes.third.deptName].filter(
+    (name) => name && name !== '없음' && name !== '선택 안 함'
+  );
+  const hasDuplicateWish = new Set(validDepartments).size !== validDepartments.length;
+  const hasAvoidConflict = validDepartments.includes(wishes.avoidDept);
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,7 +100,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             <span>STAGE 3. 희망 부서 선택 및 부서장 접촉</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            1지망, 2지망, 3지망 부서와 기피 부서를 설정하고, 부서장과의 가상 면담을 진행합니다.
+            1지망은 필수이며, 2지망과 3지망은 '없음(1지망 올인 / 미지원)'을 선택할 수 있습니다.
           </p>
         </div>
       </div>
@@ -94,7 +110,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
         <div className="p-3 bg-rose-950/80 border border-rose-500 rounded-lg text-xs text-rose-200 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <span>
-            {hasDuplicateWish && '1, 2, 3지망 부서에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요. '}
+            {hasDuplicateWish && '희망 부서에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요. '}
             {hasAvoidConflict && '기피 부서는 희망 부서(1·2·3지망)와 중복될 수 없습니다.'}
           </span>
         </div>
@@ -104,6 +120,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
       <div className="grid grid-cols-3 gap-2">
         {[1, 2, 3].map((num) => {
           const cfg = num === 1 ? wishes.first : num === 2 ? wishes.second : wishes.third;
+          const isNone = cfg.deptName === '없음' || cfg.deptName === '선택 안 함';
           const isActive = activeTab === num;
           return (
             <button
@@ -118,10 +135,14 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                   : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-750'
               }`}
             >
-              <div className="font-pixel text-xs text-blue-200">{num}지망 희망부서</div>
-              <div className="font-pixel text-sm sm:text-base font-bold mt-0.5 truncate">{cfg.deptName}</div>
+              <div className="font-pixel text-xs text-blue-200">
+                {num}지망 {isNone ? '(미지원)' : '희망부서'}
+              </div>
+              <div className={`font-pixel text-sm sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
+                {isNone ? '없음' : cfg.deptName}
+              </div>
               <div className="text-[10px] text-slate-300 mt-0.5">
-                TO: {cfg.expectedTO}
+                {isNone ? '가중치 0% (제외)' : `TO: ${cfg.expectedTO}`}
               </div>
             </button>
           );
@@ -135,7 +156,9 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             <span className="w-7 h-7 rounded bg-blue-600 text-white flex items-center justify-center font-pixel text-sm font-bold">
               {activeTab}
             </span>
-            <span className="font-pixel text-lg text-slate-100 font-bold">{activeTab}지망 부서 설정</span>
+            <span className="font-pixel text-lg text-slate-100 font-bold">
+              {activeTab}지망 부서 설정 {isCurrentWishNone && <span className="text-amber-300 text-sm font-normal">(없음)</span>}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -145,6 +168,11 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               onChange={(e) => updateCurrentWish({ deptName: e.target.value })}
               className="voxel-input text-xs py-1 font-bold"
             >
+              {activeTab !== 1 && (
+                <option value="없음">
+                  {activeTab === 2 ? '없음 (1지망 올인 / 미지원)' : '없음 (선택 안 함 / 미지원)'}
+                </option>
+              )}
               {DEFAULT_DEPARTMENTS.map((d) => (
                 <option key={d.id} value={d.name}>
                   {d.name}
@@ -154,137 +182,156 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           </div>
         </div>
 
-        {/* 부서장 NPC 가상 게임 대사 말풍선 */}
-        <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950/80 p-4 rounded-xl border-2 border-sky-500/40 shadow-xl">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-b from-blue-700 to-blue-900 border-2 border-blue-400 flex flex-col items-center justify-center text-xl flex-shrink-0 shadow-lg relative">
-              <span className="text-2xl drop-shadow">👔</span>
-              <span className="absolute -bottom-1.5 px-1 bg-amber-400 text-slate-950 text-[9px] font-pixel font-bold rounded">부장</span>
+        {isCurrentWishNone ? (
+          /* 지망 없음(미지원) 안내 카드 */
+          <div className="p-8 text-center bg-slate-950/80 rounded-xl border border-slate-800 space-y-3">
+            <div className="text-4xl">📭</div>
+            <div className="font-pixel text-slate-200 text-base font-bold">
+              {activeTab}지망을 선택하지 않았습니다 (공란 접수)
             </div>
-            <div className="flex-1">
-              <div className="text-xs font-pixel text-sky-300 mb-1.5 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-bold text-white tracking-wide">[{currentWishConfig.deptName}] 부서장 NPC</span>
-                <span className="text-[10px] bg-sky-950/80 text-sky-300 px-2 py-0.5 rounded-full border border-sky-800 font-pixel">
-                  💬 가상 인터뷰
-                </span>
-                <span className="text-[10px] text-amber-300 ml-auto font-pixel">
-                  관계: {currentWishConfig.bossRelation} ({currentWishConfig.relationTemp})
-                </span>
+            <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+              {activeTab === 2
+                ? '2지망과 3지망을 모두 비워두고 1지망에 올인합니다. 1지망에 배치되지 않을 경우 현재 부서 잔류 또는 기타 부서 발령을 감수합니다.'
+                : '3지망을 비워둡니다. 1지망 및 2지망 내에서 승부를 보며, 3지망으로의 분산 이동을 원하지 않습니다.'}
+            </p>
+            <div className="inline-block px-3 py-1 bg-blue-950/70 text-blue-300 border border-blue-800 rounded text-[11px] font-pixel">
+              * 해당 지망의 발령 확률 및 가중치는 0%로 고정됩니다.
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* 부서장 NPC 가상 게임 대사 말풍선 */}
+            <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950/80 p-4 rounded-xl border-2 border-sky-500/40 shadow-xl">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-b from-blue-700 to-blue-900 border-2 border-blue-400 flex flex-col items-center justify-center text-xl flex-shrink-0 shadow-lg relative">
+                  <span className="text-2xl drop-shadow">👔</span>
+                  <span className="absolute -bottom-1.5 px-1 bg-amber-400 text-slate-950 text-[9px] font-pixel font-bold rounded">부장</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs font-pixel text-sky-300 mb-1.5 flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-bold text-white tracking-wide">[{currentWishConfig.deptName}] 부서장 NPC</span>
+                    <span className="text-[10px] bg-sky-950/80 text-sky-300 px-2 py-0.5 rounded-full border border-sky-800 font-pixel">
+                      💬 가상 인터뷰
+                    </span>
+                    <span className="text-[10px] text-amber-300 ml-auto font-pixel">
+                      관계: {currentWishConfig.bossRelation} ({currentWishConfig.relationTemp})
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-slate-100 text-sm font-medium leading-relaxed italic relative">
+                    <span className="text-sky-400 font-pixel text-base mr-1">“</span>
+                    {generateBossDialogue(currentWishConfig)}
+                    <span className="text-sky-400 font-pixel text-base ml-1">”</span>
+                  </div>
+                </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-slate-100 text-sm font-medium leading-relaxed italic relative">
-                <span className="text-sky-400 font-pixel text-base mr-1">“</span>
-                {generateBossDialogue(currentWishConfig)}
-                <span className="text-sky-400 font-pixel text-base ml-1">”</span>
+              <div className="text-[10px] text-slate-500 mt-2 text-right font-pixel">
+                * 실제 인물이 아닌 게임 알고리즘에 의해 자동 생성된 가상 대사입니다.
               </div>
             </div>
-          </div>
-          <div className="text-[10px] text-slate-500 mt-2 text-right font-pixel">
-            * 실제 인물이 아닌 게임 알고리즘에 의해 자동 생성된 가상 대사입니다.
-          </div>
-        </div>
 
-        {/* 5가지 변수 드롭다운 그리드 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-          {/* ① 예상 TO */}
-          <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              ① 이번 인사 예상 TO
-            </label>
-            <select
-              value={currentWishConfig.expectedTO}
-              onChange={(e) => updateCurrentWish({ expectedTO: e.target.value as DeptTO })}
-              className="voxel-input w-full text-xs"
-            >
-              <option value="모름">모름 (불확실성 반영)</option>
-              <option value="0명">0명 (확정 결원 없음 - 확률 0%)</option>
-              <option value="1명">1명 (소폭 이동)</option>
-              <option value="2명">2명 (표준 규모)</option>
-              <option value="3명">3명 (대폭 확대)</option>
-              <option value="4명 이상">4명 이상 (대규모 개편)</option>
-            </select>
-          </div>
+            {/* 5가지 변수 드롭다운 그리드 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+              {/* ① 예상 TO */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ① 이번 인사 예상 TO
+                </label>
+                <select
+                  value={currentWishConfig.expectedTO}
+                  onChange={(e) => updateCurrentWish({ expectedTO: e.target.value as DeptTO })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="모름">모름 (불확실성 반영)</option>
+                  <option value="0명">0명 (확정 결원 없음 - 확률 0%)</option>
+                  <option value="1명">1명 (소폭 이동)</option>
+                  <option value="2명">2명 (표준 규모)</option>
+                  <option value="3명">3명 (대폭 확대)</option>
+                  <option value="4명 이상">4명 이상 (대규모 개편)</option>
+                </select>
+              </div>
 
-          {/* ② 2년 이상 장기근무자 수 */}
-          <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              ② 2년 이상 장기근무자 수
-            </label>
-            <select
-              value={currentWishConfig.longTermWorkers}
-              onChange={(e) => updateCurrentWish({ longTermWorkers: e.target.value as LongTermWorkers })}
-              className="voxel-input w-full text-xs"
-            >
-              <option value="모름">모름</option>
-              <option value="없음">없음 (순환 가능성 낮음)</option>
-              <option value="1명">1명</option>
-              <option value="2명">2명</option>
-              <option value="3명 이상">3명 이상 (유동성 높음)</option>
-            </select>
-            <div className="text-[10px] text-slate-500 mt-1">
-              * 확정 TO가 0명일 때는 장기근무자가 있어도 이동 확률이 0%로 고정됩니다.
+              {/* ② 2년 이상 장기근무자 수 */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ② 2년 이상 장기근무자 수
+                </label>
+                <select
+                  value={currentWishConfig.longTermWorkers}
+                  onChange={(e) => updateCurrentWish({ longTermWorkers: e.target.value as LongTermWorkers })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="모름">모름</option>
+                  <option value="없음">없음 (순환 가능성 낮음)</option>
+                  <option value="1명">1명</option>
+                  <option value="2명">2명</option>
+                  <option value="3명 이상">3명 이상 (유동성 높음)</option>
+                </select>
+                <div className="text-[10px] text-slate-500 mt-1">
+                  * 확정 TO가 0명일 때는 장기근무자가 있어도 이동 확률이 0%로 고정됩니다.
+                </div>
+              </div>
+
+              {/* ③ 희망 부서장과의 관계 */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ③ 희망 부서장과의 관계
+                </label>
+                <select
+                  value={currentWishConfig.bossRelation}
+                  onChange={(e) => updateCurrentWish({ bossRelation: e.target.value as DeptBossRelation })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="과거 직속 부장·데스크">과거 직속 부장·데스크 (+12점)</option>
+                  <option value="과거 같은 부서에서 근무한 동료">과거 같은 부서에서 근무한 동료 (+8점)</option>
+                  <option value="다른 부서에서 업무상 협업">다른 부서에서 업무상 협업 (+5점)</option>
+                  <option value="대학 선후배">대학 선후배 (+4점)</option>
+                  <option value="술자리 친구·사적 친분">술자리 친구·사적 친분 (+4점)</option>
+                  <option value="인사만 하는 사이">인사만 하는 사이 (+1점)</option>
+                  <option value="얼굴만 아는 사이">얼굴만 아는 사이 (0점)</option>
+                  <option value="안면이 전혀 없는 사이">안면이 전혀 없는 사이 (-4점)</option>
+                </select>
+              </div>
+
+              {/* ④ 부서장과의 친밀도/온도 */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ④ 부서장과의 친밀도 / 온도
+                </label>
+                <select
+                  value={currentWishConfig.relationTemp}
+                  onChange={(e) => updateCurrentWish({ relationTemp: e.target.value as RelationTemp })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="매우 좋은 관계">매우 좋은 관계 (+10점)</option>
+                  <option value="좋은 관계">좋은 관계 (+6점)</option>
+                  <option value="보통">보통 (0점)</option>
+                  <option value="잘 모름">잘 모름 (0점)</option>
+                  <option value="다소 껄끄러움">다소 껄끄러움 (-6점)</option>
+                  <option value="좋지 않은 관계">좋지 않은 관계 (-12점)</option>
+                </select>
+              </div>
+
+              {/* ⑤ 부서장의 영입 의사 신호 */}
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 sm:col-span-2 lg:col-span-2">
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                  ⑤ 부서장의 영입 의사 신호 (가장 강력)
+                </label>
+                <select
+                  value={currentWishConfig.recruitIntent}
+                  onChange={(e) => updateCurrentWish({ recruitIntent: e.target.value as BossRecruitIntent })}
+                  className="voxel-input w-full text-xs"
+                >
+                  <option value="전혀 모름">전혀 모름 (중립)</option>
+                  <option value="직접 함께 일하자고 제안">직접 함께 일하자고 제안 (+20점 강력 추천)</option>
+                  <option value="긍정적 의사 표현">긍정적 의사 표현 (+12점 호의적)</option>
+                  <option value="관심은 있어 보임">관심은 있어 보임 (+5점)</option>
+                  <option value="특별한 의사 표현 없음">특별한 의사 표현 없음 (0점)</option>
+                  <option value="부정적 반응">부정적 반응 (-15점 사실상 거부)</option>
+                </select>
+              </div>
             </div>
-          </div>
-
-          {/* ③ 희망 부서장과의 관계 */}
-          <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              ③ 희망 부서장과의 관계
-            </label>
-            <select
-              value={currentWishConfig.bossRelation}
-              onChange={(e) => updateCurrentWish({ bossRelation: e.target.value as DeptBossRelation })}
-              className="voxel-input w-full text-xs"
-            >
-              <option value="과거 직속 부장·데스크">과거 직속 부장·데스크</option>
-              <option value="과거 같은 부서에서 근무한 동료">과거 같은 부서에서 근무한 동료</option>
-              <option value="다른 부서에서 업무상 협업">다른 부서에서 업무상 협업</option>
-              <option value="대학 선후배">대학 선후배</option>
-              <option value="술자리 친구·사적 친분">술자리 친구·사적 친분</option>
-              <option value="인사만 하는 사이">인사만 하는 사이</option>
-              <option value="얼굴만 아는 사이">얼굴만 아는 사이</option>
-              <option value="안면이 전혀 없는 사이">안면이 전혀 없는 사이</option>
-              <option value="잘 모름">잘 모름</option>
-            </select>
-          </div>
-
-          {/* ④ 관계의 온도 */}
-          <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              ④ 관계의 온도 (평소 사이)
-            </label>
-            <select
-              value={currentWishConfig.relationTemp}
-              onChange={(e) => updateCurrentWish({ relationTemp: e.target.value as RelationTemp })}
-              className="voxel-input w-full text-xs"
-            >
-              <option value="매우 좋은 관계">매우 좋은 관계 🔥</option>
-              <option value="좋은 관계">좋은 관계 👍</option>
-              <option value="보통">보통 😐</option>
-              <option value="다소 껄끄러움">다소 껄끄러움 💧</option>
-              <option value="좋지 않은 관계">좋지 않은 관계 ⚡</option>
-              <option value="잘 모름">잘 모름</option>
-            </select>
-          </div>
-
-          {/* ⑤ 부서장의 영입 의사 */}
-          <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 sm:col-span-2 lg:col-span-2">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              ⑤ 부서장의 실제 영입 의사 (친분과 별개)
-            </label>
-            <select
-              value={currentWishConfig.recruitIntent}
-              onChange={(e) => updateCurrentWish({ recruitIntent: e.target.value as BossRecruitIntent })}
-              className="voxel-input w-full text-xs"
-            >
-              <option value="직접 함께 일하자고 제안">직접 함께 일하자고 제안 (가장 강력한 신호)</option>
-              <option value="긍정적 의사 표현">긍정적 의사 표현</option>
-              <option value="관심은 있어 보임">관심은 있어 보임</option>
-              <option value="특별한 의사 표현 없음">특별한 의사 표현 없음</option>
-              <option value="부정적 반응">부정적 반응 (다른 분야 선호 등)</option>
-              <option value="전혀 모름">전혀 모름</option>
-            </select>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       {/* ⑥ 현재 부서장 이동 의사 & ⑦ 기피 부서 설정 */}
@@ -337,7 +384,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           >
             {DEFAULT_DEPARTMENTS.map((d) => (
               <option key={d.id} value={d.name}>
-                {d.name} {selectedDepartments.includes(d.name) ? '(희망 부서와 중복 불가)' : ''}
+                {d.name} {validDepartments.includes(d.name) ? '(희망 부서와 중복 불가)' : ''}
               </option>
             ))}
           </select>
