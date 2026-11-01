@@ -33,6 +33,9 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
 
   // 부서장 NPC 가상 게임 대사 생성기
   const generateBossDialogue = (cfg: WishDeptConfig): string => {
+    if (activeTab === 1 && currentDeptName && cfg.deptName === currentDeptName) {
+      return '“자네가 다른 부서 안 가고 우리 부서에 더 남아주겠다고? 고맙네! 지금 진행 중인 기획 취재를 잘 마무리해보세. 국장단 회의 때 자네는 절대 못 빼가도록 내가 단단히 방어하겠네.”';
+    }
     if (cfg.expectedTO === '0명') {
       return '“자네 실력이야 잘 알지만… 이번에 우리 부서 확정 TO가 0명이야. 마음은 굴뚝같은데 자리가 없어.”';
     }
@@ -137,13 +140,13 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               }`}
             >
               <div className="font-pixel text-xs text-blue-200">
-                {num}지망 {isNone ? '(미지원)' : '희망부서'}
+                {num}지망 {isNone ? '(미지원)' : (num === 1 && cfg.deptName === currentDeptName ? '(현 부서 잔류)' : '희망부서')}
               </div>
               <div className={`font-pixel text-sm sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
-                {isNone ? '없음' : cfg.deptName}
+                {isNone ? '없음' : (num === 1 && cfg.deptName === currentDeptName ? `잔류 (${cfg.deptName})` : cfg.deptName)}
               </div>
               <div className="text-[10px] text-slate-300 mt-0.5">
-                {isNone ? '가중치 0% (제외)' : `TO: ${cfg.expectedTO}`}
+                {isNone ? '가중치 0% (제외)' : (num === 1 && cfg.deptName === currentDeptName ? '잔류 지망' : `TO: ${cfg.expectedTO}`)}
               </div>
             </button>
           );
@@ -158,7 +161,12 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {activeTab}
             </span>
             <span className="font-pixel text-lg text-slate-100 font-bold">
-              {activeTab}지망 부서 설정 {isCurrentWishNone && <span className="text-amber-300 text-sm font-normal">(없음)</span>}
+              {activeTab}지망 부서 설정{' '}
+              {isCurrentWishNone ? (
+                <span className="text-amber-300 text-sm font-normal">(없음)</span>
+              ) : activeTab === 1 && currentWishConfig.deptName === currentDeptName ? (
+                <span className="text-amber-300 text-sm font-normal">(현 부서 잔류 희망)</span>
+              ) : null}
             </span>
           </div>
 
@@ -169,6 +177,11 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               onChange={(e) => updateCurrentWish({ deptName: e.target.value })}
               className="voxel-input text-xs py-1 font-bold"
             >
+              {activeTab === 1 && currentDeptName && (
+                <option value={currentDeptName}>
+                  📌 현 부서 잔류 ({currentDeptName})
+                </option>
+              )}
               {activeTab !== 1 && (
                 <option value="없음">
                   {activeTab === 2 ? '없음 (1지망 올인 / 미지원)' : '없음 (선택 안 함 / 미지원)'}
@@ -176,7 +189,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               )}
               {DEFAULT_DEPARTMENTS.map((d) => (
                 <option key={d.id} value={d.name}>
-                  {d.name}
+                  {d.name} {activeTab === 1 && d.name === currentDeptName ? '(현재 소속 부서)' : ''}
                 </option>
               ))}
             </select>

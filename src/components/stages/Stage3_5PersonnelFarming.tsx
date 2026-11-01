@@ -396,10 +396,10 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
                 >
                   <div className="w-full flex justify-between items-center text-[10px] text-slate-400 font-pixel mb-1">
                     <span className="bg-slate-800 px-1.5 py-0.5 rounded text-sky-300 font-bold">{f.num}지망</span>
-                    <span>TO: {isNone ? '-' : f.to}</span>
+                    <span>TO: {isNone ? '-' : (f.num === 1 && f.name === currentDeptName ? '잔류 지망' : f.to)}</span>
                   </div>
                   <div className={`font-pixel font-bold text-sm my-1 ${isNone ? 'text-slate-500 line-through' : 'text-slate-100'}`}>
-                    {isNone ? '미지원' : `${f.name} 밭`}
+                    {isNone ? '미지원' : (f.num === 1 && f.name === currentDeptName ? `${f.name} (잔류) 밭` : `${f.name} 밭`)}
                   </div>
                   <div className="my-1 px-2.5 py-1 bg-slate-950 rounded-full border border-slate-800 text-[11px] font-pixel flex items-center gap-1">
                     {isNone ? (

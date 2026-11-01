@@ -70,9 +70,15 @@ export function runSimulation(
   // 연속 근무 개월수 계산 (동일 부서가 여러 블록으로 나뉘어 있어도 온전히 합산)
   const currentDeptMonths = getConsecutiveTenureMonths(careers, currentDept);
 
+  // [신규] 1지망이 현 부서 잔류(현재 소속 부서)인 경우 판별
+  const isFirstWishStay = wishes.first.deptName === currentDept;
+
   // 1. 현재 부서 이동 압력 (근속 2년 이상이면 이동 확률 증가, 1년 미만이면 잔류 압력 강함)
   let movePressure = 0.50;
-  if (currentDeptMonths <= 6) {
+  if (isFirstWishStay) {
+    // 1지망으로 현 부서 잔류를 희망한 경우: 이동 압력이 대폭 감소하여 잔류 확률이 극대화됨
+    movePressure = currentDeptMonths > 36 ? 0.30 : 0.15;
+  } else if (currentDeptMonths <= 6) {
     movePressure = 0.20; // 6개월 이하: 잔류 압력 극대 (80% 잔류)
   } else if (currentDeptMonths <= 12) {
     movePressure = 0.35;
@@ -359,7 +365,19 @@ export function runSimulation(
   let pAvoid = 0;
   let pOther = 0;
 
-  if (totalMoveWeight > 0) {
+  if (isFirstWishStay) {
+    // 1지망이 현 부서 잔류인 경우:
+    // 잔류 확률(1 - movePressure)이 곧 1지망 달성 확률!
+    const stayProb = Math.max(0, 1.0 - movePressure);
+    pFirst = stayProb;
+    const remainingMovePool = movePoolWeights.second + movePoolWeights.third + movePoolWeights.avoid + movePoolWeights.other;
+    if (remainingMovePool > 0) {
+      pSecond = eval2.isZeroTO ? 0 : movePressure * (movePoolWeights.second / remainingMovePool);
+      pThird = eval3.isZeroTO ? 0 : movePressure * (movePoolWeights.third / remainingMovePool);
+      pAvoid = movePressure * (movePoolWeights.avoid / remainingMovePool);
+      pOther = movePressure * (movePoolWeights.other / remainingMovePool);
+    }
+  } else if (totalMoveWeight > 0) {
     pFirst = eval1.isZeroTO ? 0 : movePressure * (movePoolWeights.first / totalMoveWeight);
     pSecond = eval2.isZeroTO ? 0 : movePressure * (movePoolWeights.second / totalMoveWeight);
     pThird = eval3.isZeroTO ? 0 : movePressure * (movePoolWeights.third / totalMoveWeight);
@@ -368,7 +386,7 @@ export function runSimulation(
   }
 
   // 잔류 확률: 전체 100%에서 이동 확률의 여사건
-  const pStay = Math.max(0, 1.0 - (pFirst + pSecond + pThird + pAvoid + pOther));
+  const pStay = isFirstWishStay ? pFirst : Math.max(0, 1.0 - (pFirst + pSecond + pThird + pAvoid + pOther));
 
   // 퍼센트(%) 환산 및 소수점 첫째 자리 정규화 (합계 100.0% 보장)
   let pctFirst = Math.round(pFirst * 1000) / 10;
@@ -377,13 +395,17 @@ export function runSimulation(
   let pctAvoid = Math.round(pAvoid * 1000) / 10;
   let pctStay = Math.round(pStay * 1000) / 10;
   
-  if (eval1.isZeroTO) pctFirst = 0;
+  if (eval1.isZeroTO && !isFirstWishStay) pctFirst = 0;
   if (eval2.isZeroTO) pctSecond = 0;
   if (eval3.isZeroTO) pctThird = 0;
 
-  const sumWithoutOther = pctFirst + pctSecond + pctThird + pctAvoid + pctStay;
+  const sumWithoutOther = isFirstWishStay
+    ? pctFirst + pctSecond + pctThird + pctAvoid
+    : pctFirst + pctSecond + pctThird + pctAvoid + pctStay;
   const pctOther = Math.max(0, Math.round((100.0 - sumWithoutOther) * 10) / 10);
-  const totalWish = Math.round((pctFirst + pctSecond + pctThird) * 10) / 10;
+  const totalWish = isFirstWishStay
+    ? pctFirst // 1지망 자체가 잔류이므로 1지망만으로도 압도적 희망 충족
+    : Math.round((pctFirst + pctSecond + pctThird) * 10) / 10;
 
   const probabilities: SimulationProbabilities = {
     firstWish: pctFirst,
@@ -417,12 +439,17 @@ export function drawFinalAppointment(
   // 1지망
   acc += probabilities.firstWish;
   if (rand <= acc && probabilities.firstWish > 0) {
+    const isFirstWishStay = wishes.first.deptName === currentDeptName;
     return {
       assignedDept: wishes.first.deptName,
       resultType: 'first',
-      messageHeadline: '대망의 1지망 입성!',
-      messageSubtitle: `축하합니다! ${wishes.first.deptName} 발령이 확정되었습니다.`,
-      flavorQuote: '가슴 깊이 품어왔던 취재 계획서를 드디어 데스크에 올릴 때가 왔습니다.',
+      messageHeadline: isFirstWishStay ? '1지망 달성! 현 부서 잔류 확정' : '대망의 1지망 입성!',
+      messageSubtitle: isFirstWishStay
+        ? `기자님의 뜻대로 [${wishes.first.deptName}] 잔류가 최종 확정되었습니다.`
+        : `축하합니다! ${wishes.first.deptName} 발령이 확정되었습니다.`,
+      flavorQuote: isFirstWishStay
+        ? '“자네가 남아줘서 천군만마를 얻었네. 지금 진행 중인 기획 취재에 전념해주게!”'
+        : '가슴 깊이 품어왔던 취재 계획서를 드디어 데스크에 올릴 때가 왔습니다.',
       probabilities,
       animationAction: 'celebrate'
     };

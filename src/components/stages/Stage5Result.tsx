@@ -308,7 +308,9 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             {/* 농사 최종 유머 평가 문구 */}
             <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-200 text-xs italic font-pixel leading-relaxed">
               {result.resultType === 'first' && (
-                wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
+                wishes.first.deptName === currentDeptName
+                  ? '“당신의 강력한 잔류 의지가 마침내 관철되었습니다! 진행 중이던 대형 기획 취재를 성공적으로 마무리할 무대를 지켜냈습니다.”'
+                  : wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
                   ? '“2·3지망 없이 1지망에 승부수를 던진 당신의 배포가 통했습니다! 편집국에 확실한 존재감을 각인시켰습니다.”'
                   : '“밭을 갈았더니 정말 탐스러운 싹이 났습니다! 당신의 물밑 노력과 편집국의 뜻이 완벽히 맞아떨어졌습니다.”'
               )}

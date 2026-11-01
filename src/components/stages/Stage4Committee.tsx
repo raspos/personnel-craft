@@ -192,7 +192,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
             <div className="flex justify-between text-xs font-medium">
               <span className="font-pixel text-blue-300 flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
-                1지망: {wishes.first.deptName}
+                1지망: {wishes.first.deptName === currentDept ? `${wishes.first.deptName} (현 부서 잔류)` : wishes.first.deptName}
                 {wishes.first.expectedTO === '0명' && (
                   activeEvent?.id === 'event_opening_1st' ? (
                     <span className="text-amber-300 text-[10px] bg-amber-950 px-1.5 py-0.5 rounded border border-amber-600 font-pixel animate-pulse">
@@ -314,7 +314,9 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           {/* 현 부서 잔류 & 기타 부서 */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-xs">
-              <div className="text-slate-400">현 부서 잔류 확률:</div>
+              <div className="text-slate-400">
+                {wishes.first.deptName === currentDept ? '현 부서 잔류 확률 (1지망 희망):' : '현 부서 잔류 확률:'}
+              </div>
               <div className="font-pixel text-amber-300 font-bold text-sm mt-0.5">{prob.stayCurrent}%</div>
             </div>
             <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 text-xs">
