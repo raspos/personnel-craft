@@ -42,6 +42,7 @@ import { CareerSkillsModal } from './components/CareerSkillsModal';
 import { ModelAssumptionsModal } from './components/ModelAssumptionsModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { TenYearSimulationModal } from './components/TenYearSimulationModal';
+import { useLanguage } from './i18n/LanguageContext';
 
 // Three.js 및 3D 뷰어 비동기 동적 분리 (Code Splitting)
 const VoxelWorldCanvas = lazy(() =>
@@ -58,6 +59,8 @@ export const App: React.FC = () => {
   const [activeEvent, setActiveEvent] = useState<SuddenEvent>(SUDDEN_EVENTS[0]);
   const [action, setAction] = useState<CharacterAction>('idle');
   const [activeSpeech, setActiveSpeech] = useState<{ text: string; speaker?: string } | undefined>(undefined);
+  const { language, t } = useLanguage();
+  const isEn = language === 'en';
 
   // 모달 상태
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
@@ -175,7 +178,7 @@ export const App: React.FC = () => {
                 fallback={
                   <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 rounded-2xl border-4 border-slate-800 text-slate-300 font-pixel gap-3 shadow-[4px_4px_0_#000]">
                     <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm font-bold text-amber-300">3D 편집국 월드 로딩 중...</span>
+                    <span className="text-sm font-bold text-amber-300">{t('loading3D')}</span>
                   </div>
                 }
               >
@@ -197,16 +200,16 @@ export const App: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span className="text-slate-100 font-bold">
-                    {profile.nickname} ({profile.hireYear}년 입사 · {analysis.totalYearsText})
+                    {profile.nickname} ({isEn ? `Class of ${profile.hireYear} · ${analysis.totalMonths} months` : `${profile.hireYear}년 입사 · ${analysis.totalYearsText}`})
                   </span>
                 </div>
                 <div className="text-amber-300 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                  현재 소속: {currentDept}
+                  {isEn ? `Current Beat: ${currentDept}` : `현재 소속: ${currentDept}`}
                 </div>
               </div>
             ) : (
               <div className="mt-3 bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 text-[11px] text-center text-slate-400 font-pixel">
-                기자 캐릭터 및 소속 부서 설정 중...
+                {isEn ? 'Configuring journalist persona & beat...' : '기자 캐릭터 및 소속 부서 설정 중...'}
               </div>
             )}
           </div>

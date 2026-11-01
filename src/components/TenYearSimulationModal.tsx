@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { CareerRecord, WishSelection } from '../types/game';
 import { runSimulation, drawFinalAppointment } from '../utils/simulationEngine';
-import { DEFAULT_DEPARTMENTS } from '../data/departments';
+import { DEFAULT_DEPARTMENTS, getDepartmentByName } from '../data/departments';
 import { X, Play, Clock, Award, Shield, Sparkles } from 'lucide-react';
 import { sound } from '../utils/sound';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const TenYearSimulationModal: React.FC<Props> = ({
   wishes,
   hireYear
 }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [history, setHistory] = useState<TenYearStep[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [finalTitle, setFinalTitle] = useState<string>('');
@@ -121,13 +124,14 @@ export const TenYearSimulationModal: React.FC<Props> = ({
     const sortedDepts = Object.entries(deptFreq).sort((a, b) => b[1] - a[1]);
     const maxDept = sortedDepts[0];
 
-    let title = '편집국 만능 순환의 달인';
+    let title = isEn ? 'Master of Newsroom Circulation' : '편집국 만능 순환의 달인';
     if (maxDept && maxDept[1] >= 8) {
-      title = `${maxDept[0]}의 영원한 수호자`;
+      const deptDisplayName = isEn ? (getDepartmentByName(maxDept[0])?.nameEn || maxDept[0]) : maxDept[0];
+      title = isEn ? `Eternal Guardian of ${deptDisplayName}` : `${maxDept[0]}의 영원한 수호자`;
     } else if (sortedDepts.length >= 6) {
-      title = '바람과 함께 사라지는 편집국 방랑자';
+      title = isEn ? 'Newsroom Nomad with the Wind' : '바람과 함께 사라지는 편집국 방랑자';
     } else if (steps.filter(s => s.resultType === 'first').length >= 8) {
-      title = '운과 실력을 겸비한 엘리트 데스크';
+      title = isEn ? 'Elite Correspondent Blessed by Fortune' : '운과 실력을 겸비한 엘리트 데스크';
     }
 
     setHistory(steps);
@@ -143,7 +147,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-400" />
             <h2 className="font-pixel text-lg text-slate-100 font-bold">
-              10년 기자 인생 모드 (총 20회 연속 정기인사)
+              {isEn ? '10-Year Career Simulator (20 Consecutive Cycles)' : '10년 기자 인생 모드 (총 20회 연속 정기인사)'}
             </h2>
           </div>
           <button
@@ -158,14 +162,16 @@ export const TenYearSimulationModal: React.FC<Props> = ({
         </div>
 
         <p className="text-xs text-slate-300 leading-relaxed">
-          향후 10년 동안 매년 상·하반기 총 20번의 정기인사를 순차적으로 돌려 당신의 10년 장기 커리어 궤적을 예측합니다.
+          {isEn
+            ? 'Simulates 20 consecutive semi-annual reshuffles over the next 10 years to predict your long-term career trajectory.'
+            : '향후 10년 동안 매년 상·하반기 총 20번의 정기인사를 순차적으로 돌려 당신의 10년 장기 커리어 궤적을 예측합니다.'}
         </p>
 
         {history.length === 0 ? (
           <div className="bg-slate-950 p-8 rounded-xl border border-slate-800 text-center space-y-4">
             <div className="text-4xl">⏳</div>
             <div className="font-pixel text-sm text-slate-200">
-              준비가 되셨다면 10년 타임머신을 가동하세요!
+              {isEn ? 'When ready, fire up the 10-year newsroom time machine!' : '준비가 되셨다면 10년 타임머신을 가동하세요!'}
             </div>
             <button
               onClick={runTenYears}
@@ -173,14 +179,14 @@ export const TenYearSimulationModal: React.FC<Props> = ({
               className="pixel-btn-mc pixel-btn-mc-primary text-white py-3 px-6 text-xs font-pixel flex items-center gap-2 mx-auto"
             >
               <Play className="w-4 h-4" />
-              <span>10년 (20회) 시뮬레이션 가동</span>
+              <span>{isEn ? 'Run 10-Year (20 Cycles) Simulation' : '10년 (20회) 시뮬레이션 가동'}</span>
             </button>
           </div>
         ) : (
           <div className="space-y-4">
             {/* 최종 타이틀 */}
             <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-purple-950 p-4 rounded-xl border border-indigo-400/60 text-center">
-              <span className="text-[11px] text-indigo-300 font-pixel">10년 커리어 최종 저널리스트 칭호</span>
+              <span className="text-[11px] text-indigo-300 font-pixel">{isEn ? '10-Year Lifetime Journalistic Title' : '10년 커리어 최종 저널리스트 칭호'}</span>
               <div className="font-pixel text-xl text-amber-300 font-bold my-1 flex items-center justify-center gap-2">
                 <Award className="w-5 h-5 text-amber-400" />
                 <span>{finalTitle}</span>
@@ -196,10 +202,12 @@ export const TenYearSimulationModal: React.FC<Props> = ({
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-5 text-center font-pixel text-slate-500 text-[10px]">#{step.index}</span>
-                    <span className="text-slate-400">{step.year}년 {step.half}</span>
+                    <span className="text-slate-400">{step.year} {isEn ? (step.half === '상반기' ? 'Spring' : 'Autumn') : step.half}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-pixel text-slate-100 font-bold">{step.dept}</span>
+                    <span className="font-pixel text-slate-100 font-bold">
+                      {isEn ? (getDepartmentByName(step.dept)?.nameEn || step.dept) : step.dept}
+                    </span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-pixel ${
                       step.resultType === 'first'
                         ? 'bg-blue-900 text-blue-200'
@@ -209,7 +217,13 @@ export const TenYearSimulationModal: React.FC<Props> = ({
                         ? 'bg-amber-950 text-amber-300'
                         : 'bg-slate-800 text-slate-300'
                     }`}>
-                      {step.resultType === 'first' ? '1지망' : step.resultType === 'avoid' ? '기피부서' : step.resultType === 'stay' ? '잔류' : '이동'}
+                      {step.resultType === 'first'
+                        ? (isEn ? '1st' : '1지망')
+                        : step.resultType === 'avoid'
+                        ? (isEn ? 'Blacklist' : '기피부서')
+                        : step.resultType === 'stay'
+                        ? (isEn ? 'Retain' : '잔류')
+                        : (isEn ? 'Transfer' : '이동')}
                     </span>
                   </div>
                 </div>
@@ -221,7 +235,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
                 onClick={runTenYears}
                 className="pixel-btn-mc text-slate-200 py-2.5 px-4 text-xs font-pixel flex items-center justify-center gap-1.5 flex-1"
               >
-                <span>다시 시뮬레이션</span>
+                <span>{isEn ? 'Rerun Simulation' : '다시 시뮬레이션'}</span>
               </button>
               <button
                 onClick={() => {
@@ -230,7 +244,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
                 }}
                 className="pixel-btn-mc pixel-btn-mc-primary py-2.5 px-5 text-xs font-pixel"
               >
-                닫기
+                {isEn ? 'Close' : '닫기'}
               </button>
             </div>
           </div>

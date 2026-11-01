@@ -14,6 +14,7 @@ import {
   createSpeechBubbleSprite
 } from './VoxelBuildings';
 import { getDepartmentByName } from '../../data/departments';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface VoxelWorldCanvasProps {
   stage: Stage;
@@ -35,6 +36,8 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
   activeSpeech
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [webGLFailed, setWebGLFailed] = useState(false);
 
@@ -352,7 +355,9 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
       cameraLookAtRef.current = { x: 0, y: 1.6, z: 0 };
 
       const deptList = [wishes.first.deptName, wishes.second.deptName, wishes.third.deptName];
-      const rankLabels = ['[1지망]', '[2지망]', '[3지망]'];
+      const rankLabels = isEn
+        ? ['[1st Wish]', '[2nd Wish]', '[3rd Wish]']
+        : ['[1지망]', '[2지망]', '[3지망]'];
       const xPositions = [-3.8, 0, 3.8];
       const sproutList = [
         farmingSprouts?.first ?? 0,
@@ -365,12 +370,12 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
         if (!deptDef) return;
 
         // 1. 부서별 고유 시그니처 건물 (국회의사당 돔, 은행 페디먼트, 공장 굴뚝, 사이버 안테나 등)
-        const bldg = createDistinctDeptBuilding(deptDef, rankLabels[idx]);
+        const bldg = createDistinctDeptBuilding(deptDef, rankLabels[idx], isEn);
         bldg.position.set(xPositions[idx], 0, -1.8);
         worldGroup.add(bldg);
 
         // 2. 부서장 복셀 NPC
-        const boss = createBossNPC(deptDef);
+        const boss = createBossNPC(deptDef, isEn);
         boss.group.position.set(xPositions[idx], 0, -0.2);
         boss.group.scale.set(0.9, 0.9, 0.9);
         worldGroup.add(boss.group);
@@ -431,7 +436,7 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
 
       worldGroup.add(table, envelope);
     }
-  }, [stage, careers, wishes, farmingSprouts]);
+  }, [stage, careers, wishes, farmingSprouts, language]);
 
   // 마우스 드래그 시점 둘러보기
   const handlePointerDown = (e: React.PointerEvent) => {

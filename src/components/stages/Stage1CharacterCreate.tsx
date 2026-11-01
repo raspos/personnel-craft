@@ -3,6 +3,7 @@ import { CharacterProfile, CharacterAppearance, CareerRecord } from '../../types
 import { Sparkles, User, Calendar, Glasses, Award, ArrowRight, Building2 } from 'lucide-react';
 import { DEFAULT_DEPARTMENTS, getDepartmentByName } from '../../data/departments';
 import { sound } from '../../utils/sound';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Stage1Props {
   profile: CharacterProfile;
@@ -20,15 +21,17 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
   onNext
 }) => {
   const currentYear = new Date().getFullYear();
+  const { language, t } = useLanguage();
+  const isEn = language === 'en';
 
   // 다음 단계 이동 시 유효성 검사 (커리어 블록에 강제 삽입하지 않고 독립성 유지)
   const handleProceed = () => {
     if (!profile.nickname.trim()) {
-      alert('기자 닉네임(성함)을 입력해 주세요.');
+      alert(isEn ? 'Please enter a byline / journalist nickname.' : '기자 닉네임(성함)을 입력해 주세요.');
       return;
     }
     if (!profile.currentDept) {
-      alert('현재 소속 부서를 선택해 주세요.');
+      alert(isEn ? 'Please select your current beat / department.' : '현재 소속 부서를 선택해 주세요.');
       return;
     }
 
@@ -120,11 +123,20 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       {/* 인트로 스토리 배너 */}
       <div className="pixel-card p-5 border-blue-500/50 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950">
         <h2 className="font-pixel text-xl sm:text-2xl text-blue-400 font-bold mb-2 flex items-center gap-2">
-          <span>📰</span> "편집국에 오신 것을 환영합니다."
+          <span>📰</span> {isEn ? '"Welcome to the Newsroom Battlefield."' : '"편집국에 오신 것을 환영합니다."'}
         </h2>
         <p className="text-slate-300 text-sm leading-relaxed">
-          당신은 수많은 인사발령을 견뎌온 대한민국 기자입니다.<br />
-          출입처의 밤샘 마감과 데스크의 불호령을 넘어, 이번 정기인사에서는 과연 원하던 부서로 갈 수 있을까요?
+          {isEn ? (
+            <>
+              You are an investigative journalist surviving relentless newsroom politics.<br />
+              Past midnight deadlines and screaming section editors, can you escape your current beat this reshuffle?
+            </>
+          ) : (
+            <>
+              당신은 수많은 인사발령을 견뎌온 대한민국 기자입니다.<br />
+              출입처의 밤샘 마감과 데스크의 불호령을 넘어, 이번 정기인사에서는 과연 원하던 부서로 갈 수 있을까요?
+            </>
+          )}
         </p>
       </div>
 
@@ -132,26 +144,26 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       <div className="pixel-card p-4">
         <div className="text-xs font-pixel text-slate-400 mb-2.5 flex items-center gap-1.5">
           <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>캐릭터 프리셋 선택 (원클릭)</span>
+          <span>{isEn ? 'Quick Persona Presets' : '캐릭터 프리셋 선택 (원클릭)'}</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => applyPreset('rookie')}
             className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-blue-300 font-pixel"
           >
-            🔥 열정 신입형
+            {isEn ? '🔥 Eager Rookie' : '🔥 열정 신입형'}
           </button>
           <button
             onClick={() => applyPreset('veteran')}
             className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-slate-300 font-pixel"
           >
-            ☕ 야근 베테랑형
+            {isEn ? '☕ Burnt-out Veteran' : '☕ 야근 베테랑형'}
           </button>
           <button
             onClick={() => applyPreset('investigative')}
             className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-emerald-300 font-pixel"
           >
-            🕵️ 특종 탐사형
+            {isEn ? '🕵️ Scoop Hunter' : '🕵️ 특종 탐사형'}
           </button>
         </div>
       </div>
@@ -160,19 +172,21 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       <div className="pixel-card p-5 space-y-4">
         <h3 className="font-pixel text-base text-amber-300 border-b-2 border-slate-950 pb-2 flex items-center gap-2">
           <User className="w-4 h-4 text-blue-400" />
-          <span>기자 신상 정보</span>
+          <span>{isEn ? 'Journalist Profile & Beat' : '기자 신상 정보'}</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">기자 닉네임</label>
+            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">
+              {isEn ? 'Byline / Nickname' : '기자 닉네임'}
+            </label>
             <input
               type="text"
               value={profile.nickname}
               onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
-              placeholder="예: 김기자"
+              placeholder={isEn ? 'e.g. Reporter Kim' : '예: 김기자'}
               className="voxel-input w-full text-sm font-medium"
-              maxLength={12}
+              maxLength={16}
             />
           </div>
 
@@ -180,17 +194,17 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           <div>
             <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1 font-pixel">
               <Building2 className="w-3.5 h-3.5 text-blue-400" />
-              <span>현재 소속 부서</span>
+              <span>{isEn ? 'Current Beat / Desk' : '현재 소속 부서'}</span>
             </label>
             <select
               value={profile.currentDept || ''}
               onChange={(e) => handleDeptChange(e.target.value)}
               className="voxel-input w-full text-sm font-bold text-amber-300"
             >
-              <option value="">-- 소속 부서 선택 --</option>
+              <option value="">{isEn ? '-- Select Beat --' : '-- 소속 부서 선택 --'}</option>
               {DEFAULT_DEPARTMENTS.map(d => (
                 <option key={d.id} value={d.name}>
-                  {d.name}
+                  {isEn ? `${d.nameEn} (${d.name})` : d.name}
                 </option>
               ))}
             </select>
@@ -199,7 +213,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           <div>
             <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1 font-pixel">
               <Calendar className="w-3.5 h-3.5" />
-              <span>입사 연도</span>
+              <span>{isEn ? 'Hiring Year (Class)' : '입사 연도'}</span>
             </label>
             <select
               value={profile.hireYear}
@@ -208,14 +222,16 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
             >
               {Array.from({ length: 25 }, (_, i) => currentYear - i).map((y) => (
                 <option key={y} value={y}>
-                  {y}년 입사 ({currentYear - y}년차)
+                  {isEn ? `Class of ${y} (${currentYear - y} yr tenure)` : `${y}년 입사 (${currentYear - y}년차)`}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">이번 인사 시점</label>
+            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">
+              {isEn ? 'Reshuffle Season' : '이번 인사 시점'}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               {(['상반기', '하반기'] as const).map((half) => (
                 <button
@@ -231,7 +247,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
                       : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
                   }`}
                 >
-                  {half}
+                  {half === '상반기' ? (isEn ? 'Spring' : '상반기') : (isEn ? 'Autumn' : '하반기')}
                 </button>
               ))}
             </div>
@@ -327,7 +343,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
               className="rounded bg-slate-900 border-slate-700 text-blue-500 focus:ring-0 w-4 h-4"
             />
             <Glasses className="w-4 h-4 text-slate-400" />
-            <span>기자 안경 착용</span>
+            <span>{isEn ? 'Wear Eyeglasses (Intellect +2)' : '기자 안경 착용'}</span>
           </label>
         </div>
       </div>
@@ -337,7 +353,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
         onClick={handleProceed}
         className="pixel-btn-mc w-full py-3.5 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 mt-2 text-white bg-blue-600 hover:bg-blue-500"
       >
-        <span>편집국 입장 (나의 커리어 구성)</span>
+        <span>{isEn ? 'Enter Newsroom (Stack Career Blocks)' : '편집국 입장 (나의 커리어 구성)'}</span>
         <ArrowRight className="w-5 h-5" />
       </button>
     </div>

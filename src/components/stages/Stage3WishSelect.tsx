@@ -13,6 +13,7 @@ import {
 import { DEFAULT_DEPARTMENTS, getDepartmentByName } from '../../data/departments';
 import { ArrowRight, ArrowLeft, MessageSquare, AlertTriangle, Building2, UserCheck, ShieldAlert } from 'lucide-react';
 import { sound } from '../../utils/sound';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Stage3Props {
   wishes: WishSelection;
@@ -30,43 +31,69 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
   onPrev
 }) => {
   const [activeTab, setActiveTab] = useState<1 | 2 | 3>(1);
+  const { language, t } = useLanguage();
+  const isEn = language === 'en';
 
   // 부서장 NPC 가상 게임 대사 생성기
   const generateBossDialogue = (cfg: WishDeptConfig, isStay: boolean): string => {
     if (isStay) {
       if (cfg.relationTemp === '매우 좋은 관계' || cfg.relationTemp === '좋은 관계') {
-        return '“자네가 다른 데 안 가고 우리 부서에 더 남아주겠다고? 정말 든든하네! 지금 진행 중인 대형 기획 취재 자네가 중심 잡고 이끌어주게. 국장단 회의 때 자네는 절대 못 빼가도록 내가 단단히 방어하겠네.”';
+        return isEn
+          ? '“You want to stay on our beat instead of jumping ship? Fantastic! Lead our investigative series to the finish line. I will personally defend your desk in the Managing Editor\'s council.”'
+          : '“자네가 다른 데 안 가고 우리 부서에 더 남아주겠다고? 정말 든든하네! 지금 진행 중인 대형 기획 취재 자네가 중심 잡고 이끌어주게. 국장단 회의 때 자네는 절대 못 빼가도록 내가 단단히 방어하겠네.”';
       }
       if (cfg.relationTemp === '좋지 않은 관계' || cfg.relationTemp === '다소 껄끄러움') {
-        return '“…자네가 우리 부서에 더 남겠다고? 글쎄, 서로 좀 분위기를 쇄신할 타이밍이 아닌가 싶었는데… 인사위 결과를 지켜보세.”';
+        return isEn
+          ? '“...You wish to stay here longer? Frankly, I thought it was high time for a mutual change of scenery... We shall see what the Committee decides.”'
+          : '“…자네가 우리 부서에 더 남겠다고? 글쎄, 서로 좀 분위기를 쇄신할 타이밍이 아닌가 싶었는데… 인사위 결과를 지켜보세.”';
       }
-      return '“자네가 우리 부서 잔류를 희망했군. 지금 맡고 있는 출입처와 취재 라인을 잘 지켜주게. 인사위원회 결과를 지켜보세.”';
+      return isEn
+        ? '“So you requested to retain your current beat. Guard your sources and beat faithfully. We shall await the Committee order.”'
+        : '“자네가 우리 부서 잔류를 희망했군. 지금 맡고 있는 출입처와 취재 라인을 잘 지켜주게. 인사위원회 결과를 지켜보세.”';
     }
     if (cfg.expectedTO === '0명') {
-      return '“자네 실력이야 잘 알지만… 이번에 우리 부서 확정 TO가 0명이야. 마음은 굴뚝같은데 자리가 없어.”';
+      return isEn
+        ? '“I know your caliber full well, but our department has zero headcount openings this reshuffle. There is simply no vacant desk.”'
+        : '“자네 실력이야 잘 알지만… 이번에 우리 부서 확정 TO가 0명이야. 마음은 굴뚝같은데 자리가 없어.”';
     }
     if (cfg.recruitIntent === '직접 함께 일하자고 제안') {
-      return '“자네가 온다면 내가 국장한테 직접 말해볼게. 이번에 자리 생기면 꼭 같이 일해보자!”';
+      return isEn
+        ? '“If you want to come over, I will personally pitch your name to the Managing Editor. Let us work together this cycle!”'
+        : '“자네가 온다면 내가 국장한테 직접 말해볼게. 이번에 자리 생기면 꼭 같이 일해보자!”';
     }
     if (cfg.recruitIntent === '부정적 반응') {
-      return '“글쎄… 이번엔 우리 쪽에 다른 전문성을 가진 인력이 필요해서 말이지.”';
+      return isEn
+        ? '“Well... our desk is looking for a completely different profile of expertise this time around.”'
+        : '“글쎄… 이번엔 우리 쪽에 다른 전문성을 가진 인력이 필요해서 말이지.”';
     }
     if (cfg.bossRelation === '술자리 친구·사적 친분') {
-      return '“하하, 우리 다음에 소주 한잔해야지! 근데… 인사는 또 완전히 다른 문제인 거 알지?”';
+      return isEn
+        ? '“Haha, we should definitely grab drinks soon! But you know newsroom personnel politics is an entirely separate beast, right?”'
+        : '“하하, 우리 다음에 소주 한잔해야지! 근데… 인사는 또 완전히 다른 문제인 거 알지?”';
     }
     if (cfg.bossRelation === '대학 선후배') {
-      return '“오, 오랜만이네! 선배로서 힘써주고 싶지만 편집국 분위기가 워낙 빡빡해서 장담은 못 해.”';
+      return isEn
+        ? '“Long time no see, fellow alumni! I would love to pull strings for you, but newsroom politics is cutthroat right now.”'
+        : '“오, 오랜만이네! 선배로서 힘써주고 싶지만 편집국 분위기가 워낙 빡빡해서 장담은 못 해.”';
     }
     if (cfg.bossRelation === '과거 직속 부장·데스크') {
-      return '“예전에 자네랑 마감 칠 때 호흡이 참 좋았지. 이번에도 기회가 닿으면 좋겠는데.”';
+      return isEn
+        ? '“We had phenomenal chemistry closing front-page deadlines together in the past. I hope the stars align again.”'
+        : '“예전에 자네랑 마감 칠 때 호흡이 참 좋았지. 이번에도 기회가 닿으면 좋겠는데.”';
     }
     if (cfg.bossRelation === '안면이 전혀 없는 사이' || cfg.bossRelation === '얼굴만 아는 사이') {
-      return '“어디 보자… 이번에 우리 부서 지원하셨다고요? 어떤 기사를 주로 쓰셨는지 좀 볼까요?”';
+      return isEn
+        ? '“Let us see... you applied to our section? Mind sharing some clips of the stories you have been breaking lately?”'
+        : '“어디 보자… 이번에 우리 부서 지원하셨다고요? 어떤 기사를 주로 쓰셨는지 좀 볼까요?”';
     }
     if (cfg.relationTemp === '다소 껄끄러움' || cfg.relationTemp === '좋지 않은 관계') {
-      return '“…서로 업무 스타일이 좀 다른 면이 있었죠. 이번 인사 결과는 뚜껑을 열어봐야 알겠네요.”';
+      return isEn
+        ? '“...We always had rather contrasting editorial temperaments. The Committee will decide what is best for the paper.”'
+        : '“…서로 업무 스타일이 좀 다른 면이 있었죠. 이번 인사 결과는 뚜껑을 열어봐야 알겠네요.”';
     }
-    return '“원하는 부서에 꼭 배치되길 바라네. 인사위원회 결과를 지켜보자고.”';
+    return isEn
+      ? '“Best of luck landing your preferred desk. Let us see what the Managing Editor decides.”'
+      : '“원하는 부서에 꼭 배치되길 바라네. 인사위원회 결과를 지켜보자고.”';
   };
 
   const currentWishConfig = activeTab === 1 ? wishes.first : activeTab === 2 ? wishes.second : wishes.third;
@@ -142,10 +169,12 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
         <div>
           <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
             <Building2 className="w-5 h-5 text-amber-400" />
-            <span>STAGE 3. 희망 부서 선택 및 부서장 접촉</span>
+            <span>{isEn ? 'STAGE 3. Preference Wishlist & Desk Politics' : 'STAGE 3. 희망 부서 선택 및 부서장 접촉'}</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            1지망은 '현 부서 잔류' 또는 희망 부서를 선택하며, 2·3지망은 이동 희망 부서 또는 '없음(미지원)'을 선택합니다.
+            {isEn
+              ? 'Select your 1st preference (or stay on current beat), and 2nd/3rd choices (or leave unfilled).'
+              : '1지망은 \'현 부서 잔류\' 또는 희망 부서를 선택하며, 2·3지망은 이동 희망 부서 또는 \'없음(미지원)\'을 선택합니다.'}
           </p>
         </div>
       </div>
@@ -155,12 +184,18 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
         <div className="p-3 bg-rose-950/80 border border-rose-500 rounded-lg text-xs text-rose-200 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
           <div className="space-y-0.5">
-            {hasDuplicateWish && <div>• 희망 지망 부서 간에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요.</div>}
-            {(hasSecondWishCurrentConflict || hasThirdWishCurrentConflict) && (
-              <div>• 2지망과 3지망에는 현재 소속 부서({currentDeptName})를 선택할 수 없습니다. (현재 부서 잔류 희망은 1지망에서만 가능)</div>
+            {hasDuplicateWish && (
+              <div>• {isEn ? 'Duplicate departments selected across wishes. Please choose distinct desks.' : '희망 지망 부서 간에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요.'}</div>
             )}
-            {hasAvoidConflict && <div>• 기피 부서는 희망 지망 부서(1·2·3지망)와 중복될 수 없습니다.</div>}
-            {hasAvoidEmpty && <div>• 기피 부서를 1곳 반드시 선택해 주세요. (절대 가고 싶지 않은 부서)</div>}
+            {(hasSecondWishCurrentConflict || hasThirdWishCurrentConflict) && (
+              <div>• {isEn ? `2nd and 3rd wishes cannot be your current beat (${currentDeptName}). Retention is only allowed in 1st wish.` : `2지망과 3지망에는 현재 소속 부서(${currentDeptName})를 선택할 수 없습니다. (현재 부서 잔류 희망은 1지망에서만 가능)`}</div>
+            )}
+            {hasAvoidConflict && (
+              <div>• {isEn ? 'Graveyard beat cannot overlap with your 1st, 2nd, or 3rd wishlist choices.' : '기피 부서는 희망 지망 부서(1·2·3지망)와 중복될 수 없습니다.'}</div>
+            )}
+            {hasAvoidEmpty && (
+              <div>• {isEn ? 'Please choose 1 graveyard beat you strictly wish to avoid.' : '기피 부서를 1곳 반드시 선택해 주세요. (절대 가고 싶지 않은 부서)'}</div>
+            )}
           </div>
         </div>
       )}
@@ -171,6 +206,9 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           const cfg = num === 1 ? wishes.first : num === 2 ? wishes.second : wishes.third;
           const isNone = cfg.deptName === '없음' || cfg.deptName === '선택 안 함';
           const isActive = activeTab === num;
+          const dDef = getDepartmentByName(cfg.deptName);
+          const displayName = isEn ? (dDef ? dDef.nameEn : cfg.deptName) : cfg.deptName;
+
           return (
             <button
               key={num}
@@ -185,13 +223,15 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               }`}
             >
               <div className="font-pixel text-xs text-slate-400">
-                {num}지망 {isNone ? '(미지원)' : (num === 1 && cfg.deptName === currentDeptName ? '(현 부서 잔류)' : '희망부서')}
+                {isEn
+                  ? `${num === 1 ? '1st' : num === 2 ? '2nd' : '3rd'} Wish ${isNone ? '(None)' : (num === 1 && cfg.deptName === currentDeptName ? '(Stay)' : '')}`
+                  : `${num}지망 ${isNone ? '(미지원)' : (num === 1 && cfg.deptName === currentDeptName ? '(현 부서 잔류)' : '희망부서')}`}
               </div>
               <div className={`font-pixel text-sm sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
-                {isNone ? '없음' : (num === 1 && cfg.deptName === currentDeptName ? `잔류 (${cfg.deptName})` : cfg.deptName)}
+                {isNone ? (isEn ? 'None' : '없음') : (num === 1 && cfg.deptName === currentDeptName ? (isEn ? `Stay (${displayName})` : `잔류 (${cfg.deptName})`) : displayName)}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
-                {isNone ? '가중치 0% (제외)' : (num === 1 && cfg.deptName === currentDeptName ? '잔류 지망' : `TO: ${cfg.expectedTO}`)}
+                {isNone ? (isEn ? 'Excluded (0%)' : '가중치 0% (제외)') : (num === 1 && cfg.deptName === currentDeptName ? (isEn ? 'Retention' : '잔류 지망') : `TO: ${cfg.expectedTO}`)}
               </div>
             </button>
           );
@@ -206,17 +246,17 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {activeTab}
             </span>
             <span className="font-pixel text-lg text-slate-100 font-bold">
-              {activeTab}지망 부서 설정{' '}
+              {isEn ? `${activeTab === 1 ? '1st' : activeTab === 2 ? '2nd' : '3rd'} Wish Configuration ` : `${activeTab}지망 부서 설정 `}
               {isCurrentWishNone ? (
-                <span className="text-amber-300 text-sm font-normal">(없음)</span>
+                <span className="text-amber-300 text-sm font-normal">({isEn ? 'Unfilled' : '없음'})</span>
               ) : activeTab === 1 && currentWishConfig.deptName === currentDeptName ? (
-                <span className="text-amber-300 text-sm font-normal">(현 부서 잔류 희망)</span>
+                <span className="text-amber-300 text-sm font-normal">({isEn ? 'Stay on Current Beat' : '현 부서 잔류 희망'})</span>
               ) : null}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-400">부서 변경:</label>
+            <label className="text-xs text-slate-400">{isEn ? 'Change Desk:' : '부서 변경:'}</label>
             <select
               value={currentWishConfig.deptName}
               onChange={(e) => updateCurrentWish({ deptName: e.target.value })}
@@ -265,21 +305,21 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-b from-blue-700 to-blue-900 border-2 border-blue-400 flex flex-col items-center justify-center text-xl flex-shrink-0 shadow-lg relative">
                   <span className="text-2xl drop-shadow">👔</span>
                   <span className="absolute -bottom-1.5 px-1 bg-amber-400 text-slate-950 text-[9px] font-pixel font-bold rounded">
-                    {isStayWish ? '현부장' : '부장'}
+                    {isStayWish ? (isEn ? 'Boss' : '현부장') : (isEn ? 'Chief' : '부장')}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="text-xs font-pixel text-sky-300 mb-1.5 flex flex-wrap items-center gap-2">
                     <span className="text-sm font-bold text-white tracking-wide">
-                      [{currentWishConfig.deptName}] {isStayWish ? '현 직속 부서장 NPC' : '부서장 NPC'}
+                      [{isEn ? (getDepartmentByName(currentWishConfig.deptName)?.nameEn || currentWishConfig.deptName) : currentWishConfig.deptName}] {isStayWish ? (isEn ? 'Current Direct Desk Chief NPC' : '현 직속 부서장 NPC') : (isEn ? 'Section Chief NPC' : '부서장 NPC')}
                     </span>
                     <span className="text-[10px] bg-sky-950/80 text-sky-300 px-2 py-0.5 rounded-full border border-sky-800 font-pixel">
-                      💬 {isStayWish ? '면담 메모' : '가상 인터뷰'}
+                      💬 {isStayWish ? (isEn ? '1-on-1 Memo' : '면담 메모') : (isEn ? 'Virtual Interview' : '가상 인터뷰')}
                     </span>
                     <span className="text-[10px] text-amber-300 ml-auto font-pixel">
                       {isStayWish
-                        ? `현 부서장과의 관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`
-                        : `관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`}
+                        ? (isEn ? `Current Boss Ties: ${currentWishConfig.bossRelation}` : `현 부서장과의 관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)
+                        : (isEn ? `Chief Ties: ${currentWishConfig.bossRelation}` : `관계: ${currentWishConfig.bossRelation} (${currentWishConfig.relationTemp})`)}
                     </span>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-slate-100 text-sm font-medium leading-relaxed italic relative">
@@ -290,7 +330,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                 </div>
               </div>
               <div className="text-[10px] text-slate-500 mt-2 text-right font-pixel">
-                * 실제 인물이 아닌 게임 알고리즘에 의해 자동 생성된 가상 대사입니다.
+                {isEn ? '* Generated by the newsroom AI algorithm based on relations and status.' : '* 실제 인물이 아닌 게임 알고리즘에 의해 자동 생성된 가상 대사입니다.'}
               </div>
             </div>
 
@@ -299,23 +339,25 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {/* ① 예상 TO */}
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  {isStayWish ? '① 현 부서 정원 및 잔류 여건' : '① 이번 인사 예상 TO'}
+                  {isStayWish 
+                    ? (isEn ? '① Current Desk Openings / Retention Climate' : '① 현 부서 정원 및 잔류 여건') 
+                    : (isEn ? '① Estimated Headcount (Open Seats)' : '① 이번 인사 예상 TO')}
                 </label>
                 <select
                   value={currentWishConfig.expectedTO}
                   onChange={(e) => updateCurrentWish({ expectedTO: e.target.value as DeptTO })}
                   className="voxel-input w-full text-xs"
                 >
-                  <option value="모름">모름 (불확실성 반영)</option>
-                  <option value="0명">0명 (확정 결원 없음)</option>
-                  <option value="1명">1명 (소폭 이동)</option>
-                  <option value="2명">2명 (표준 규모)</option>
-                  <option value="3명">3명 (대폭 확대)</option>
-                  <option value="4명 이상">4명 이상 (대규모 개편)</option>
+                  <option value="모름">{isEn ? 'Unknown (Reflects uncertainty)' : '모름 (불확실성 반영)'}</option>
+                  <option value="0명">{isEn ? '0 Seats (No Vacancy)' : '0명 (확정 결원 없음)'}</option>
+                  <option value="1명">{isEn ? '1 Seat (Slight Movement)' : '1명 (소폭 이동)'}</option>
+                  <option value="2명">{isEn ? '2 Seats (Standard Scale)' : '2명 (표준 규모)'}</option>
+                  <option value="3명">{isEn ? '3 Seats (Major Expansion)' : '3명 (대폭 확대)'}</option>
+                  <option value="4명 이상">{isEn ? '4+ Seats (Massive Shakeup)' : '4명 이상 (대규모 개편)'}</option>
                 </select>
                 {isStayWish && (
                   <div className="text-[10px] text-emerald-400/90 mt-1 font-pixel">
-                    * 잔류 희망 시 외부 이동 TO 제약을 받지 않고 원직 유지가 우선 검토됩니다.
+                    {isEn ? '* Retaining desk bypasses external TO limits unless forced transfer occurs.' : '* 잔류 희망 시 외부 이동 TO 제약을 받지 않고 원직 유지가 우선 검토됩니다.'}
                   </div>
                 )}
               </div>
@@ -323,61 +365,67 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {/* ② 2년 이상 장기근무자 수 */}
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  {isStayWish ? '② 부서 내 2년 이상 장기근무 동료 수' : '② 2년 이상 장기근무자 수'}
+                  {isStayWish 
+                    ? (isEn ? '② Peers with 2+ Years on Current Desk' : '② 부서 내 2년 이상 장기근무 동료 수') 
+                    : (isEn ? '② Veterans on Target Desk (2+ Years)' : '② 2년 이상 장기근무자 수')}
                 </label>
                 <select
                   value={currentWishConfig.longTermWorkers}
                   onChange={(e) => updateCurrentWish({ longTermWorkers: e.target.value as LongTermWorkers })}
                   className="voxel-input w-full text-xs"
                 >
-                  <option value="모름">모름</option>
-                  <option value="없음">없음 (순환 가능성 낮음)</option>
-                  <option value="1명">1명</option>
-                  <option value="2명">2명</option>
-                  <option value="3명 이상">3명 이상 (유동성 높음)</option>
+                  <option value="모름">{isEn ? 'Unknown' : '모름'}</option>
+                  <option value="없음">{isEn ? 'None (Low Rotation)' : '없음 (순환 가능성 낮음)'}</option>
+                  <option value="1명">{isEn ? '1 person' : '1명'}</option>
+                  <option value="2명">{isEn ? '2 people' : '2명'}</option>
+                  <option value="3명 이상">{isEn ? '3+ people (High Turnover)' : '3명 이상 (유동성 높음)'}</option>
                 </select>
                 <div className="text-[10px] text-slate-500 mt-1">
-                  * 부서 내 장기근속자가 많을수록 타 부서 순환 압력이 분산됩니다.
+                  {isEn ? '* More veterans on desk increases rotation and slot availability.' : '* 부서 내 장기근속자가 많을수록 타 부서 순환 압력이 분산됩니다.'}
                 </div>
               </div>
 
               {/* ③ 부서장과의 관계 (현 부서 잔류 시 '현 부서장과의 관계'로 전환) */}
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  {isStayWish ? '③ 현 부서장과의 관계' : '③ 희망 부서장과의 관계'}
+                  {isStayWish 
+                    ? (isEn ? '③ Relationship with Current Chief' : '③ 현 부서장과의 관계') 
+                    : (isEn ? '③ Relationship with Target Chief' : '③ 희망 부서장과의 관계')}
                 </label>
                 <select
                   value={currentWishConfig.bossRelation}
                   onChange={(e) => updateCurrentWish({ bossRelation: e.target.value as DeptBossRelation })}
                   className="voxel-input w-full text-xs"
                 >
-                  <option value="과거 직속 부장·데스크">과거 직속 부장·데스크 (+12점)</option>
-                  <option value="과거 같은 부서에서 근무한 동료">과거 같은 부서에서 근무한 동료 (+8점)</option>
-                  <option value="다른 부서에서 업무상 협업">다른 부서에서 업무상 협업 (+5점)</option>
-                  <option value="대학 선후배">대학 선후배 (+4점)</option>
-                  <option value="술자리 친구·사적 친분">술자리 친구·사적 친분 (+4점)</option>
-                  <option value="인사만 하는 사이">인사만 하는 사이 (+1점)</option>
-                  <option value="얼굴만 아는 사이">얼굴만 아는 사이 (0점)</option>
-                  <option value="안면이 전혀 없는 사이">안면이 전혀 없는 사이 (-4점)</option>
+                  <option value="과거 직속 부장·데스크">{isEn ? 'Former Direct Desk Chief (+12)' : '과거 직속 부장·데스크 (+12점)'}</option>
+                  <option value="과거 같은 부서에서 근무한 동료">{isEn ? 'Former Department Colleague (+8)' : '과거 같은 부서에서 근무한 동료 (+8점)'}</option>
+                  <option value="다른 부서에서 업무상 협업">{isEn ? 'Cross-Desk Collaborator (+5)' : '다른 부서에서 업무상 협업 (+5점)'}</option>
+                  <option value="대학 선후배">{isEn ? 'Alumni / University Junior/Senior (+4)' : '대학 선후배 (+4점)'}</option>
+                  <option value="술자리 친구·사적 친분">{isEn ? 'Drinking Buddy / Close Friend (+4)' : '술자리 친구·사적 친분 (+4점)'}</option>
+                  <option value="인사만 하는 사이">{isEn ? 'Casual Acquaintance (+1)' : '인사만 하는 사이 (+1점)'}</option>
+                  <option value="얼굴만 아는 사이">{isEn ? 'Know by face only (0)' : '얼굴만 아는 사이 (0점)'}</option>
+                  <option value="안면이 전혀 없는 사이">{isEn ? 'Complete Stranger (-4)' : '안면이 전혀 없는 사이 (-4점)'}</option>
                 </select>
               </div>
 
               {/* ④ 부서장과의 친밀도/신뢰도 (현 부서 잔류 시 '현 부서장과의 친밀도'로 전환) */}
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  {isStayWish ? '④ 현 부서장과의 친밀도' : '④ 부서장과의 친밀도 / 온도'}
+                  {isStayWish 
+                    ? (isEn ? '④ Affinity with Current Chief' : '④ 현 부서장과의 친밀도') 
+                    : (isEn ? '④ Chief Affinity / Rapport' : '④ 부서장과의 친밀도 / 온도')}
                 </label>
                 <select
                   value={currentWishConfig.relationTemp}
                   onChange={(e) => updateCurrentWish({ relationTemp: e.target.value as RelationTemp })}
                   className="voxel-input w-full text-xs"
                 >
-                  <option value="매우 좋은 관계">매우 좋은 관계 (+10점)</option>
-                  <option value="좋은 관계">좋은 관계 (+6점)</option>
-                  <option value="보통">보통 (0점)</option>
-                  <option value="잘 모름">잘 모름 (0점)</option>
-                  <option value="다소 껄끄러움">다소 껄끄러움 (-6점)</option>
-                  <option value="좋지 않은 관계">좋지 않은 관계 (-12점)</option>
+                  <option value="매우 좋은 관계">{isEn ? 'Excellent (+10)' : '매우 좋은 관계 (+10점)'}</option>
+                  <option value="좋은 관계">{isEn ? 'Good (+6)' : '좋은 관계 (+6점)'}</option>
+                  <option value="보통">{isEn ? 'Neutral (0)' : '보통 (0점)'}</option>
+                  <option value="잘 모름">{isEn ? 'Unknown (0)' : '잘 모름 (0점)'}</option>
+                  <option value="다소 껄끄러움">{isEn ? 'Slightly Awkward (-6)' : '다소 껄끄러움 (-6점)'}</option>
+                  <option value="좋지 않은 관계">{isEn ? 'Strained (-12)' : '좋지 않은 관계 (-12점)'}</option>
                 </select>
               </div>
 
@@ -385,19 +433,19 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {!isStayWish && (
                 <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                   <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                    ⑤ 부서장의 영입 의사 신호 (가장 강력)
+                    {isEn ? '⑤ Chief Recruiting Intent (Strongest Factor)' : '⑤ 부서장의 영입 의사 신호 (가장 강력)'}
                   </label>
                   <select
                     value={currentWishConfig.recruitIntent}
                     onChange={(e) => updateCurrentWish({ recruitIntent: e.target.value as BossRecruitIntent })}
                     className="voxel-input w-full text-xs"
                   >
-                    <option value="전혀 모름">전혀 모름 (중립)</option>
-                    <option value="직접 함께 일하자고 제안">직접 함께 일하자고 제안 (+20점 강력 추천)</option>
-                    <option value="긍정적 의사 표현">긍정적 의사 표현 (+12점 호의적)</option>
-                    <option value="관심은 있어 보임">관심은 있어 보임 (+5점)</option>
-                    <option value="특별한 의사 표현 없음">특별한 의사 표현 없음 (0점)</option>
-                    <option value="부정적 반응">부정적 반응 (-15점 사실상 거부)</option>
+                    <option value="전혀 모름">{isEn ? 'No idea (Neutral)' : '전혀 모름 (중립)'}</option>
+                    <option value="직접 함께 일하자고 제안">{isEn ? 'Personally Asked to Join (+20)' : '직접 함께 일하자고 제안 (+20점 강력 추천)'}</option>
+                    <option value="긍정적 의사 표현">{isEn ? 'Positive Interest (+12)' : '긍정적 의사 표현 (+12점 호의적)'}</option>
+                    <option value="관심은 있어 보임">{isEn ? 'Seems Interested (+5)' : '관심은 있어 보임 (+5점)'}</option>
+                    <option value="특별한 의사 표현 없음">{isEn ? 'No Particular Opinion (0)' : '특별한 의사 표현 없음 (0점)'}</option>
+                    <option value="부정적 반응">{isEn ? 'Negative / Reluctant (-15)' : '부정적 반응 (-15점 사실상 거부)'}</option>
                   </select>
                 </div>
               )}
@@ -405,23 +453,25 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
               {/* ⑥ 지원 예상 경쟁자 수 (경쟁률 모델) */}
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  {isStayWish ? '⑤ 외부 타 기자들의 부서 진입 경쟁률' : '⑥ 이번 인사 예상 경쟁 기자 수'}
+                  {isStayWish 
+                    ? (isEn ? '⑤ External Competition for Your Desk' : '⑤ 외부 타 기자들의 부서 진입 경쟁률') 
+                    : (isEn ? '⑥ Estimated Competitors Applying' : '⑥ 이번 인사 예상 경쟁 기자 수')}
                 </label>
                 <select
                   value={currentWishConfig.competitors || '모름'}
                   onChange={(e) => updateCurrentWish({ competitors: e.target.value as CompetitorCount })}
                   className="voxel-input w-full text-xs"
                 >
-                  <option value="모름">모름 (표준 추정 경쟁률)</option>
-                  <option value="0명 (단독 지원)">0명 (단독 지원 - 무혈입성 우대)</option>
-                  <option value="1~2명 (보통)">1~2명 (보통 수준 경쟁)</option>
-                  <option value="3~4명 (경쟁 치열)">3~4명 (경쟁 치열 - 격전지)</option>
-                  <option value="5명 이상 (바늘구멍)">5명 이상 (바늘구멍 - 극심한 경쟁)</option>
+                  <option value="모름">{isEn ? 'Unknown (Standard Estimate)' : '모름 (표준 추정 경쟁률)'}</option>
+                  <option value="0명 (단독 지원)">{isEn ? '0 Competitors (Sole Applicant)' : '0명 (단독 지원 - 무혈입성 우대)'}</option>
+                  <option value="1~2명 (보통)">{isEn ? '1~2 (Moderate Competition)' : '1~2명 (보통 수준 경쟁)'}</option>
+                  <option value="3~4명 (경쟁 치열)">{isEn ? '3~4 (Fierce Battlefield)' : '3~4명 (경쟁 치열 - 격전지)'}</option>
+                  <option value="5명 이상 (바늘구멍)">{isEn ? '5+ (Eye of a Needle)' : '5명 이상 (바늘구멍 - 극심한 경쟁)'}</option>
                 </select>
                 <div className="text-[10px] text-slate-500 mt-1">
                   {isStayWish
-                    ? '* 외부 지원 경쟁자가 많을수록 인사위원회에서 자리를 비워주어야 할 압박이 발생할 수 있습니다.'
-                    : '* TO 대비 지원 경쟁자 수에 따라 실질적인 발령 확률이 직접 변동합니다.'}
+                    ? (isEn ? '* More external contenders applying puts pressure on the desk to rotate you.' : '* 외부 지원 경쟁자가 많을수록 인사위원회에서 자리를 비워주어야 할 압박이 발생할 수 있습니다.')
+                    : (isEn ? '* More contenders reduces placement odds directly against openings.' : '* TO 대비 지원 경쟁자 수에 따라 실질적인 발령 확률이 직접 변동합니다.')}
                 </div>
               </div>
             </div>
@@ -437,14 +487,14 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             <UserCheck className="w-4 h-4 text-amber-400" />
             <h3 className="font-pixel text-sm text-slate-100 font-bold">
               {isStayWish
-                ? `⑦ 현재 부서장(${currentDeptName})의 방출 / 잔류 지지 의향`
-                : `⑦ 현재 부서장(${currentDeptName})의 방출 의사`}
+                ? (isEn ? `⑦ Current Chief (${currentDeptName}) Retention Support` : `⑦ 현재 부서장(${currentDeptName})의 방출 / 잔류 지지 의향`)
+                : (isEn ? `⑦ Current Chief (${currentDeptName}) Release Willingness` : `⑦ 현재 부서장(${currentDeptName})의 방출 의사`)}
             </h3>
           </div>
           <p className="text-xs text-slate-400 mb-2">
             {isStayWish
-              ? '본인의 잔류 희망에 대해 현재 부서장이 지켜줄지(남기려 함), 인력 순환을 위해 내보내려 할지(방출)를 설정합니다.'
-              : '현재 부서에서 순순히 놓아줄지 여부가 인사이동 성사율에 영향을 줍니다.'}
+              ? (isEn ? 'Whether your current boss backs your stay or pushes for staff circulation.' : '본인의 잔류 희망에 대해 현재 부서장이 지켜줄지(남기려 함), 인력 순환을 위해 내보내려 할지(방출)를 설정합니다.')
+              : (isEn ? 'Whether your current chief willingly lets you go or blocks your transfer.' : '현재 부서에서 순순히 놓아줄지 여부가 인사이동 성사율에 영향을 줍니다.')}
           </p>
           <select
             value={wishes.currentBossIntent}
@@ -454,11 +504,11 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             }}
             className="voxel-input w-full text-xs"
           >
-            <option value="적극적으로 보내주려 한다">적극적으로 보내주려 한다 (길 터주기 / 방출 의향)</option>
-            <option value="이동을 허용할 가능성이 높다">이동을 허용할 가능성이 높다</option>
-            <option value="잘 모르겠다">잘 모르겠다</option>
-            <option value="잔류를 원하는 분위기다">잔류를 원하는 분위기다 (인력 부족 등 잔류 지지)</option>
-            <option value="반드시 남기려고 한다">반드시 남기려고 한다 (철통 방어 / 잔류 절대 지지)</option>
+            <option value="적극적으로 보내주려 한다">{isEn ? 'Eagerly Supports Transfer / Release' : '적극적으로 보내주려 한다 (길 터주기 / 방출 의향)'}</option>
+            <option value="이동을 허용할 가능성이 높다">{isEn ? 'Likely to Allow Move' : '이동을 허용할 가능성이 높다'}</option>
+            <option value="잘 모르겠다">{isEn ? 'Unclear / Neutral' : '잘 모르겠다'}</option>
+            <option value="잔류를 원하는 분위기다">{isEn ? 'Wants You to Stay (Short-staffed)' : '잔류를 원하는 분위기다 (인력 부족 등 잔류 지지)'}</option>
+            <option value="반드시 남기려고 한다">{isEn ? 'Adamantly Defends Retention' : '반드시 남기려고 한다 (철통 방어 / 잔류 절대 지지)'}</option>
           </select>
         </div>
 
@@ -467,11 +517,11 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="w-4 h-4 text-rose-400" />
             <h3 className="font-pixel text-sm text-amber-300 font-bold">
-              ⑧ 절대 가고 싶지 않은 기피 부서 (1곳)
+              {isEn ? '⑧ Blacklisted Department (Avoid at all costs)' : '⑧ 절대 가고 싶지 않은 기피 부서 (1곳)'}
             </h3>
           </div>
           <p className="text-xs text-slate-400 mb-2">
-            희망 부서 탈락 시 밀려날 수 있는 기피 부서 확률을 별도로 계산합니다.
+            {isEn ? 'Calculates risk odds of being exiled here if all wishes fail.' : '희망 부서 탈락 시 밀려날 수 있는 기피 부서 확률을 별도로 계산합니다.'}
           </p>
           <select
             value={wishes.avoidDept}
@@ -483,7 +533,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           >
             {DEFAULT_DEPARTMENTS.map((d) => (
               <option key={d.id} value={d.name}>
-                {d.name} {validDepartments.includes(d.name) ? '(희망 부서와 중복 불가)' : ''}
+                {isEn ? (d.nameEn || d.name) : d.name} {validDepartments.includes(d.name) ? (isEn ? '(Cannot match wish)' : '(희망 부서와 중복 불가)') : ''}
               </option>
             ))}
           </select>
@@ -500,7 +550,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
           className="pixel-btn-mc text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>이전</span>
+          <span>{isEn ? 'Back' : '이전'}</span>
         </button>
 
         <button
@@ -513,7 +563,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             isFormInvalid ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
-          <span>추석 이후 인사 농사 시작하기 (STAGE 3.5)</span>
+          <span>{isEn ? 'Start Post-Chuseok Beat Politicking (STAGE 3.5)' : '추석 이후 인사 농사 시작하기 (STAGE 3.5)'}</span>
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

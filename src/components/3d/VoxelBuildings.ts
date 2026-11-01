@@ -33,7 +33,12 @@ export function createPixelPatternTexture(baseColorHex: string, noiseStrength: n
 }
 
 // 부서명 선명한 3D 픽셀 간판 텍스처 생성기
-export function createDepartmentSignTexture(rankLabel: string, deptName: string, colorHex: string): THREE.CanvasTexture {
+export function createDepartmentSignTexture(
+  rankLabel: string,
+  deptName: string,
+  colorHex: string,
+  isEn: boolean = false
+): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 96;
@@ -53,17 +58,17 @@ export function createDepartmentSignTexture(rankLabel: string, deptName: string,
   ctx.lineWidth = 2;
   ctx.strokeRect(10, 10, 236, 76);
 
-  // 지망 배지 (예: [1지망] / [2지망] / [3지망])
+  // 지망 배지 (예: [1지망] / [1st Wish])
   ctx.fillStyle = colorHex || '#fbbf24';
-  ctx.font = 'bold 18px "Pretendard", sans-serif';
+  ctx.font = isEn ? 'bold 15px "Pretendard", sans-serif' : 'bold 18px "Pretendard", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.fillText(rankLabel, 128, 14);
 
-  // 부서명 한글 텍스트 (예: "정치부")
+  // 부서명 텍스트 (예: "정치부" / "Politics")
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 32px "Pretendard", sans-serif';
-  ctx.fillText(deptName, 128, 42);
+  ctx.font = isEn ? 'bold 22px "Pretendard", sans-serif' : 'bold 30px "Pretendard", sans-serif';
+  ctx.fillText(deptName, 128, 44);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.magFilter = THREE.NearestFilter;
@@ -129,7 +134,7 @@ export function createSpeechBubbleSprite(text: string, speakerName?: string): TH
 }
 
 // 부서장 NPC 머리 위 플로팅 이름표 스프라이트 (마인크래프트 네임태그 스타일)
-export function createNameTagSprite(bossName: string, deptName: string): THREE.Sprite {
+export function createNameTagSprite(bossTitle: string, deptName: string, isEn: boolean = false): THREE.Sprite {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 64;
@@ -144,10 +149,11 @@ export function createNameTagSprite(bossName: string, deptName: string): THREE.S
   ctx.strokeRect(4, 4, 248, 56);
 
   ctx.fillStyle = '#fde047';
-  ctx.font = 'bold 20px "Pretendard", sans-serif';
+  ctx.font = isEn ? 'bold 15px "Pretendard", sans-serif' : 'bold 20px "Pretendard", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`[${deptName}장] ${bossName}`, 128, 32);
+  const label = isEn ? `[${deptName}] ${bossTitle}` : `[${deptName}장] ${bossTitle}`;
+  ctx.fillText(label, 128, 32);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.magFilter = THREE.NearestFilter;
@@ -340,9 +346,10 @@ export function createCareerVoxelMap(careers: CareerRecord[]): THREE.Group {
 }
 
 // 4. [특화] 부서별 개성 있는 복셀 건축물 생성기 (Stage 3 & Stage 3.5)
-export function createDistinctDeptBuilding(deptDef: DepartmentDef, rankLabel: string): THREE.Group {
+export function createDistinctDeptBuilding(deptDef: DepartmentDef, rankLabel: string, isEn: boolean = false): THREE.Group {
   const group = new THREE.Group();
   const baseColor = new THREE.Color(deptDef.color);
+  const deptName = deptDef.name;
 
   // 기본 본체 벽면 (부서 고유 컬러의 톤다운된 복셀 벽)
   const wallMat = new THREE.MeshLambertMaterial({ color: baseColor.clone().multiplyScalar(0.75) });
@@ -379,8 +386,6 @@ export function createDistinctDeptBuilding(deptDef: DepartmentDef, rankLabel: st
   group.add(roofRim);
 
   // === 부서별 랜드마크 복셀 조형물 ===
-  const deptName = deptDef.name;
-
   if (deptName.includes('정치')) {
     // [정치부] 국회의사당 스타일: 백색 4대 열주 기둥 + 청록색 돔 + 게양 깃발
     const pillarMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
@@ -500,8 +505,9 @@ export function createDistinctDeptBuilding(deptDef: DepartmentDef, rankLabel: st
     group.add(spire);
   }
 
-  // 선명한 2D 캔버스 한글 픽셀 간판 부착
-  const signTexture = createDepartmentSignTexture(rankLabel, deptName, deptDef.color);
+  // 선명한 2D 캔버스 픽셀 간판 부착
+  const signDeptName = isEn ? deptDef.nameEn : deptDef.name;
+  const signTexture = createDepartmentSignTexture(rankLabel, signDeptName, deptDef.color, isEn);
   const signMat = new THREE.MeshBasicMaterial({ map: signTexture, transparent: false });
   const signGeo = new THREE.BoxGeometry(2.5, 0.8, 0.15);
   const signMesh = new THREE.Mesh(signGeo, signMat);
@@ -512,7 +518,7 @@ export function createDistinctDeptBuilding(deptDef: DepartmentDef, rankLabel: st
 }
 
 // 5. 부서장 NPC 생성 (고유 복장, 소품, 표정)
-export function createBossNPC(deptDef: DepartmentDef): { group: THREE.Group; animate: (t: number) => void } {
+export function createBossNPC(deptDef: DepartmentDef, isEn: boolean = false): { group: THREE.Group; animate: (t: number) => void } {
   const group = new THREE.Group();
 
   const skinMat = new THREE.MeshLambertMaterial({ color: 0xfed7aa });
@@ -614,7 +620,11 @@ export function createBossNPC(deptDef: DepartmentDef): { group: THREE.Group; ani
   }
 
   // 머리 위 플로팅 이름표 부착
-  const nameTag = createNameTagSprite(deptDef.bossTitle, deptDef.name);
+  const nameTag = createNameTagSprite(
+    isEn ? deptDef.bossTitleEn : deptDef.bossTitle,
+    isEn ? deptDef.nameEn : deptDef.name,
+    isEn
+  );
   nameTag.position.set(0, 2.35, 0);
 
   group.add(headGroup, body, legL, legR, armL, armR, nameTag);

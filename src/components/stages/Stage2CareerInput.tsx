@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { SkillRadarChart } from '../SkillRadarChart';
 import { sound } from '../../utils/sound';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Stage2Props {
   careers: CareerRecord[];
@@ -31,6 +32,8 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
   onPrev,
   onOpenSkillsModal
 }) => {
+  const { language, t } = useLanguage();
+  const isEn = language === 'en';
   const [selectedDeptToAdd, setSelectedDeptToAdd] = useState('사회부');
   const [customDeptName, setCustomDeptName] = useState('');
   const [isCustomDept, setIsCustomDept] = useState(false);
@@ -197,10 +200,10 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             >
               {DEFAULT_DEPARTMENTS.map(d => (
                 <option key={d.id} value={d.name}>
-                  {d.name} ({d.category})
+                  {isEn ? `${d.nameEn} (${d.name})` : `${d.name} (${d.category})`}
                 </option>
               ))}
-              <option value="__custom__">직접 입력...</option>
+              <option value="__custom__">{isEn ? 'Custom input...' : '직접 입력...'}</option>
             </select>
           ) : (
             <div className="flex items-center gap-2">
@@ -208,7 +211,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                 type="text"
                 value={customDeptName}
                 onChange={(e) => setCustomDeptName(e.target.value)}
-                placeholder="부서명 직접 입력 (예: 탐사기획팀)"
+                placeholder={isEn ? 'Enter custom beat name' : '부서명 직접 입력 (예: 탐사기획팀)'}
                 className="voxel-input text-xs py-2"
               />
               <button
@@ -216,7 +219,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                 onClick={() => setIsCustomDept(false)}
                 className="text-xs text-slate-400 hover:text-white underline font-pixel"
               >
-                목록 선택으로 복귀
+                {isEn ? 'Back to list' : '목록 선택으로 복귀'}
               </button>
             </div>
           )}
@@ -226,7 +229,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             className="pixel-btn-mc pixel-btn-mc-primary text-xs py-2 px-3.5 flex items-center gap-1 font-pixel"
           >
             <Plus className="w-4 h-4" />
-            <span>근무 부서 블록 추가</span>
+            <span>{isEn ? 'Add Career Beat Block' : '근무 부서 블록 추가'}</span>
           </button>
         </div>
       </div>
@@ -236,9 +239,15 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
         {careers.length === 0 ? (
           <div className="pixel-card p-8 text-center text-slate-400 font-pixel space-y-3 bg-slate-900/60 border-2 border-dashed border-slate-700">
             <div className="text-4xl animate-bounce">🧱</div>
-            <p className="text-base text-slate-200 font-bold">등록된 기자 커리어 블록이 없습니다.</p>
+            <p className="text-base text-slate-200 font-bold">
+              {isEn ? 'No career beat blocks registered yet.' : '등록된 기자 커리어 블록이 없습니다.'}
+            </p>
             <p className="text-xs text-slate-400 font-sans max-w-md mx-auto leading-relaxed">
-              위의 <strong>[근무 부서 블록 추가]</strong> 버튼을 눌러 과거 출입했던 부서와 현재 소속 부서 블록을 순서대로 쌓아보세요!
+              {isEn ? (
+                <>Click <strong>[Add Career Beat Block]</strong> above to stack past desks and your current assignment in chronological order!</>
+              ) : (
+                <>위의 <strong>[근무 부서 블록 추가]</strong> 버튼을 눌러 과거 출입했던 부서와 현재 소속 부서 블록을 순서대로 쌓아보세요!</>
+              )}
             </p>
           </div>
         ) : (
@@ -413,13 +422,13 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
           className="pixel-btn-mc text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>이전</span>
+          <span>{isEn ? 'Back' : '이전'}</span>
         </button>
 
         <button
           onClick={() => {
             if (careers.length === 0) {
-              alert('최소 1개 이상의 근무 부서 커리어 블록을 추가해 주세요.');
+              alert(isEn ? 'Please add at least one career beat block.' : '최소 1개 이상의 근무 부서 커리어 블록을 추가해 주세요.');
               return;
             }
             sound.playClick();
@@ -427,7 +436,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
           }}
           className="pixel-btn-mc flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-500"
         >
-          <span>희망 부서 선택 및 부서장 접촉</span>
+          <span>{isEn ? 'Select Wishlist & Politicking' : '희망 부서 선택 및 부서장 접촉'}</span>
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

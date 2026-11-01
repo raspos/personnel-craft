@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Stage } from '../types/game';
-import { Volume2, VolumeX, RotateCcw, Newspaper } from 'lucide-react';
+import { Volume2, VolumeX, RotateCcw, Newspaper, Globe } from 'lucide-react';
 import { sound } from '../utils/sound';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   currentStage: Stage;
@@ -11,6 +12,7 @@ interface Props {
 
 export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => {
   const [isMuted, setIsMuted] = useState(!sound.enabled);
+  const { language, toggleLanguage, t } = useLanguage();
 
   const toggleSound = () => {
     sound.enabled = !sound.enabled;
@@ -20,13 +22,13 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
     }
   };
 
-  const stages: { stage: Stage; label: string }[] = [
-    { stage: 1, label: '캐릭터 생성' },
-    { stage: 2, label: '나의 커리어' },
-    { stage: 3, label: '희망 부서' },
-    { stage: 3.5, label: '인사 농사' },
-    { stage: 4, label: '인사위원회' },
-    { stage: 5, label: '운명의 발령' }
+  const stages: { stage: Stage; labelKey: 'stage1Nav' | 'stage2Nav' | 'stage3Nav' | 'stage35Nav' | 'stage4Nav' | 'stage5Nav' }[] = [
+    { stage: 1, labelKey: 'stage1Nav' },
+    { stage: 2, labelKey: 'stage2Nav' },
+    { stage: 3, labelKey: 'stage3Nav' },
+    { stage: 3.5, labelKey: 'stage35Nav' },
+    { stage: 4, labelKey: 'stage4Nav' },
+    { stage: 5, labelKey: 'stage5Nav' }
   ];
 
   return (
@@ -40,14 +42,14 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-pixel text-base sm:text-lg text-white font-extrabold tracking-tight">
-                인사 크래프트
+                {t('appTitle')}
               </h1>
               <span className="text-[10px] font-pixel text-blue-400 bg-blue-950/80 px-1.5 py-0.5 rounded border border-blue-800">
-                PERSONNEL CRAFT
+                {t('appBadge')}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 hidden sm:block">
-              편집국 생존기 — 이번엔 제발 원하는 부서로!
+              {t('appSubTitle')}
             </p>
           </div>
         </div>
@@ -73,7 +75,7 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
                 }`}
               >
                 <span className="text-[10px] opacity-75">{st.stage}.</span>
-                <span>{st.label}</span>
+                <span>{t(st.labelKey)}</span>
               </button>
             );
           })}
@@ -81,11 +83,24 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
 
         {/* 유틸리티 버튼들 */}
         <div className="flex items-center gap-2">
+          {/* 다국어 언어 전환 [KO | EN] 픽셀 토글 스위치 */}
+          <button
+            onClick={() => {
+              sound.playClick();
+              toggleLanguage();
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-400 text-xs font-pixel text-amber-300 flex items-center gap-1.5 transition-all shadow-sm"
+            title="Switch Language (한국어 / English)"
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-bold">{language === 'ko' ? 'EN' : '한국어'}</span>
+          </button>
+
           {/* 사운드 토글 */}
           <button
             onClick={toggleSound}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
-            title={isMuted ? '소리 켜기' : '소리 끄기'}
+            title={isMuted ? t('soundOn') : t('soundOff')}
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-blue-400" />}
           </button>
@@ -94,7 +109,7 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
           <button
             onClick={onReset}
             className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-            title="데이터 초기화"
+            title={t('resetTooltip')}
           >
             <RotateCcw className="w-4 h-4" />
           </button>

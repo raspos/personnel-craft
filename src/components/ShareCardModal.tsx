@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { CharacterProfile, FinalAppointmentResult, CareerRecord, WishSelection } from '../types/game';
 import { analyzeCareer } from '../utils/careerAnalysis';
+import { getDepartmentByName } from '../data/departments';
+import { useLanguage } from '../i18n/LanguageContext';
 import { toPng } from 'html-to-image';
 import { X, Download, Share2, Check, Sparkles } from 'lucide-react';
 import { sound } from '../utils/sound';
@@ -22,6 +24,8 @@ export const ShareCardModal: React.FC<Props> = ({
   careers,
   wishes
 }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -29,7 +33,7 @@ export const ShareCardModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   const analysis = analyzeCareer(careers);
-  const topField = analysis.topFields[0]?.field || '현장 취재';
+  const topField = analysis.topFields[0]?.field || (isEn ? 'Field Reporting' : '현장 취재');
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -41,14 +45,14 @@ export const ShareCardModal: React.FC<Props> = ({
         pixelRatio: 2,
       });
       const link = document.createElement('a');
-      link.download = `인사크래프트_인사발령_${profile.nickname}_${Date.now()}.png`;
+      link.download = `PersonnelCraft_${profile.nickname}_${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
       setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 2500);
     } catch (err) {
       console.error('Failed to export image', err);
-      alert('이미지 생성 중 문제가 발생했습니다. 화면 캡처 기능을 이용해 주세요.');
+      alert(isEn ? 'Error exporting image. Please use screen capture.' : '이미지 생성 중 문제가 발생했습니다. 화면 캡처 기능을 이용해 주세요.');
     } finally {
       setIsExporting(false);
     }
@@ -60,7 +64,9 @@ export const ShareCardModal: React.FC<Props> = ({
         <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
           <div className="flex items-center gap-2">
             <Share2 className="w-4 h-4 text-blue-400" />
-            <span className="font-pixel text-sm text-slate-100 font-bold">인사발령 결과 카드 공유</span>
+            <span className="font-pixel text-sm text-slate-100 font-bold">
+              {isEn ? 'Share Appointment Result Card' : '인사발령 결과 카드 공유'}
+            </span>
           </div>
           <button
             onClick={() => {
@@ -85,11 +91,11 @@ export const ShareCardModal: React.FC<Props> = ({
               <span className="text-xl">📰</span>
               <div>
                 <div className="font-pixel text-xs text-blue-400 font-bold tracking-wider">PERSONNEL CRAFT</div>
-                <div className="text-[11px] text-slate-400 font-medium">인사 크래프트 — 편집국 생존기</div>
+                <div className="text-[11px] text-slate-400 font-medium">{isEn ? 'Newsroom Reshuffle Survival Simulator' : '인사 크래프트 — 편집국 생존기'}</div>
               </div>
             </div>
             <div className="bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded text-[10px] font-pixel">
-              정기인사 리포트
+              {isEn ? 'Reshuffle Report' : '정기인사 리포트'}
             </div>
           </div>
 
@@ -99,12 +105,12 @@ export const ShareCardModal: React.FC<Props> = ({
               🧑‍💼
             </div>
             <div>
-              <div className="text-xs text-slate-400">나의 기자 유형</div>
+              <div className="text-xs text-slate-400">{isEn ? 'Journalist Archetype' : '나의 기자 유형'}</div>
               <div className="font-pixel text-amber-300 font-bold text-sm">
                 {analysis.reporterType}
               </div>
               <div className="text-[11px] text-slate-300 mt-0.5">
-                총 경력 {analysis.totalYearsText} · 주력 분야 [{topField}]
+                {isEn ? `Exp: ${analysis.totalYearsText} · Key Beat [${topField}]` : `총 경력 ${analysis.totalYearsText} · 주력 분야 [${topField}]`}
               </div>
               {analysis.careerSynergy && (
                 <div className="text-[10px] text-cyan-300 font-pixel mt-1 flex items-center gap-1">
@@ -118,24 +124,24 @@ export const ShareCardModal: React.FC<Props> = ({
           {/* 희망 부서 3곳 vs 최종 발령 */}
           <div className="space-y-2 mb-4 text-xs">
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-center">
-              <span className="text-slate-400">희망 지망 부서:</span>
+              <span className="text-slate-400">{isEn ? 'Wishes:' : '희망 지망 부서:'}</span>
               <span className="font-pixel text-slate-200">
-                1지망 {wishes.first.deptName === profile.currentDept ? `${wishes.first.deptName}(잔류)` : wishes.first.deptName}
-                {wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함' ? ` · 2지망 ${wishes.second.deptName}` : ' · 2지망 없음'}
-                {wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함' ? ` · 3지망 ${wishes.third.deptName}` : ' · 3지망 없음'}
+                1: {wishes.first.deptName === profile.currentDept ? (isEn ? `${wishes.first.deptName} (Stay)` : `${wishes.first.deptName}(잔류)`) : wishes.first.deptName}
+                {wishes.second.deptName && wishes.second.deptName !== '없음' && wishes.second.deptName !== '선택 안 함' ? ` · 2: ${wishes.second.deptName}` : (isEn ? ' · 2: None' : ' · 2지망 없음')}
+                {wishes.third.deptName && wishes.third.deptName !== '없음' && wishes.third.deptName !== '선택 안 함' ? ` · 3: ${wishes.third.deptName}` : (isEn ? ' · 3: None' : ' · 3지망 없음')}
               </span>
             </div>
 
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-center">
-              <span className="text-slate-400">희망 부서 합산 확률:</span>
+              <span className="text-slate-400">{isEn ? 'Total Wish Success Odds:' : '희망 부서 합산 확률:'}</span>
               <span className="font-pixel text-blue-400 font-bold">{result.probabilities.totalWish}%</span>
             </div>
 
             {/* 최종 발령 결과 하이라이트 */}
             <div className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 p-4 rounded-xl border border-blue-400/60 text-center my-2">
-              <div className="text-[11px] text-blue-300 font-pixel">최종 인사발령 결과</div>
+              <div className="text-[11px] text-blue-300 font-pixel">{isEn ? 'Final Appointment Order' : '최종 인사발령 결과'}</div>
               <div className="font-pixel text-2xl text-amber-300 font-black my-1">
-                [ {result.assignedDept} ]
+                [ {isEn ? (getDepartmentByName(result.assignedDept)?.nameEn || result.assignedDept) : result.assignedDept} ]
               </div>
               <div className="text-xs text-slate-200 font-medium">
                 {result.messageSubtitle}
@@ -148,7 +154,7 @@ export const ShareCardModal: React.FC<Props> = ({
             "{result.flavorQuote}"
           </div>
           <div className="text-right text-[9px] text-slate-600 mt-2 font-pixel">
-            * PERSONNEL CRAFT — 한국 언론사 가상 인사 시뮬레이터
+            * PERSONNEL CRAFT — {isEn ? 'Virtual Newsroom Reshuffle Simulator' : '한국 언론사 가상 인사 시뮬레이터'}
           </div>
         </div>
 
@@ -162,12 +168,12 @@ export const ShareCardModal: React.FC<Props> = ({
             {downloadSuccess ? (
               <>
                 <Check className="w-4 h-4 text-emerald-300" />
-                <span>저장 완료!</span>
+                <span>{isEn ? 'Saved!' : '저장 완료!'}</span>
               </>
             ) : (
               <>
                 <Download className="w-4 h-4" />
-                <span>{isExporting ? '이미지 생성 중...' : 'PNG 이미지 다운로드'}</span>
+                <span>{isExporting ? (isEn ? 'Generating...' : '이미지 생성 중...') : (isEn ? 'Download PNG Image' : 'PNG 이미지 다운로드')}</span>
               </>
             )}
           </button>
@@ -178,7 +184,7 @@ export const ShareCardModal: React.FC<Props> = ({
             }}
             className="pixel-btn-mc text-slate-300 py-2.5 px-4 text-xs font-pixel"
           >
-            닫기
+            {isEn ? 'Close' : '닫기'}
           </button>
         </div>
       </div>

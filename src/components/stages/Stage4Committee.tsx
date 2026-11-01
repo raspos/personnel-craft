@@ -21,6 +21,7 @@ import {
   Percent
 } from 'lucide-react';
 import { sound } from '../../utils/sound';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface Stage4Props {
   careers: CareerRecord[];
@@ -47,6 +48,8 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
   farmingState,
   currentDept
 }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [isSimulating, setIsSimulating] = useState(false);
 
   // 1. 관계 변수 반영 상태(현재) 시뮬레이션 실행 (결정론적 PRNG 캐싱)
@@ -84,10 +87,12 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
         <div>
           <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
             <Scale className="w-5 h-5 text-amber-400" />
-            <span>STAGE 4. 인사위원회 몬테카를로 시뮬레이션</span>
+            <span>{isEn ? 'STAGE 4. Reshuffle Committee Monte Carlo Simulation' : 'STAGE 4. 인사위원회 몬테카를로 시뮬레이션'}</span>
           </h2>
           <p className="text-xs text-slate-300 mt-1 font-medium">
-            “인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.” 인사 농사에서 모은 정보와 행동이 인사판에 반영되었습니다.
+            {isEn
+              ? '“You water the relationships, but the Managing Editor signs the order.” Your politicking moves have been integrated into the 10,000-run model.'
+              : '“인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.” 인사 농사에서 모은 정보와 행동이 인사판에 반영되었습니다.'}
           </p>
         </div>
 
@@ -99,7 +104,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           className="pixel-btn-mc text-slate-200 text-xs py-1.5 px-3 flex items-center gap-1 font-pixel"
         >
           <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-          <span>모형 가정 보기</span>
+          <span>{isEn ? 'Model Assumptions' : '모형 가정 보기'}</span>
         </button>
       </div>
 
@@ -112,11 +117,11 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
         <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-slate-800 pb-2 mb-2">
           <div className="flex items-center gap-2">
             <Zap className={`w-4 h-4 ${activeEvent.type === 'scenario' ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
-            <span className="font-pixel text-xs text-slate-300">편집국 인사 돌발 이벤트</span>
+            <span className="font-pixel text-xs text-slate-300">{isEn ? 'Newsroom Flash Event' : '편집국 인사 돌발 이벤트'}</span>
             <span className={`text-[10px] px-2 py-0.5 rounded font-pixel font-bold ${
               activeEvent.type === 'scenario' ? 'bg-amber-900 text-amber-200 border border-amber-500' : 'bg-slate-800 text-slate-400'
             }`}>
-              {activeEvent.type === 'scenario' ? '시나리오 변수 변동' : '일반 분위기'}
+              {activeEvent.type === 'scenario' ? (isEn ? 'Scenario Shift' : '시나리오 변수 변동') : (isEn ? 'Newsroom Climate' : '일반 분위기')}
             </span>
           </div>
 
@@ -125,7 +130,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
             className="pixel-btn-mc text-xs text-amber-300 py-1 px-2.5 flex items-center gap-1 font-pixel"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>다른 이벤트 뽑기</span>
+            <span>{isEn ? 'Draw Another Event' : '다른 이벤트 뽑기'}</span>
           </button>
         </div>
 
@@ -133,7 +138,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           <div className="font-pixel text-base text-slate-100 font-bold">{activeEvent.title}</div>
           <p className="text-xs text-slate-300">{activeEvent.description}</p>
           <div className="text-xs text-amber-300 font-medium pt-1 font-pixel">
-            ▶ 반영 효과: {activeEvent.effectDescription}
+            ▶ {isEn ? 'Impact Effect: ' : '반영 효과: '}{activeEvent.effectDescription}
           </div>
         </div>
       </div>
@@ -142,15 +147,17 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
       <div className="pixel-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <div className="font-pixel text-sm text-slate-200 font-bold flex items-center gap-2">
-            <span>부서장 관계 및 사적 친분 변수 반영</span>
+            <span>{isEn ? 'Chief Relationship & Backroom Ties Factor' : '부서장 관계 및 사적 친분 변수 반영'}</span>
             <span className={`text-[11px] px-2 py-0.5 font-pixel border ${
               wishes.applyBossRelation ? 'bg-blue-900/80 text-blue-200 border-blue-400' : 'bg-slate-800 text-slate-400 border-slate-700'
             }`}>
-              {wishes.applyBossRelation ? 'ON (현실 풍자 모형)' : 'OFF (순수 경력·TO 모형)'}
+              {wishes.applyBossRelation ? (isEn ? 'ON (Realistic Satire Model)' : 'ON (현실 풍자 모형)') : (isEn ? 'OFF (Pure Merit/Tenure Model)' : 'OFF (순수 경력·TO 모형)')}
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            스위치를 켜면 영입 의사·사적 친분 변수가 가중치에 포함되며, 끄면 경력·근속·TO만으로 계산됩니다.
+            {isEn
+              ? 'When toggled ON, recruitment intent and personal rapport affect weights. When OFF, only merit, tenure, and TO count.'
+              : '스위치를 켜면 영입 의사·사적 친분 변수가 가중치에 포함되며, 끄면 경력·근속·TO만으로 계산됩니다.'}
           </p>
         </div>
 
@@ -161,12 +168,12 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           {wishes.applyBossRelation ? (
             <>
               <ToggleRight className="w-5 h-5 text-cyan-400" />
-              <span>관계 변수 끄기</span>
+              <span>{isEn ? 'Turn Off Relations' : '관계 변수 끄기'}</span>
             </>
           ) : (
             <>
               <ToggleLeft className="w-5 h-5 text-slate-400" />
-              <span>관계 변수 켜기</span>
+              <span>{isEn ? 'Turn On Relations' : '관계 변수 켜기'}</span>
             </>
           )}
         </button>
@@ -178,11 +185,11 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           <div className="flex items-center gap-2">
             <Percent className="w-5 h-5 text-cyan-400" />
             <h3 className="font-pixel text-base text-slate-100 font-bold">
-              10,000회 시뮬레이션 예상 발령 확률
+              {isEn ? 'Projected Placement Odds (10,000 Runs)' : '10,000회 시뮬레이션 예상 발령 확률'}
             </h3>
           </div>
           <div className="text-xs font-pixel text-emerald-400 bg-emerald-950/90 px-3 py-1 border-2 border-emerald-600">
-            희망 부서 합산 성공률: {prob.totalWish}%
+            {isEn ? 'Total Wish Success Odds: ' : '희망 부서 합산 성공률: '}{prob.totalWish}%
           </div>
         </div>
 
@@ -192,15 +199,15 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
             <div className="flex justify-between text-xs font-medium">
               <span className="font-pixel text-cyan-300 flex items-center gap-1.5">
                 <span className="w-4 h-4 bg-cyan-700 text-white flex items-center justify-center text-[10px] font-bold border border-cyan-400">1</span>
-                1지망: {wishes.first.deptName === currentDept ? `${wishes.first.deptName} (현 부서 잔류)` : wishes.first.deptName}
+                {isEn ? '1st Wish: ' : '1지망: '}{wishes.first.deptName === currentDept ? (isEn ? `${wishes.first.deptName} (Stay Current)` : `${wishes.first.deptName} (현 부서 잔류)`) : wishes.first.deptName}
                 {wishes.first.expectedTO === '0명' && (
                   activeEvent?.id === 'event_opening_1st' ? (
                     <span className="text-amber-300 text-[10px] bg-amber-950 px-1.5 py-0.5 border border-amber-500 font-pixel animate-pulse">
-                      🚨 긴급 결원 발생 (0명 제약 해제 & 단독 공석 신설)
+                      {isEn ? '🚨 Emergency Vacancy (0 TO Lifted)' : '🚨 긴급 결원 발생 (0명 제약 해제 & 단독 공석 신설)'}
                     </span>
                   ) : (
                     <span className="text-rose-400 text-[10px] bg-rose-950 px-1.5 py-0.5 border border-rose-800 font-pixel">
-                      확정 TO 0명 (0% 고정)
+                      {isEn ? '0 Seats (Fixed 0%)' : '확정 TO 0명 (0% 고정)'}
                     </span>
                   )
                 )}
@@ -230,10 +237,10 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
                 <div className="flex justify-between text-xs font-medium">
                   <span className={`font-pixel flex items-center gap-1.5 ${isNone2 ? 'text-slate-500' : 'text-slate-200'}`}>
                     <span className="w-4 h-4 bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold border border-slate-500">2</span>
-                    2지망: {isNone2 ? '없음 (미지원)' : wishes.second.deptName}
+                    {isEn ? '2nd Wish: ' : '2지망: '}{isNone2 ? (isEn ? 'None' : '없음 (미지원)') : wishes.second.deptName}
                     {!isNone2 && wishes.second.expectedTO === '0명' && (
                       <span className="text-rose-400 text-[10px] bg-rose-950 px-1.5 py-0.5 border border-rose-800 font-pixel">
-                        확정 TO 0명 (0% 고정)
+                        {isEn ? '0 Seats (Fixed 0%)' : '확정 TO 0명 (0% 고정)'}
                       </span>
                     )}
                   </span>
@@ -266,10 +273,10 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
                 <div className="flex justify-between text-xs font-medium">
                   <span className={`font-pixel flex items-center gap-1.5 ${isNone3 ? 'text-slate-500' : 'text-slate-300'}`}>
                     <span className="w-4 h-4 bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold border border-slate-500">3</span>
-                    3지망: {isNone3 ? '없음 (미지원)' : wishes.third.deptName}
+                    {isEn ? '3rd Wish: ' : '3지망: '}{isNone3 ? (isEn ? 'None' : '없음 (미지원)') : wishes.third.deptName}
                     {!isNone3 && wishes.third.expectedTO === '0명' && (
                       <span className="text-rose-400 text-[10px] bg-rose-950 px-1.5 py-0.5 border border-rose-800 font-pixel">
-                        확정 TO 0명 (0% 고정)
+                        {isEn ? '0 Seats (Fixed 0%)' : '확정 TO 0명 (0% 고정)'}
                       </span>
                     )}
                   </span>
@@ -299,7 +306,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
             <div className="flex justify-between text-xs font-medium">
               <span className="font-pixel text-rose-300 flex items-center gap-1.5">
                 <AlertOctagon className="w-4 h-4 text-rose-400" />
-                기피 부서 유입 위험: {wishes.avoidDept}
+                {isEn ? 'Blacklisted Desk Risk: ' : '기피 부서 유입 위험: '}{wishes.avoidDept}
               </span>
               <span className="text-rose-400 font-bold text-sm font-pixel">{prob.avoidDept}%</span>
             </div>
@@ -315,18 +322,20 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="pixel-slot p-3 text-xs">
               <div className="text-slate-400 font-pixel">
-                {wishes.first.deptName === currentDept ? '현 부서 잔류 확률 (1지망 희망):' : '현 부서 잔류 확률:'}
+                {wishes.first.deptName === currentDept
+                  ? (isEn ? 'Retention Odds (1st Wish):' : '현 부서 잔류 확률 (1지망 희망):')
+                  : (isEn ? 'Current Desk Retention Odds:' : '현 부서 잔류 확률:')}
               </div>
               <div className="font-pixel text-amber-300 font-bold text-base mt-1">{prob.stayCurrent}%</div>
             </div>
             <div className="pixel-slot p-3 text-xs">
-              <div className="text-slate-400 font-pixel">기타 부서 임의 배치:</div>
+              <div className="text-slate-400 font-pixel">{isEn ? 'Other Department Assignment:' : '기타 부서 임의 배치:'}</div>
               <div className="font-pixel text-slate-300 font-bold text-base mt-1">{prob.otherDept}%</div>
             </div>
           </div>
 
           <div className="text-[11px] text-slate-400 text-right pt-1 font-pixel">
-            * 모든 항목의 합계는 수학적으로 정확히 100.0%로 정규화되었습니다.
+            {isEn ? '* All probability sums are mathematically normalized to 100.0%.' : '* 모든 항목의 합계는 수학적으로 정확히 100.0%로 정규화되었습니다.'}
           </div>
         </div>
       </div>
@@ -341,7 +350,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           className="pixel-btn-mc text-slate-300 py-3 px-5 text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>이전</span>
+          <span>{isEn ? 'Back' : '이전'}</span>
         </button>
 
         <button
@@ -351,7 +360,7 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
           }}
           className="pixel-btn-mc pixel-btn-mc-primary flex-1 py-3 px-6 text-base font-bold flex items-center justify-center gap-2"
         >
-          <span>운명의 인사발령 발표장으로 입장</span>
+          <span>{isEn ? 'Enter the Reshuffle Announcement Hall' : '운명의 인사발령 발표장으로 입장'}</span>
           <ArrowRight className="w-5 h-5 text-amber-300" />
         </button>
       </div>

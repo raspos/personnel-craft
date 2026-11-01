@@ -11,6 +11,8 @@ import { drawFinalAppointment } from '../../utils/simulationEngine';
 import { analyzeCareer } from '../../utils/careerAnalysis';
 import { sound } from '../../utils/sound';
 import { recordCompletedRun, PersonalRunBadge } from '../VisitorCounter';
+import { getDepartmentByName } from '../../data/departments';
+import { useLanguage } from '../../i18n/LanguageContext';
 import confetti from 'canvas-confetti';
 import {
   RotateCcw,
@@ -50,6 +52,8 @@ export const Stage5Result: React.FC<Stage5Props> = ({
   onOpenTenYearModal,
   onActionChange
 }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [phase, setPhase] = useState<'envelope' | 'revealed'>('envelope');
   const [countdown, setCountdown] = useState<number>(3);
   const [isOpening, setIsOpening] = useState<boolean>(false);
@@ -132,17 +136,17 @@ export const Stage5Result: React.FC<Stage5Props> = ({
   const getStampData = (type: string) => {
     switch (type) {
       case 'first':
-        return { text: '1지망 영전 확정', color: 'stamp-green' };
+        return { text: isEn ? '1st Wish Confirmed' : '1지망 영전 확정', color: 'stamp-green' };
       case 'second':
-        return { text: '2지망 안착 승인', color: 'stamp-green' };
+        return { text: isEn ? '2nd Wish Approved' : '2지망 안착 승인', color: 'stamp-green' };
       case 'third':
-        return { text: '3지망 턱걸이', color: 'stamp-amber' };
+        return { text: isEn ? '3rd Wish Squeaked By' : '3지망 턱걸이', color: 'stamp-amber' };
       case 'stay':
-        return { text: '원직 잔류 조치', color: 'stamp-amber' };
+        return { text: isEn ? 'Current Desk Retained' : '원직 잔류 조치', color: 'stamp-amber' };
       case 'avoid':
-        return { text: '격오지 기피 유입', color: '' };
+        return { text: isEn ? 'Exiled to Blacklist' : '격오지 기피 유입', color: '' };
       default:
-        return { text: '인사위 직권 발령', color: 'stamp-amber' };
+        return { text: isEn ? 'Executive Order' : '인사위 직권 발령', color: 'stamp-amber' };
     }
   };
 
@@ -156,19 +160,23 @@ export const Stage5Result: React.FC<Stage5Props> = ({
           <div className="inline-block p-5 pixel-card border-2 border-amber-500/80 shadow-xl relative bg-amber-950/40">
             <Mail className="w-16 h-16 text-amber-400 mx-auto animate-bounce" />
             <div className="w-8 h-8 rounded bg-red-600 border-2 border-red-300 absolute -bottom-2 -right-2 flex items-center justify-center text-xs font-bold text-white shadow font-pixel">
-              封
+              {isEn ? 'SEAL' : '封'}
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="font-pixel text-xs text-red-400 tracking-widest uppercase">
-              ★ [TOP SECRET] 대외비 편집국 정기인사 통지서 ★
+              {isEn ? '★ [TOP SECRET] CONFIDENTIAL RESHUFFLE NOTICE ★' : '★ [TOP SECRET] 대외비 편집국 정기인사 통지서 ★'}
             </div>
             <h2 className="font-pixel text-2xl sm:text-3xl text-slate-100 font-extrabold">
-              {profile.hireYear + Math.floor(analysis.totalMonths / 12)}년도 {profile.currentHalf} 인사발령
+              {isEn
+                ? `${profile.hireYear + Math.floor(analysis.totalMonths / 12)} ${profile.currentHalf === '하반기' ? 'Autumn' : 'Spring'} Reshuffle Order`
+                : `${profile.hireYear + Math.floor(analysis.totalMonths / 12)}년도 ${profile.currentHalf} 인사발령`}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm font-pixel">
-              편집국장의 결재 도장이 찍힌 인사발령 봉투를 개봉하고 있습니다...
+              {isEn
+                ? 'Unsealing the confidential appointment envelope stamped by the Managing Editor...'
+                : '편집국장의 결재 도장이 찍힌 인사발령 봉투를 개봉하고 있습니다...'}
             </p>
           </div>
 
@@ -177,7 +185,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               {countdown}
             </div>
             <div className="text-xs text-slate-400 mt-3 font-pixel">
-              {countdown > 0 ? '봉투 개봉 3초 전...' : '개봉 완료!'}
+              {countdown > 0 ? (isEn ? `Unsealing in ${countdown}s...` : '봉투 개봉 3초 전...') : (isEn ? 'Unsealed!' : '개봉 완료!')}
             </div>
           </div>
 
@@ -185,7 +193,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             onClick={revealResult}
             className="text-xs text-slate-400 hover:text-amber-300 underline font-pixel"
           >
-            카운트다운 건너뛰고 바로 열기 ➔
+            {isEn ? 'Skip countdown and open now ➔' : '카운트다운 건너뛰고 바로 열기 ➔'}
           </button>
         </div>
       ) : result ? (
@@ -203,13 +211,15 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             {/* 호외 신문 상단 헤더 바 */}
             <div className="border-b-2 border-slate-700/80 pb-3 mb-5 flex flex-wrap items-center justify-between gap-2 text-xs font-pixel text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="bg-red-600 text-white font-black px-2 py-0.5 border border-red-300 text-[11px]">호외 (號外)</span>
-                <span className="font-bold text-slate-200">편집국 인사 특별 속보</span>
+                <span className="bg-red-600 text-white font-black px-2 py-0.5 border border-red-300 text-[11px]">{isEn ? 'EXTRA!' : '호외 (號外)'}</span>
+                <span className="font-bold text-slate-200">{isEn ? 'NEWSROOM SPECIAL BULLETIN' : '편집국 인사 특별 속보'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <PersonalRunBadge />
                 <span>
-                  발행: {profile.hireYear + Math.floor(analysis.totalMonths / 12)}년 {profile.currentHalf} 정기인사위원회
+                  {isEn
+                    ? `Issued: ${profile.hireYear + Math.floor(analysis.totalMonths / 12)} Reshuffle Council`
+                    : `발행: ${profile.hireYear + Math.floor(analysis.totalMonths / 12)}년 ${profile.currentHalf} 정기인사위원회`}
                 </span>
               </div>
             </div>
@@ -226,12 +236,12 @@ export const Stage5Result: React.FC<Stage5Props> = ({
 
             {/* 상단 뱃지 */}
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 pixel-slot text-xs font-pixel mb-3">
-              {result.resultType === 'first' && <span className="text-cyan-400 font-bold">🎉 1지망 대성공</span>}
-              {result.resultType === 'second' && <span className="text-blue-300 font-bold">✨ 2지망 안착</span>}
-              {result.resultType === 'third' && <span className="text-indigo-300 font-bold">🛡️ 3지망 턱걸이</span>}
-              {result.resultType === 'avoid' && <span className="text-red-400 font-bold">⚠️ 기피 부서 유입</span>}
-              {result.resultType === 'stay' && <span className="text-amber-400 font-bold">📌 현 부서 잔류</span>}
-              {result.resultType === 'other' && <span className="text-purple-400 font-bold">🎲 기타 부서 발령</span>}
+              {result.resultType === 'first' && <span className="text-cyan-400 font-bold">{isEn ? '🎉 1st Wish Triumph' : '🎉 1지망 대성공'}</span>}
+              {result.resultType === 'second' && <span className="text-blue-300 font-bold">{isEn ? '✨ 2nd Wish Landed' : '✨ 2지망 안착'}</span>}
+              {result.resultType === 'third' && <span className="text-indigo-300 font-bold">{isEn ? '🛡️ 3rd Wish Survivor' : '🛡️ 3지망 턱걸이'}</span>}
+              {result.resultType === 'avoid' && <span className="text-red-400 font-bold">{isEn ? '⚠️ Exiled to Blacklist' : '⚠️ 기피 부서 유입'}</span>}
+              {result.resultType === 'stay' && <span className="text-amber-400 font-bold">{isEn ? '📌 Desk Retained' : '📌 현 부서 잔류'}</span>}
+              {result.resultType === 'other' && <span className="text-purple-400 font-bold">{isEn ? '🎲 Transferred to Other Desk' : '🎲 기타 부서 발령'}</span>}
             </div>
 
             {/* 헤드라인 & 발령 부서 */}
@@ -239,7 +249,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               {result.messageHeadline}
             </h2>
             <div className="font-pixel text-3xl sm:text-5xl text-amber-300 font-black my-4 drop-shadow-lg tracking-wider">
-              [ {result.assignedDept} ] 발령!
+              [ {isEn ? (getDepartmentByName(result.assignedDept)?.nameEn || result.assignedDept) : result.assignedDept} ] {isEn ? 'ORDER ISSUED!' : '발령!'}
             </div>
             <p className="text-slate-300 text-sm sm:text-base font-medium max-w-xl mx-auto leading-relaxed mb-4">
               {result.messageSubtitle}
@@ -253,19 +263,19 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             {/* 인사 확률 리뷰 배지 바 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 max-w-lg mx-auto">
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[10px] font-pixel">1지망 확률</div>
+                <div className="text-slate-400 text-[10px] font-pixel">{isEn ? '1st Wish Odds' : '1지망 확률'}</div>
                 <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">{probabilities.firstWish}%</div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[10px] font-pixel">희망부서 합산</div>
+                <div className="text-slate-400 text-[10px] font-pixel">{isEn ? 'Total Wish Combined' : '희망부서 합산'}</div>
                 <div className="font-pixel text-emerald-400 font-bold text-sm mt-0.5">{probabilities.totalWish}%</div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[10px] font-pixel">현부서 잔류</div>
+                <div className="text-slate-400 text-[10px] font-pixel">{isEn ? 'Retention Odds' : '현부서 잔류'}</div>
                 <div className="font-pixel text-amber-400 font-bold text-sm mt-0.5">{probabilities.stayCurrent}%</div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[10px] font-pixel">기피부서 위험</div>
+                <div className="text-slate-400 text-[10px] font-pixel">{isEn ? 'Blacklist Risk' : '기피부서 위험'}</div>
                 <div className="font-pixel text-red-400 font-bold text-sm mt-0.5">{probabilities.avoidDept}%</div>
               </div>
             </div>
@@ -276,22 +286,22 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             <div className="font-pixel text-sm text-amber-300 font-bold flex items-center justify-between border-b-2 border-slate-800 pb-2">
               <div className="flex items-center gap-2">
                 <span>🌾</span>
-                <span>나의 인사 농사 성적표 종합 리포트</span>
+                <span>{isEn ? 'Newsroom Politicking Report Card' : '나의 인사 농사 성적표 종합 리포트'}</span>
               </div>
               <span className="text-[11px] text-slate-400 font-normal">
-                {profile.currentHalf === '하반기' ? '추석 이후 4주 활동 총결산' : '상반기 활동 총결산'}
+                {isEn ? 'Comprehensive Season Review' : (profile.currentHalf === '하반기' ? '추석 이후 4주 활동 총결산' : '상반기 활동 총결산')}
               </span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-slate-300">
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[11px] font-pixel">부서장 면담</div>
+                <div className="text-slate-400 text-[11px] font-pixel">{isEn ? 'Chief Meetings' : '부서장 면담'}</div>
                 <div className="font-pixel text-blue-400 font-bold text-sm mt-0.5">
-                  {Object.values(farmingState.bossVisitCount).reduce((a, b) => a + b, 0)}회 접촉
+                  {Object.values(farmingState.bossVisitCount).reduce((a, b) => a + b, 0)}{isEn ? ' times' : '회 접촉'}
                 </div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[11px] font-pixel">1지망 부서 인지도</div>
+                <div className="text-slate-400 text-[11px] font-pixel">{isEn ? '1st Wish Awareness' : '1지망 부서 인지도'}</div>
                 <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">
                   {typeof farmingState.metrics.deptAwareness === 'number'
                     ? farmingState.metrics.deptAwareness
@@ -299,11 +309,11 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 </div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[11px] font-pixel">현 부서 잔류 압력</div>
+                <div className="text-slate-400 text-[11px] font-pixel">{isEn ? 'Retention Pressure' : '현 부서 잔류 압력'}</div>
                 <div className="font-pixel text-rose-400 font-bold text-sm mt-0.5">{farmingState.metrics.stayPressure}%</div>
               </div>
               <div className="pixel-slot p-2.5">
-                <div className="text-slate-400 text-[11px] font-pixel">기사 작성 성과</div>
+                <div className="text-slate-400 text-[11px] font-pixel">{isEn ? 'Scoop Score' : '기사 작성 성과'}</div>
                 <div className="font-pixel text-emerald-400 font-bold text-sm mt-0.5">{farmingState.metrics.articleScore}P</div>
               </div>
             </div>
@@ -312,20 +322,20 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             <div className="p-3 pixel-slot text-slate-200 text-xs italic font-pixel leading-relaxed">
               {result.resultType === 'first' && (
                 wishes.first.deptName === currentDeptName
-                  ? '“당신의 강력한 잔류 의지가 마침내 관철되었습니다! 진행 중이던 대형 기획 취재를 성공적으로 마무리할 무대를 지켜냈습니다.”'
+                  ? (isEn ? '“Your unshakeable resolve to retain your beat prevailed! You have defended your desk to finish your big investigative series.”' : '“당신의 강력한 잔류 의지가 마침내 관철되었습니다! 진행 중이던 대형 기획 취재를 성공적으로 마무리할 무대를 지켜냈습니다.”')
                   : wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
-                  ? '“2·3지망 없이 1지망에 승부수를 던진 당신의 배포가 통했습니다! 편집국에 확실한 존재감을 각인시켰습니다.”'
-                  : '“밭을 갈았더니 정말 탐스러운 싹이 났습니다! 당신의 물밑 노력과 편집국의 뜻이 완벽히 맞아떨어졌습니다.”'
+                  ? (isEn ? '“Betting everything on 1st wish without a backup paid off! You made an indelible statement across the newsroom.”' : '“2·3지망 없이 1지망에 승부수를 던진 당신의 배포가 통했습니다! 편집국에 확실한 존재감을 각인시켰습니다.”')
+                  : (isEn ? '“Groundwork nurtured rich harvest! Your backroom lobbying and the newsroom council aligned perfectly.”' : '“밭을 갈았더니 정말 탐스러운 싹이 났습니다! 당신의 물밑 노력과 편집국의 뜻이 완벽히 맞아떨어졌습니다.”')
               )}
-              {result.resultType === 'second' && '“1지망 밭은 아쉽게 비껴갔지만, 2지망 밭에서 뜻밖의 풍성한 수확을 거두었습니다!”'}
-              {result.resultType === 'third' && '“치열한 인사 가뭄 속에서도 턱걸이 수확에 성공했습니다. 생존력 만점입니다!”'}
+              {result.resultType === 'second' && (isEn ? '“The 1st wish narrowly missed, but your 2nd wish yielded a surprisingly rich harvest!”' : '“1지망 밭은 아쉽게 비껴갔지만, 2지망 밭에서 뜻밖의 풍성한 수확을 거두었습니다!”')}
+              {result.resultType === 'third' && (isEn ? '“You squeaked into your 3rd wish despite a brutal reshuffle drought. Ultimate survivor!”' : '“치열한 인사 가뭄 속에서도 턱걸이 수확에 성공했습니다. 생존력 만점입니다!”')}
               {result.resultType === 'stay' && (
                 wishes.second.deptName === '없음' || wishes.second.deptName === '선택 안 함'
-                  ? '“1지망 올인이 불발되어 현 부서에 잔류합니다. 배수의 진을 쳤던 만큼 다음 인사의 이동 명분이 더욱 강력해졌습니다.”'
-                  : '“밭은 열심히 갈았는데… 결국 현 부서의 잔류 벽을 넘지 못했습니다. 내년 봄 인사를 기약합니다.”'
+                  ? (isEn ? '“Your all-in 1st wish gambit fell through, holding you in your current desk. Having burned the bridges, your justification to move next cycle is ironclad.”' : '“1지망 올인이 불발되어 현 부서에 잔류합니다. 배수의 진을 쳤던 만큼 다음 인사의 이동 명분이 더욱 강력해졌습니다.”')
+                  : (isEn ? '“You cultivated your connections diligently, but could not break the current desk\'s retention grip. Prepare for the spring reshuffle!”' : '“밭은 열심히 갈았는데… 결국 현 부서의 잔류 벽을 넘지 못했습니다. 내년 봄 인사를 기약합니다.”')
               )}
-              {result.resultType === 'avoid' && '“인사 농사보다 무서운 건 편집국의 돌발 태풍이었습니다. 기피 부서에서 진정한 대기자(大記者)로 거듭납니다.”'}
-              {result.resultType === 'other' && '“예상하지 못한 곳에서 싹이 틉니다. 인생도 인사도 언제나 미지의 연속입니다.”'}
+              {result.resultType === 'avoid' && (isEn ? '“Fiercer than any reshuffle politicking was the newsroom typhoon. Reborn as a battle-hardened veteran in exile!”' : '“인사 농사보다 무서운 건 편집국의 돌발 태풍이었습니다. 기피 부서에서 진정한 대기자(大記者)로 거듭납니다.”')}
+              {result.resultType === 'other' && (isEn ? '“Sprouts emerge from the most unexpected soil. Life, like newsroom reshuffles, is full of mysteries.”' : '“예상하지 못한 곳에서 싹이 틉니다. 인생도 인사도 언제나 미지의 연속입니다.”')}
             </div>
           </div>
 
@@ -333,16 +343,16 @@ export const Stage5Result: React.FC<Stage5Props> = ({
           <div className="pixel-card p-4 text-xs space-y-2">
             <div className="font-pixel text-sm text-slate-200 font-bold flex items-center gap-1.5 border-b-2 border-slate-800 pb-2">
               <Briefcase className="w-4 h-4 text-cyan-400" />
-              <span>기자 프로필 요약</span>
+              <span>{isEn ? 'Reporter Dossier Summary' : '기자 프로필 요약'}</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-slate-300 font-pixel">
-              <div>기자 닉네임: <strong className="text-white">{profile.nickname}</strong></div>
-              <div>기자 연차: <strong className="text-white">{analysis.totalYearsText}</strong></div>
-              <div>기자 유형: <strong className="text-amber-300">{analysis.reporterType}</strong></div>
+              <div>{isEn ? 'Byline:' : '기자 닉네임:'} <strong className="text-white">{profile.nickname}</strong></div>
+              <div>{isEn ? 'Experience:' : '기자 연차:'} <strong className="text-white">{analysis.totalYearsText}</strong></div>
+              <div>{isEn ? 'Archetype:' : '기자 유형:'} <strong className="text-amber-300">{analysis.reporterType}</strong></div>
               {analysis.careerSynergy && (
                 <div className="col-span-full pt-2 border-t border-slate-800 flex flex-wrap items-center gap-2 text-xs">
                   <span className="px-2 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-500 font-bold font-pixel">
-                    ⚡ 시너지
+                    ⚡ {isEn ? 'Synergy' : '시너지'}
                   </span>
                   <span className="text-cyan-200 font-bold">{analysis.careerSynergy.title}</span>
                   <span className="text-slate-400">({analysis.careerSynergy.combination})</span>
@@ -361,7 +371,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               className="pixel-btn-mc text-slate-200 py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
               <RotateCcw className="w-4 h-4 text-cyan-400" />
-              <span>동일 조건으로 다시 뽑기</span>
+              <span>{isEn ? 'Reroll (Same Odds)' : '동일 조건으로 다시 뽑기'}</span>
             </button>
 
             <button
@@ -372,7 +382,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               className="pixel-btn-mc pixel-btn-mc-primary py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
               <Share2 className="w-4 h-4 text-white" />
-              <span>결과 카드 이미지 저장</span>
+              <span>{isEn ? 'Save Result Card (Image)' : '결과 카드 이미지 저장'}</span>
             </button>
 
             <button
@@ -383,7 +393,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               className="pixel-btn-mc text-amber-300 py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
               <Clock className="w-4 h-4 text-amber-400" />
-              <span>10년 기자 인생 모드</span>
+              <span>{isEn ? '10-Year Career Simulation' : '10년 기자 인생 모드'}</span>
             </button>
           </div>
 
@@ -396,7 +406,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               }}
               className="text-xs text-slate-400 hover:text-slate-200 underline font-pixel"
             >
-              캐릭터 및 경력 처음부터 다시 설정하기
+              {isEn ? 'Reset and re-configure character & career from Stage 1' : '캐릭터 및 경력 처음부터 다시 설정하기'}
             </button>
           </div>
         </div>
