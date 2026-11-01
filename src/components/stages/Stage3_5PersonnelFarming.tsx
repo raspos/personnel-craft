@@ -95,6 +95,9 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   // 복잡한 세부 첩보 지표 아코디언 토글 (기본 접힘으로 시각적 인지 부하 대폭 절감)
   const [showDetailedIntel, setShowDetailedIntel] = useState(false);
 
+  // 현재 타겟이 현 부서 잔류 희망인지 판별
+  const isTargetingStay = selectedTargetWish === 1 && wishes.first.deptName === currentDeptName;
+
   // 선택된 접촉 대상이 '없음'인 경우 1지망으로 자동 복귀
   useEffect(() => {
     const curDept = selectedTargetWish === 1
@@ -367,7 +370,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
                         </div>
                         <div className="text-[10px] text-slate-500 flex justify-between pt-0.5">
                           <span>밭: {item.stage === 0 ? '씨앗' : item.stage === 1 ? '새싹' : item.stage === 2 ? '성장' : '결실'}</span>
-                          <span>TO: {item.to}</span>
+                          <span>{item.name === currentDeptName && item.num === 1 ? '잔류 지망' : `TO: ${item.to}`}</span>
                         </div>
                       </div>
                     ) : (
@@ -526,14 +529,20 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-sky-300 font-bold text-xs mb-1">
               <Users className="w-4 h-4 text-sky-400" />
-              <span>A. 희망 부서장 면담 ({selectedTargetWish}지망 부장)</span>
+              <span>
+                {selectedTargetWish === 1 && wishes.first.deptName === currentDeptName
+                  ? 'A. 현 직속 부서장 면담 (잔류 굳히기)'
+                  : `A. 희망 부서장 면담 (${selectedTargetWish}지망 부장)`}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              부장실을 찾아가 영입 의사를 묻고 관심을 이끌어냅니다. (캐릭터가 직접 이동)
+              {selectedTargetWish === 1 && wishes.first.deptName === currentDeptName
+                ? '부장실을 찾아가 현재 취재를 계속 마무리하겠다는 잔류 의사를 확실히 밝힙니다.'
+                : '부장실을 찾아가 영입 의사를 묻고 관심을 이끌어냅니다. (캐릭터가 직접 이동)'}
             </p>
           </button>
 
-          {/* 행동 B: 희망 부서 동료 만나기 */}
+          {/* 행동 B: 동료 만나기 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('meet_peer')}
@@ -541,14 +550,20 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-amber-300 font-bold text-xs mb-1">
               <Coffee className="w-4 h-4 text-amber-400" />
-              <span>B. 희망 부서 동료와 티타임</span>
+              <span>
+                {isTargetingStay
+                  ? 'B. 현 부서 후배·동료들과 결속 다지기'
+                  : `B. 희망 부서 동료와 티타임 (${selectedTargetWish}지망)`}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              내부 분위기, 장기근무자의 이동 의향, 부서장의 선호 인재상 소문을 파악합니다.
+              {isTargetingStay
+                ? '동료들과 티타임을 가지며 "선배 빠지면 팀 무너진다"는 사내 여론을 조성합니다.'
+                : '내부 분위기, 장기근무자의 이동 의향, 부서장의 선호 인재상 소문을 파악합니다.'}
             </p>
           </button>
 
-          {/* 행동 C: 편집국에 소문 흘리기 */}
+          {/* 행동 C: 소문 흘리기 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('spread_rumor')}
@@ -556,14 +571,20 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-purple-300 font-bold text-xs mb-1">
               <MessageSquareShare className="w-4 h-4 text-purple-400" />
-              <span>C. 편집국에 인사 소문 흘리기</span>
+              <span>
+                {isTargetingStay
+                  ? 'C. "나 딴 데 안 간다" 잔류 소문 못 박기'
+                  : 'C. 편집국에 인사 이동 소문 흘리기'}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              "나 이번에 움직이고 싶어." 희망 부서에 알려지지만 현재 부서장이 눈치챌 수도 있습니다!
+              {isTargetingStay
+                ? '"나 이번에 출입처 절대 안 바꾼다"고 소문을 퍼뜨려 타 부서의 강제 차출을 차단합니다.'
+                : '"나 이번에 움직이고 싶어." 희망 부서에 알려지지만 현재 부서장이 눈치챌 수도 있습니다!'}
             </p>
           </button>
 
-          {/* 행동 D: 휴게실 인사판 탐색 */}
+          {/* 행동 D: 휴게실 탐색 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('explore_board')}
@@ -571,14 +592,20 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-cyan-300 font-bold text-xs mb-1">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>D. 휴게실 인사판 & 정세 탐색</span>
+              <span>
+                {isTargetingStay
+                  ? 'D. 휴게실 정세 탐색 (부서 노리는 침입자 파악)'
+                  : 'D. 휴게실 인사판 & 도미노 정세 탐색'}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              선배 기자들과 담소를 나누며 이번 인사의 폭과 연쇄 도미노 기류를 엿봅니다.
+              {isTargetingStay
+                ? '선배들과 담소를 나누며 우리 부서로 밀고 들어오려는 외부 경쟁자나 낙하산 기류를 탐색합니다.'
+                : '선배 기자들과 담소를 나누며 이번 인사의 폭과 연쇄 도미노 기류를 엿봅니다.'}
             </p>
           </button>
 
-          {/* 행동 E: 현재 부서장과 솔직한 면담 */}
+          {/* 행동 E: 부서장 담판 / 기획안 제출 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('meet_cur_boss')}
@@ -586,10 +613,16 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-amber-300 font-bold text-xs mb-1">
               <UserCheck className="w-4 h-4 text-amber-400" />
-              <span>E. 현재 부서장과 솔직한 면담</span>
+              <span>
+                {isTargetingStay
+                  ? 'E. 중장기 심층 기획안 제출 (부서 잔류 알박기)'
+                  : 'E. 현재 부서장과 솔직한 면담 (길 터달라 설득)'}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              "부장님, 이번엔 다른 분야를 경험해보고 싶습니다." 부서장의 본심을 확률적으로 확인합니다.
+              {isTargetingStay
+                ? '내년까지 이어지는 대형 심층 기획안을 데스크에 공식 제출하여 잔류할 수밖에 없는 명분을 굳힙니다.'
+                : '"부장님, 이번엔 다른 분야를 경험해보고 싶습니다." 부서장의 본심을 확률적으로 확인합니다.'}
             </p>
           </button>
 
@@ -601,10 +634,16 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           >
             <div className="flex items-center gap-2 font-pixel text-emerald-300 font-bold text-xs mb-1">
               <FileEdit className="w-4 h-4 text-emerald-400" />
-              <span>F. 인사 농사 대신 특종 기사 집필 (실력파)</span>
+              <span>
+                {isTargetingStay
+                  ? 'F. 현 출입처 단독 특종 보도 (대체 불가 입증)'
+                  : 'F. 인사 농사 대신 특종 기사 집필 (실력파)'}
+              </span>
             </div>
             <p className="text-[11px] text-slate-300">
-              사내 정치 대신 실력으로 승부합니다. 기사 성과 대폭 상승 및 1지망 데스크 호평 획득.
+              {isTargetingStay
+                ? '현재 맡은 출입처에서 대형 단독 특종을 터뜨려 "이 자리는 김 기자가 아니면 안 된다"는 것을 증명합니다.'
+                : '사내 정치 대신 실력으로 승부합니다. 기사 성과 대폭 상승 및 1지망 데스크 호평 획득.'}
             </p>
           </button>
         </div>
@@ -617,7 +656,11 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
             className="w-full py-2.5 px-3 rounded-lg bg-slate-950 border border-slate-800 hover:bg-slate-900 text-xs font-pixel text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2"
           >
             <Smile className="w-4 h-4 text-slate-500" />
-            <span>G. "나는 인사에 연연하지 않는다" (평소처럼 묵묵히 마감 대기)</span>
+            <span>
+              {isTargetingStay
+                ? 'G. "인사 풍파에 흔들리지 않는다" (출입처 굳건히 지키며 마감 대기)'
+                : 'G. "나는 인사에 연연하지 않는다" (평소처럼 묵묵히 마감 대기)'}
+            </span>
           </button>
         </div>
       </div>

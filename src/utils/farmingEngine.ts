@@ -57,6 +57,8 @@ export function executeFarmingAction(
     ? updatedWishes.second
     : updatedWishes.third;
 
+  const isStayMode = targetWishIndex === 1 && targetWish.deptName === currentDeptName;
+
   let actionTitle = '';
   let targetDept = targetWish.deptName;
   let dialogueText = '';
@@ -66,9 +68,40 @@ export function executeFarmingAction(
 
   switch (actionType) {
     case 'meet_boss': {
-      actionTitle = `${targetWish.deptName} 부서장 면담 (${targetWishIndex}지망)`;
       const visits = (updatedState.bossVisitCount[targetWish.deptName] || 0) + 1;
       updatedState.bossVisitCount[targetWish.deptName] = visits;
+
+      if (isStayMode) {
+        actionTitle = `${currentDeptName} 직속 부서장 면담 (잔류 굳히기)`;
+        if (visits === 1) {
+          dialogueText = '자네가 다른 데 안 가고 우리 부서에 더 남아주겠다고? 정말 든든하네! 지금 진행 중인 기획 취재 자네가 중심 잡고 이끌어주게. 내가 국장단 회의 때 자네는 무조건 지켜낼 테니 걱정 말게.';
+          updatedState.metrics.bossInterest[targetKey] = Math.min(100, updatedState.metrics.bossInterest[targetKey] + 25);
+          updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 18);
+          updatedState.metrics.sproutStage.first = Math.min(3, updatedState.metrics.sproutStage.first + 1);
+          outcomeText = `${currentDeptName} 부서장이 잔류 의사를 적극 환영하며 국장단 회의에서 철통 방어하겠다고 약속했습니다.`;
+          impactText = `[현 부서 잔류] 부서장 신임도 +25P, 현 부서 잔류 압력 +18P (잔류 성사율 대폭 상승)`;
+        } else if (visits === 2) {
+          dialogueText = '자네 뜻은 확실히 알았고 내가 국장한테도 이미 자네 잔류를 강력히 못 박아뒀네. 부서 일에만 전념하게.';
+          updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 12);
+          updatedState.metrics.bossInterest[targetKey] = Math.min(100, updatedState.metrics.bossInterest[targetKey] + 10);
+          outcomeText = `부서장의 결재 방어 의지를 재확인하고 잔류 기반을 한층 더 공고히 했습니다.`;
+          impactText = `현 부서 잔류 압력 +12P (부서장의 잔류 결재 확약)`;
+        } else {
+          dialogueText = '자네를 남기는 건 확정적이지만, 자꾸 찾아오면 딴 팀 부장들이 왜 저렇게 단속하나 눈치채네. 현장 취재에 집중하게나.';
+          updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 5);
+          outcomeText = '부서장이 확신을 주며 현장 취재에 집중할 것을 당부했습니다.';
+          impactText = '현 부서 잔류 압력 +5P (안정적 잔류 유지)';
+        }
+
+        popupDialogue = {
+          speaker: `현재 ${currentDeptName} 직속 부서장`,
+          text: dialogueText,
+          note: '부장실 1:1 잔류 면담'
+        };
+        break;
+      }
+
+      actionTitle = `${targetWish.deptName} 부서장 면담 (${targetWishIndex}지망)`;
 
       if (visits === 1) {
         if (targetWish.bossRelation === '과거 직속 부장·데스크') {
@@ -125,6 +158,23 @@ export function executeFarmingAction(
     }
 
     case 'meet_peer': {
+      if (isStayMode) {
+        actionTitle = `${currentDeptName} 후배·동료 기자와 티타임 (결속 다지기)`;
+        dialogueText = '선배! 이번에 절대 다른 부서 가지 마세요. 선배 빠지면 저희 팀 진짜 기획 엎어져요. 부장님한테도 선배 꼭 남겨달라고 저희가 다 같이 말할게요!';
+        updatedState.metrics.deptAwareness[targetKey] = Math.min(100, updatedState.metrics.deptAwareness[targetKey] + 30);
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 15);
+        updatedState.metrics.infoConfidence = Math.min(100, updatedState.metrics.infoConfidence + 20);
+        outcomeText = `${currentDeptName} 동료들과 끈끈한 결속을 다지고, 부서 내 대체 불가 필수 인력이라는 사내 여론을 형성했습니다.`;
+        impactText = `부서 내 신임도 +30P, 현 부서 잔류 압력 +15P, 정보 신뢰도 +20P (팀 사수 여론 결집)`;
+
+        popupDialogue = {
+          speaker: `${currentDeptName} 후배 동료 기자`,
+          text: dialogueText,
+          note: '사내 카페테리아 티타임'
+        };
+        break;
+      }
+
       actionTitle = `${targetWish.deptName} 동료 기자 티타임 (${targetWishIndex}지망)`;
       dialogueText = '우리 부서에 2~3년 넘게 근무한 선배가 있어서 이번에 움직일 가능성이 높아 보여. 부장님한테 자네 이야기 좋게 귀띔해둘게!';
       // 해당 지망의 인지도 대폭 상승 & 부서장 관심도 연계
@@ -143,6 +193,34 @@ export function executeFarmingAction(
     }
 
     case 'spread_rumor': {
+      if (isStayMode) {
+        actionTitle = `"나 딴 데 안 간다" 잔류 소문 못 박기`;
+        const successChance = 0.60 + ((updatedState.metrics.infoConfidence / 100) * 0.30);
+        const isSuccess = Math.random() < successChance;
+
+        if (isSuccess) {
+          dialogueText = `김 기자가 이번에 ${currentDeptName}에 완전히 뼈를 묻는다고 선언했다더라고. 다른 부서 데스크들이 영입하려다 명분이 없어서 포기했대.`;
+          updatedState.metrics.rumorSpread = Math.min(100, updatedState.metrics.rumorSpread + 20);
+          updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 18);
+          updatedState.metrics.deptAwareness[targetKey] = Math.min(100, updatedState.metrics.deptAwareness[targetKey] + 20);
+          outcomeText = `잔류 희망 의사가 편집국에 확실히 알려져 타 부서의 강제 차출 시도를 사전에 차단했습니다.`;
+          impactText = `소문 확산도 +20P, 현 부서 잔류 압력 +18P (타 부서 강제 차출 방어 성공)`;
+        } else {
+          dialogueText = '자네 딴 데 안 간다고 큰소리치고 다닌다며? 인사는 국장이 내는 건데 너무 방심하다 엉뚱한 데로 튕겨나갈 수도 있어.';
+          updatedState.metrics.rumorSpread = Math.min(100, updatedState.metrics.rumorSpread + 15);
+          updatedState.metrics.stayPressure = Math.max(0, updatedState.metrics.stayPressure - 5);
+          outcomeText = '소문이 헛돌아 편집국 간부진에게 방심한다는 인상을 주었습니다.';
+          impactText = '소문 확산도 +15P, 현 부서 잔류 압력 -5P';
+        }
+
+        popupDialogue = {
+          speaker: isSuccess ? '동기 기자' : '편집국 타 데스크',
+          text: dialogueText,
+          note: '편집국 복도 소문 확산'
+        };
+        break;
+      }
+
       actionTitle = `${targetWish.deptName} 지망 소문 흘리기 (${targetWishIndex}지망)`;
       // 정보 신뢰도(infoConfidence)가 높을수록 소문 성공 확률 증가!
       const successChance = 0.55 + ((updatedState.metrics.infoConfidence / 100) * 0.35);
@@ -181,6 +259,23 @@ export function executeFarmingAction(
     }
 
     case 'explore_board': {
+      if (isStayMode) {
+        actionTitle = '휴게실 정세 탐색 (우리 부서 노리는 외부 침입자 파악)';
+        dialogueText = `이번에 ${currentDeptName} 쪽으로 밀고 들어오려는 타 부서 기자들이 몇몇 있더군. 하지만 자네가 기획을 쥐고 버티고 있으면 국장도 함부로 못 건드릴 걸세.`;
+        updatedState.metrics.infoConfidence = Math.min(100, updatedState.metrics.infoConfidence + 30);
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 12);
+        updatedState.metrics.bossInterest.first = Math.min(100, updatedState.metrics.bossInterest.first + 10);
+        outcomeText = `외부 경쟁자들의 진입 시도를 사전에 파악하고, 부서 내 자리를 지키기 위한 방어 논리를 확보했습니다.`;
+        impactText = `인사 정보 신뢰도 +30P, 현 부서 잔류 압력 +12P (방어 정보 획득)`;
+
+        popupDialogue = {
+          speaker: '편집국 휴게실 선배 기자',
+          text: dialogueText,
+          note: '휴게실 커피 머신 앞'
+        };
+        break;
+      }
+
       actionTitle = '휴게실 인사판 탐색 & 정세 분석';
       dialogueText = '이번 인사는 국장단 교체설이 있어서 몇몇 부서에서 연쇄 도미노가 생길 거라더군. 각 부서별 결원 사정을 꼼꼼히 파악해두게.';
       updatedState.metrics.infoConfidence = Math.min(100, updatedState.metrics.infoConfidence + 30);
@@ -200,6 +295,23 @@ export function executeFarmingAction(
     }
 
     case 'meet_cur_boss': {
+      if (isStayMode) {
+        actionTitle = '중장기 심층 기획안 제출 (부서 잔류 알박기)';
+        dialogueText = `자네가 가져온 기획안 정말 대단하군! 내년까지 이어질 대형 프로젝트야. 이 기획안을 국장한테 들이밀면 자네는 감히 아무도 다른 데로 못 빼가겠네. 내가 무조건 결재 받아오지!`;
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 22);
+        updatedState.metrics.articleScore = Math.min(100, updatedState.metrics.articleScore + 15);
+        updatedWishes.currentBossIntent = '반드시 남기려고 한다';
+        outcomeText = `내년까지 이어지는 대형 심층 기획안을 공식 제출하여 부서에 남아야만 하는 불가피한 명분을 완벽히 구축했습니다.`;
+        impactText = `현 부서 잔류 압력 +22P, 기사 성과 +15P, 부서장 결재 의사 [반드시 남기려고 한다] 전환! (완벽한 잔류 알박기)`;
+
+        popupDialogue = {
+          speaker: `현재 ${currentDeptName} 직속 부서장`,
+          text: dialogueText,
+          note: '부장실 심층 기획안 대면 보고'
+        };
+        break;
+      }
+
       actionTitle = `현재 ${currentDeptName} 부서장과 속내 탐색 및 면담`;
 
       // 무조건 '보내준다'로 바뀌는 치트키 제거!
@@ -270,6 +382,24 @@ export function executeFarmingAction(
     }
 
     case 'write_article': {
+      if (isStayMode) {
+        actionTitle = '현 출입처 단독 특종 보도 (대체 불가 입증)';
+        updatedState.metrics.articleScore = Math.min(100, updatedState.metrics.articleScore + 25);
+        updatedState.metrics.stayPressure = Math.min(100, updatedState.metrics.stayPressure + 15);
+        updatedState.metrics.bossInterest.first = Math.min(100, updatedState.metrics.bossInterest.first + 10);
+
+        dialogueText = `[데스크 단체방 공지] 우리 부서 김 기자의 단독 기사가 1면 톱에 걸렸습니다! 국장도 "이 출입처는 김 기자가 꽉 쥐고 있으니 절대 건드리지 마라"고 지시했습니다.`;
+        outcomeText = '출입처 단독 특종을 터뜨려 편집국장과 간부진에게 대체 불가능한 핵심 기자임을 확실히 각인시켰습니다.';
+        impactText = '기사 작성 성과 +25P, 현 부서 잔류 압력 +15P (출입처 장악력 인정으로 잔류 성사율 상승)';
+
+        popupDialogue = {
+          speaker: '편집국 데스크 단체 메신저',
+          text: dialogueText,
+          note: '현 출입처 특종 성과 인정'
+        };
+        break;
+      }
+
       actionTitle = '인사 농사 대신 묵묵히 특종 기사 집필';
       updatedState.metrics.articleScore = Math.min(100, updatedState.metrics.articleScore + 25);
       // 실력파 기자 스토리 연계: 1지망 부서장의 관심도 함께 상승!
@@ -295,10 +425,16 @@ export function executeFarmingAction(
 
     case 'do_nothing':
     default: {
-      actionTitle = '인사에 연연하지 않고 평소처럼 근무';
-      dialogueText = '인사 농사는 사람이 짓지만 결과는 하늘(편집국장)이 정하는 법. 평정심을 유지합니다.';
-      outcomeText = '어떠한 소문이나 인위적 개입 없이 담담하게 정기인사를 기다립니다.';
-      impactText = '상태 변화 없음 (기존 경력과 TO 중심 유지)';
+      actionTitle = isStayMode
+        ? '인사 풍파에 흔들리지 않고 묵묵히 마감 대기'
+        : '인사에 연연하지 않고 평소처럼 근무';
+      dialogueText = isStayMode
+        ? '인사철 바람에 일희일비하지 않고 제자리를 굳건히 지키는 것이 가장 강력한 잔류의 길입니다.'
+        : '인사 농사는 사람이 짓지만 결과는 하늘(편집국장)이 정하는 법. 평정심을 유지합니다.';
+      outcomeText = isStayMode
+        ? '평소처럼 출입처를 단단히 지키며 흔들림 없는 존재감을 보여주었습니다.'
+        : '어떠한 소문이나 인위적 개입 없이 담담하게 정기인사를 기다립니다.';
+      impactText = '상태 변화 없음 (기존 경력과 부서 기반 유지)';
 
       popupDialogue = {
         speaker: '나의 다짐',

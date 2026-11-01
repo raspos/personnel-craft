@@ -108,6 +108,33 @@ export function runSimulation(
       break;
   }
 
+  // [신규] 1지망이 현 부서 잔류이고 부서장 관계 변수가 ON인 경우:
+  // 현 부서장과의 관계 및 친밀도가 잔류 성사율(movePressure 완화)에 직접 반영됨!
+  if (isFirstWishStay && wishes.applyBossRelation) {
+    let stayBossBonus = 0;
+    // 현 부서장과의 관계
+    switch (wishes.first.bossRelation) {
+      case '과거 직속 부장·데스크': stayBossBonus += 0.08; break;
+      case '과거 같은 부서에서 근무한 동료': stayBossBonus += 0.06; break;
+      case '다른 부서에서 업무상 협업': stayBossBonus += 0.03; break;
+      case '대학 선후배': stayBossBonus += 0.04; break;
+      case '술자리 친구·사적 친분': stayBossBonus += 0.04; break;
+      case '인사만 하는 사이': stayBossBonus += 0.01; break;
+      case '안면이 전혀 없는 사이': stayBossBonus -= 0.04; break;
+      default: break;
+    }
+    // 현 부서장과의 친밀도 / 신뢰도
+    switch (wishes.first.relationTemp) {
+      case '매우 좋은 관계': stayBossBonus += 0.10; break;
+      case '좋은 관계': stayBossBonus += 0.06; break;
+      case '다소 껄끄러움': stayBossBonus -= 0.08; break;
+      case '좋지 않은 관계': stayBossBonus -= 0.15; break;
+      default: break;
+    }
+    // 사이가 좋을수록 잔류 성공(movePressure 감소), 나쁠수록 다른 부서로 방출(movePressure 증가)
+    movePressure -= stayBossBonus;
+  }
+
   // 인사 농사 지표 반영: 현재 부서 잔류 압력(stayPressure) 및 소문 과열
   if (farmingState) {
     const sp = farmingState.metrics.stayPressure;
@@ -127,8 +154,10 @@ export function runSimulation(
   } else if (activeEvent?.id === 'event_senior_move') {
     movePressure -= 0.10; // 선배 대거 복귀: 내 자리 좁아짐
   }
-  // 극단값 방지 (최소 15% 잔류, 최대 85% 이동) -> E 한 번에 5%로 폭락하는 현상 완벽 방지
-  movePressure = Math.max(0.15, Math.min(0.85, movePressure));
+  // 극단값 방지 (1지망 잔류 시 5%~85%, 일반 이동 시 15%~85%)
+  const minMove = isFirstWishStay ? 0.05 : 0.15;
+  const maxMove = isFirstWishStay ? 0.75 : 0.85;
+  movePressure = Math.max(minMove, Math.min(maxMove, movePressure));
 
   // 2. 부서별 가중치 평가 함수
   const evaluateDept = (
@@ -233,14 +262,16 @@ export function runSimulation(
         default: break;
       }
 
-      // 3) 영입 의사 (가장 강력한 결정권: 최대 +20 ~ -15)
-      switch (wish.recruitIntent) {
-        case '직접 함께 일하자고 제안': relationScore += 20; break;
-        case '긍정적 의사 표현': relationScore += 12; break;
-        case '관심은 있어 보임': relationScore += 5; break;
-        case '특별한 의사 표현 없음': relationScore += 0; break;
-        case '부정적 반응': relationScore -= 15; break;
-        case '전혀 모름': default: break;
+      // 3) 영입 의사 (1지망이 현 부서 잔류일 때는 영입 개념이 아니므로 제외)
+      if (!(wishRank === 1 && isFirstWishStay)) {
+        switch (wish.recruitIntent) {
+          case '직접 함께 일하자고 제안': relationScore += 20; break;
+          case '긍정적 의사 표현': relationScore += 12; break;
+          case '관심은 있어 보임': relationScore += 5; break;
+          case '특별한 의사 표현 없음': relationScore += 0; break;
+          case '부정적 반응': relationScore -= 15; break;
+          case '전혀 모름': default: break;
+        }
       }
 
       relationScore = Math.max(-20, Math.min(40, relationScore + eventIntentBonus));
