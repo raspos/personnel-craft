@@ -7,12 +7,11 @@ import {
   Trash2,
   ArrowRight,
   ArrowLeft,
-  BarChart2,
   Compass,
   Layers,
-  ChevronUp,
-  ChevronDown,
-  Hexagon
+  GripVertical,
+  Hexagon,
+  ArrowUpDown
 } from 'lucide-react';
 import { SkillRadarChart } from '../SkillRadarChart';
 import { sound } from '../../utils/sound';
@@ -36,6 +35,10 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
   const [customDeptName, setCustomDeptName] = useState('');
   const [isCustomDept, setIsCustomDept] = useState(false);
 
+  // 드래그 앤 드롭(스와프) 상태
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
   const analysis = analyzeCareer(careers);
 
   // 부서 추가
@@ -58,24 +61,41 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
   // 부서 삭제
   const handleRemoveCareer = (id: string) => {
     sound.playBlip();
-    if (careers.length <= 1) {
-      alert('최소 1개 이상의 근무 부서 경력이 필요합니다.');
-      return;
-    }
     setCareers(careers.filter(c => c.id !== id));
   };
 
-  // [신규] 커리어 블록 위/아래 순서 이동
-  const handleMoveCareer = (index: number, direction: 'up' | 'down') => {
-    sound.playBlip();
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= careers.length) return;
+  // [신규] 드래그 앤 드롭 스와프(순서 재배치) 핸들러
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    setDraggedIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+    // Firefox 호환용 dummy 데이터
+    e.dataTransfer.setData('text/plain', String(idx));
+  };
 
-    const updated = [...careers];
-    const temp = updated[index];
-    updated[index] = updated[targetIndex];
-    updated[targetIndex] = temp;
-    setCareers(updated);
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIdx !== idx) {
+      setDragOverIdx(idx);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (draggedIdx !== null && draggedIdx !== targetIdx) {
+      sound.playClick();
+      const updated = [...careers];
+      const [draggedItem] = updated.splice(draggedIdx, 1);
+      updated.splice(targetIdx, 0, draggedItem);
+      setCareers(updated);
+    }
+    setDraggedIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIdx(null);
+    setDragOverIdx(null);
   };
 
   // 근무 기간 변경 (6개월 단위)
@@ -85,7 +105,6 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     setCareers(
       careers.map(c => {
         if (c.id !== id) return c;
-        // 세부 분야 기간은 큰 틀의 기간에 맞춰 균등 업데이트
         const updatedSubFields = c.subFields.map(sf => ({
           ...sf,
           months: Math.max(6, Math.floor(newMonths / Math.max(1, c.subFields.length)))
@@ -99,7 +118,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     );
   };
 
-  // [신규] 세부 취재 분야 단순 클릭 토글 (세부 기간 배분 없이 항목만 클릭)
+  // 세부 취재 분야 단순 클릭 토글 (세부 기간 배분 없이 항목만 클릭)
   const handleToggleSubField = (careerId: string, fieldName: string) => {
     sound.playBlip();
     setCareers(
@@ -115,7 +134,6 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
           updated = [...c.subFields, { name: fieldName, months: c.periodMonths }];
         }
 
-        // 각 선택된 세부 분야에 큰 틀의 근무 기간 반영
         const perFieldMonths = Math.max(6, Math.floor(c.periodMonths / Math.max(1, updated.length)));
         const finalSubFields = updated.map(sf => ({
           ...sf,
@@ -133,14 +151,15 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
       <div className="voxel-card p-4 border-amber-500/40 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
-            <Layers className="w-5 h-5" />
+            <Layers className="w-5 h-5 text-amber-400" />
             <span>STAGE 2. 나의 기자 커리어 블록</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            부서 순서는 위/아래 화살표로 자유롭게 이동할 수 있으며, 세부 취재 분야는 클릭만으로 간편하게 선택됩니다.
+          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+            <ArrowUpDown className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+            <span>블록 좌측 핸들을 마우스나 터치로 끌어다 놓으면 순서가 바로 <strong>스와프(교체)</strong>됩니다.</span>
           </p>
         </div>
-        <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-pixel text-slate-300">
+        <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-pixel text-slate-300 flex-shrink-0">
           총 경력: <span className="text-amber-400 font-bold text-sm">{analysis.totalYearsText}</span>
         </div>
       </div>
@@ -158,163 +177,167 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                   setSelectedDeptToAdd(e.target.value);
                 }
               }}
-              className="voxel-input text-xs flex-1 min-w-[150px]"
+              className="voxel-input text-xs py-2 font-medium"
             >
               {DEFAULT_DEPARTMENTS.map(d => (
                 <option key={d.id} value={d.name}>
                   {d.name} ({d.category})
                 </option>
               ))}
-              <option value="__custom__">+ 부서 직접 입력 (사용자 정의)</option>
+              <option value="__custom__">직접 입력...</option>
             </select>
           ) : (
-            <div className="flex gap-2 flex-1 min-w-[150px]">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder="새 부서명 (예: 탐사기획팀)"
                 value={customDeptName}
                 onChange={(e) => setCustomDeptName(e.target.value)}
-                className="voxel-input text-xs flex-1"
+                placeholder="부서명 직접 입력 (예: 탐사기획팀)"
+                className="voxel-input text-xs py-2"
               />
               <button
                 type="button"
                 onClick={() => setIsCustomDept(false)}
-                className="px-2 text-xs text-slate-400 hover:text-white"
+                className="text-xs text-slate-400 hover:text-white underline font-pixel"
               >
-                취소
+                목록 선택으로 복귀
               </button>
             </div>
           )}
 
           <button
             onClick={handleAddCareer}
-            className="voxel-btn bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 text-white text-xs py-2 px-3.5 rounded flex items-center gap-1 font-pixel"
+            className="voxel-btn voxel-btn-emerald text-xs py-2 px-3.5 rounded flex items-center gap-1 font-pixel"
           >
             <Plus className="w-4 h-4" />
-            <span>근무 부서 추가</span>
+            <span>근무 부서 블록 추가</span>
           </button>
         </div>
       </div>
 
-      {/* 근무 부서 타임라인 리스트 (위/아래 순서 변경 가능) */}
-      <div className="space-y-4">
+      {/* 근무 부서 타임라인 리스트 (드래그 앤 드롭 스와프) */}
+      <div className="space-y-3">
         {careers.length === 0 ? (
           <div className="voxel-card p-8 text-center text-slate-400 font-pixel space-y-3 bg-slate-900/60 border-2 border-dashed border-slate-700">
             <div className="text-4xl animate-bounce">🧱</div>
             <p className="text-base text-slate-200 font-bold">등록된 기자 커리어 블록이 없습니다.</p>
             <p className="text-xs text-slate-400 font-sans max-w-md mx-auto leading-relaxed">
-              위의 <strong>[근무 부서 추가]</strong> 버튼을 눌러 과거 출입했던 부서와 현재 소속 부서 블록을 순서대로 쌓아보세요!
+              위의 <strong>[근무 부서 블록 추가]</strong> 버튼을 눌러 과거 출입했던 부서와 현재 소속 부서 블록을 순서대로 쌓아보세요!
             </p>
           </div>
         ) : (
           careers.map((career, idx) => {
-          const deptDef = getDepartmentByName(career.deptName);
-          const availableSubFields = deptDef ? deptDef.subFields : ['일반 취재', '기획', '현장'];
+            const deptDef = getDepartmentByName(career.deptName);
+            const availableSubFields = deptDef ? deptDef.subFields : ['일반 취재', '기획', '현장'];
+            const isDragging = draggedIdx === idx;
+            const isDragOver = dragOverIdx === idx && draggedIdx !== idx;
 
-          return (
-            <div
-              key={career.id}
-              className="voxel-card p-4 border-l-4 transition-all"
-              style={{ borderLeftColor: deptDef ? deptDef.color : '#3b82f6' }}
-            >
-              {/* 부서 헤더 & 순서 이동 컨트롤 */}
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-3">
-                <div className="flex items-center gap-2">
-                  {/* 위 / 아래 순서 변경 버튼 */}
-                  <div className="flex flex-col gap-0.5 bg-slate-800/80 p-0.5 rounded border border-slate-700">
-                    <button
-                      disabled={idx === 0}
-                      onClick={() => handleMoveCareer(idx, 'up')}
-                      className="p-0.5 text-slate-400 hover:text-blue-300 disabled:opacity-20 disabled:hover:text-slate-400"
-                      title="위로 이동 (과거 쪽으로)"
+            return (
+              <div
+                key={career.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, idx)}
+                onDragOver={(e) => handleDragOver(e, idx)}
+                onDrop={(e) => handleDrop(e, idx)}
+                onDragEnd={handleDragEnd}
+                className={`voxel-card p-4 border-l-4 transition-all select-none ${
+                  isDragging
+                    ? 'opacity-40 scale-[0.98] border-dashed border-sky-400 ring-2 ring-sky-500/50 shadow-2xl'
+                    : isDragOver
+                    ? 'border-t-4 border-t-amber-400 translate-y-1'
+                    : 'hover:shadow-lg'
+                }`}
+                style={{ borderLeftColor: deptDef ? deptDef.color : '#3b82f6' }}
+              >
+                {/* 부서 헤더 & 스와프 그립 핸들 */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    {/* 드래그 앤 드롭 스와프 핸들 */}
+                    <div
+                      className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg bg-slate-800/90 border border-slate-700 hover:border-sky-400 text-slate-400 hover:text-sky-300 transition-colors flex items-center gap-0.5"
+                      title="이 핸들을 끌어서 다른 블록 위치로 스와프(교체)하세요."
                     >
-                      <ChevronUp className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      disabled={idx === careers.length - 1}
-                      onClick={() => handleMoveCareer(idx, 'down')}
-                      className="p-0.5 text-slate-400 hover:text-blue-300 disabled:opacity-20 disabled:hover:text-slate-400"
-                      title="아래로 이동 (최근 쪽으로)"
-                    >
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                      <GripVertical className="w-4 h-4" />
+                      <span className="text-[10px] font-pixel text-slate-500 hidden sm:inline">스와프</span>
+                    </div>
 
-                  <span className="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-pixel text-slate-300">
-                    {idx + 1}
-                  </span>
-                  <span className="font-pixel text-base text-slate-100 font-bold">{career.deptName}</span>
-                  {idx === careers.length - 1 && (
-                    <span className="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.2 rounded font-pixel">
-                      현재 부서
+                    <span className="w-6 h-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-pixel text-slate-300">
+                      {idx + 1}
                     </span>
-                  )}
-                  <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                    {career.periodMonths / 12}년 ({career.periodMonths}개월)
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* 근무 기간 조절 버튼 */}
-                  <div className="flex items-center bg-slate-800 rounded border border-slate-700 text-xs">
-                    <button
-                      onClick={() => handlePeriodChange(career.id, career.periodMonths - 6)}
-                      className="px-2.5 py-1 text-slate-300 hover:bg-slate-700 font-bold"
-                    >
-                      -6개월
-                    </button>
-                    <span className="px-2 font-pixel text-amber-400">{career.periodMonths / 12}년</span>
-                    <button
-                      onClick={() => handlePeriodChange(career.id, career.periodMonths + 6)}
-                      className="px-2.5 py-1 text-slate-300 hover:bg-slate-700 font-bold"
-                    >
-                      +6개월
-                    </button>
+                    <span className="font-pixel text-base text-slate-100 font-bold">{career.deptName}</span>
+                    {idx === careers.length - 1 && (
+                      <span className="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-1.5 py-0.2 rounded font-pixel">
+                        최근 부서
+                      </span>
+                    )}
+                    <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                      {career.periodMonths / 12}년 ({career.periodMonths}개월)
+                    </span>
                   </div>
 
-                  <button
-                    onClick={() => handleRemoveCareer(career.id)}
-                    className="p-1.5 text-slate-500 hover:text-red-400 transition-colors"
-                    title="부서 삭제"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* 세부 취재 분야 (클릭만으로 간편 토글) */}
-              <div>
-                <div className="text-xs text-slate-400 mb-2 flex items-center justify-between">
-                  <span>세부 취재 분야 선택 (항목을 클릭하여 켜고 끄세요):</span>
-                  <span className="text-[11px] text-slate-500">
-                    {career.subFields.length}개 분야 선택됨
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {availableSubFields.map(field => {
-                    const isSelected = career.subFields.some(sf => sf.name === field);
-                    return (
+                  <div className="flex items-center gap-2">
+                    {/* 근무 기간 조절 버튼 */}
+                    <div className="flex items-center bg-slate-800 rounded border border-slate-700 text-xs">
                       <button
-                        key={field}
-                        type="button"
-                        onClick={() => handleToggleSubField(career.id, field)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-600/35 border-blue-400 text-blue-200 font-bold shadow-sm'
-                            : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
-                        }`}
+                        onClick={() => handlePeriodChange(career.id, -6)}
+                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold"
+                        title="6개월 감소"
                       >
-                        <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-400' : 'bg-slate-600'}`} />
-                        <span>{field}</span>
+                        -
                       </button>
-                    );
-                  })}
+                      <span className="px-2 font-pixel text-amber-300">{career.periodMonths / 12}년</span>
+                      <button
+                        onClick={() => handlePeriodChange(career.id, 6)}
+                        className="px-2.5 py-1 hover:bg-slate-700 text-slate-300 font-bold"
+                        title="6개월 증가"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* 삭제 버튼 */}
+                    <button
+                      onClick={() => handleRemoveCareer(career.id)}
+                      className="p-1 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded"
+                      title="부서 삭제"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 세부 취재 분야 태그 (단순 클릭 토글형) */}
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                    <span className="font-pixel">취재 출입처·전문 분야 (클릭하여 켜기/끄기):</span>
+                    <span className="text-[11px] text-slate-500 font-sans">
+                      * 기간은 전체 근무 기간에 균등 배분됩니다.
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableSubFields.map(field => {
+                      const isSelected = career.subFields.some(sf => sf.name === field);
+                      return (
+                        <button
+                          key={field}
+                          type="button"
+                          onClick={() => handleToggleSubField(career.id, field)}
+                          className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
+                            isSelected
+                              ? 'bg-blue-600/35 border-blue-400 text-blue-200 font-bold shadow-sm'
+                              : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-400' : 'bg-slate-600'}`} />
+                          <span>{field}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })
+            );
+          })
         )}
       </div>
 
@@ -344,14 +367,13 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
               <span className="text-xs text-slate-400">기자 유형:</span>
               <span className="font-pixel text-amber-300 font-bold text-base">{analysis.reporterType}</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xs text-slate-400">세부 전문성:</span>
-              <span className="text-slate-200 font-medium">{analysis.detailedSpecialty}</span>
+            <div className="text-xs font-pixel text-sky-300">
+              {analysis.detailedSpecialty}
             </div>
-            <p className="text-xs text-slate-300 bg-slate-900/70 p-3 rounded border border-slate-800 leading-relaxed mt-2">
+            <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-3 rounded-lg border border-slate-800">
               {analysis.description}
             </p>
-            <div className="text-[11px] text-slate-400 italic pt-1">
+            <div className="text-[11px] text-slate-400 italic">
               * 본 다각형 그래프와 평가는 부서 및 취재 분야에 기반한 가상 상대적 축적도입니다.
             </div>
           </div>

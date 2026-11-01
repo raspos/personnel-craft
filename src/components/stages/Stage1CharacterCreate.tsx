@@ -21,7 +21,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 }) => {
   const currentYear = new Date().getFullYear();
 
-  // 다음 단계 이동 시 유효성 검사 및 현재 소속 부서 커리어 반영
+  // 다음 단계 이동 시 유효성 검사 (커리어 블록에 강제 삽입하지 않고 독립성 유지)
   const handleProceed = () => {
     if (!profile.nickname.trim()) {
       alert('기자 닉네임(성함)을 입력해 주세요.');
@@ -33,67 +33,13 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
     }
 
     sound.playClick();
-    const currentDept = profile.currentDept;
-    const defaultDef = getDepartmentByName(currentDept);
-    const initialSubField = defaultDef && defaultDef.subFields.length > 0 ? defaultDef.subFields[0] : '일반 취재';
-
-    let updatedCareers = [...careers];
-    if (updatedCareers.length === 0) {
-      updatedCareers = [{
-        id: 'c_' + Date.now(),
-        deptName: currentDept,
-        periodMonths: 24,
-        subFields: [{ name: initialSubField, months: 24 }]
-      }];
-    } else {
-      const lastCareer = updatedCareers[updatedCareers.length - 1];
-      if (lastCareer.deptName !== currentDept) {
-        // 기존 목록에 해당 부서가 이미 있다면 맨 뒤(현재)로 이동
-        const existingIdx = updatedCareers.findIndex(c => c.deptName === currentDept);
-        if (existingIdx !== -1) {
-          const item = updatedCareers.splice(existingIdx, 1)[0];
-          updatedCareers.push(item);
-        } else {
-          // 마지막 부서명을 현재 부서로 동기화
-          lastCareer.deptName = currentDept;
-          lastCareer.subFields = [{ name: initialSubField, months: lastCareer.periodMonths }];
-        }
-      }
-    }
-    setCareers(updatedCareers);
     onNext();
   };
 
-  // 현재 부서 드롭다운 변경 시 즉시 profile 및 careers 동기화
+  // 현재 부서 드롭다운 변경 (프로필 정보만 갱신)
   const handleDeptChange = (newDept: string) => {
     sound.playBlip();
     setProfile({ ...profile, currentDept: newDept });
-
-    if (!newDept) return;
-
-    const defaultDef = getDepartmentByName(newDept);
-    const initialSubField = defaultDef && defaultDef.subFields.length > 0 ? defaultDef.subFields[0] : '일반 취재';
-
-    let updatedCareers = [...careers];
-    if (updatedCareers.length === 0) {
-      updatedCareers = [{
-        id: 'c_' + Date.now(),
-        deptName: newDept,
-        periodMonths: 24,
-        subFields: [{ name: initialSubField, months: 24 }]
-      }];
-    } else {
-      const lastCareer = updatedCareers[updatedCareers.length - 1];
-      const existingIdx = updatedCareers.findIndex(c => c.deptName === newDept);
-      if (existingIdx !== -1 && existingIdx !== updatedCareers.length - 1) {
-        const item = updatedCareers.splice(existingIdx, 1)[0];
-        updatedCareers.push(item);
-      } else {
-        lastCareer.deptName = newDept;
-        lastCareer.subFields = [{ name: initialSubField, months: lastCareer.periodMonths }];
-      }
-    }
-    setCareers(updatedCareers);
   };
 
   // 프리셋 3종
