@@ -41,6 +41,7 @@ import { CareerSkillsModal } from './components/CareerSkillsModal';
 import { ModelAssumptionsModal } from './components/ModelAssumptionsModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { TenYearSimulationModal } from './components/TenYearSimulationModal';
+import { VisitorCounter } from './components/VisitorCounter';
 
 export const App: React.FC = () => {
   // 1. 상태 선언
@@ -255,11 +256,35 @@ export const App: React.FC = () => {
       </main>
 
       {/* 푸터 */}
-      <footer className="w-full bg-slate-950 border-t border-slate-900 py-4 text-center text-xs text-slate-500 font-pixel">
-        <p>인사 크래프트 (PERSONNEL CRAFT) — 데이터저널리즘 가상 시뮬레이션 프로젝트</p>
-        <p className="text-[10px] text-slate-600 mt-1">
-          * “인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.” 본 게임의 모든 확률 모형은 가상의 알고리즘입니다.
-        </p>
+      <footer className="w-full bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-400 font-pixel space-y-3">
+        {/* 방문자 수 카운터 (TODAY / TOTAL) */}
+        <div className="flex justify-center">
+          <VisitorCounter />
+        </div>
+
+        <div>
+          <p className="font-bold text-slate-300">인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            데이터저널리즘 가상 시뮬레이션 인터랙티브 프로젝트
+          </p>
+        </div>
+
+        <div className="pt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+          <span>
+            © <a
+              href="https://raspos.github.io/databrew"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:text-sky-300 underline font-bold transition-colors"
+            >
+              databrew
+            </a>. All rights reserved.
+          </span>
+          <span className="text-slate-700">|</span>
+          <span className="text-slate-500 italic">
+            “인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.”
+          </span>
+        </div>
       </footer>
 
       {/* 팝업 모달들 */}
