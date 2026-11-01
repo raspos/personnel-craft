@@ -147,7 +147,8 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     deptMonths[c.deptName] = (deptMonths[c.deptName] || 0) + c.periodMonths;
     if (c.subFields && c.subFields.length > 0) {
       c.subFields.forEach(sf => {
-        subFieldCounts[sf.name] = (subFieldCounts[sf.name] || 0) + (c.periodMonths / c.subFields.length);
+        const actualMonths = typeof sf.months === 'number' && sf.months > 0 ? sf.months : Math.round(c.periodMonths / c.subFields.length);
+        subFieldCounts[sf.name] = (subFieldCounts[sf.name] || 0) + actualMonths;
       });
     }
   });

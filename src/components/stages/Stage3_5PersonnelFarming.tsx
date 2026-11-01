@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   CharacterProfile,
   CareerRecord,
@@ -30,6 +30,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
+import { CharacterAction } from '../3d/VoxelCharacter';
+
 interface Stage3_5Props {
   profile: CharacterProfile;
   careers: CareerRecord[];
@@ -40,7 +42,7 @@ interface Stage3_5Props {
   onResetFarming: () => void;
   onNext: () => void;
   onPrev: () => void;
-  onActionChange: (action: 'idle' | 'walk' | 'nervous') => void;
+  onActionChange: (action: CharacterAction) => void;
 }
 
 export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
@@ -55,17 +57,19 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   onPrev,
   onActionChange
 }) => {
-  const currentDeptName = careers.length > 0 ? careers[careers.length - 1].deptName : '사회부';
+  const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const isSecondHalf = profile.currentHalf === '하반기';
 
-  // 인사 농사 전 기준 확률 기록 (최초 1회 저장)
+  // 인사 농사 전 기준 확률 기록 (최초 1회 저장 - 농사 영향 없는 순수 확률)
   if (!farmingState.initialProbabilities) {
-    const initialSim = runSimulation(careers, wishes, null, 5000);
+    const initialSim = runSimulation(careers, wishes, null, 5000, undefined, currentDeptName);
     farmingState.initialProbabilities = initialSim.probabilities;
   }
 
-  // 현재 농사 상태가 반영된 실시간 시뮬레이션 확률
-  const currentSim = runSimulation(careers, wishes, null, 5000);
+  // 현재 농사 상태(기사 작성 성과, 밭가꾸기, 인지도, 소문)가 즉시 반영된 실시간 시뮬레이션 확률
+  const currentSim = useMemo(() => {
+    return runSimulation(careers, wishes, null, 5000, farmingState, currentDeptName);
+  }, [careers, wishes, farmingState, currentDeptName]);
   const probBefore = farmingState.initialProbabilities || currentSim.probabilities;
   const probNow = currentSim.probabilities;
 
@@ -79,11 +83,23 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   // 부서장/동료 면담 시 타겟 부서 선택
   const [selectedTargetWish, setSelectedTargetWish] = useState<1 | 2 | 3>(1);
 
-  // 행동 실행 핸들러
+  // 행동 실행 핸들러 (선택한 행동에 따라 3D 캐릭터 실시간 모션 연동)
   const handleAction = (actionType: FarmingActionType) => {
     if (farmingState.remainingPoints <= 0) return;
     sound.playClick();
-    onActionChange('walk');
+
+    // 행동별 맞춤형 3D 복셀 캐릭터 애니메이션 트리거
+    if (actionType === 'write_article') {
+      onActionChange('stay_desk'); // 묵묵히 책상에서 기사 집필
+    } else if (actionType === 'meet_boss' || actionType === 'meet_cur_boss') {
+      onActionChange('walk'); // 부서장실로 걸어가는 모션
+    } else if (actionType === 'spread_rumor') {
+      onActionChange('nervous'); // 주변 눈치 보며 소문 흘리기
+    } else if (actionType === 'meet_peer' || actionType === 'explore_board') {
+      onActionChange('walk'); // 휴게실/카페테리아 탐색
+    } else {
+      onActionChange('idle');
+    }
 
     const result = executeFarmingAction(
       farmingState,
@@ -103,7 +119,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
 
     setTimeout(() => {
       onActionChange('idle');
-    }, 600);
+    }, 1200);
   };
 
   const getSproutEmoji = (stage: number) => {

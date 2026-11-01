@@ -107,16 +107,20 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     return `${years}년 ${rem}개월`;
   };
 
-  // 근무 기간 변경 (6개월 단위 delta: -6 또는 +6)
+  // 근무 기간 변경 (6개월 단위 delta: -6 또는 +6, 세부 분야 기간 합계가 총 기간과 완벽히 일치하도록 정밀 분배)
   const handlePeriodChange = (id: string, delta: number) => {
     sound.playBlip();
     setCareers(
       careers.map(c => {
         if (c.id !== id) return c;
         const newMonths = Math.max(6, Math.min(120, c.periodMonths + delta)); // 최소 6개월, 최대 10년
-        const updatedSubFields = c.subFields.map(sf => ({
+        const count = Math.max(1, c.subFields.length);
+        const baseMonths = Math.floor(newMonths / count);
+        const remainder = newMonths % count;
+
+        const updatedSubFields = c.subFields.map((sf, idx) => ({
           ...sf,
-          months: Math.max(6, Math.floor(newMonths / Math.max(1, c.subFields.length)))
+          months: baseMonths + (idx === 0 ? remainder : 0)
         }));
         return {
           ...c,
@@ -127,7 +131,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
     );
   };
 
-  // 세부 취재 분야 단순 클릭 토글 (세부 기간 배분 없이 항목만 클릭)
+  // 세부 취재 분야 클릭 토글 (총 근무 기간을 세부 분야 수로 정확히 나누어 총합 보존)
   const handleToggleSubField = (careerId: string, fieldName: string) => {
     sound.playBlip();
     setCareers(
@@ -140,13 +144,16 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
           if (c.subFields.length === 1) return c; // 최소 1개 유지
           updated = c.subFields.filter(sf => sf.name !== fieldName);
         } else {
-          updated = [...c.subFields, { name: fieldName, months: c.periodMonths }];
+          updated = [...c.subFields, { name: fieldName, months: 0 }];
         }
 
-        const perFieldMonths = Math.max(6, Math.floor(c.periodMonths / Math.max(1, updated.length)));
-        const finalSubFields = updated.map(sf => ({
+        const count = Math.max(1, updated.length);
+        const baseMonths = Math.floor(c.periodMonths / count);
+        const remainder = c.periodMonths % count;
+
+        const finalSubFields = updated.map((sf, idx) => ({
           ...sf,
-          months: perFieldMonths
+          months: baseMonths + (idx === 0 ? remainder : 0)
         }));
 
         return { ...c, subFields: finalSubFields };

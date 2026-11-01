@@ -181,4 +181,5 @@ export interface FarmingState {
   logs: FarmingLogEntry[];
   bossVisitCount: Record<string, number>;
   initialProbabilities: SimulationProbabilities | null; // 인사 농사 전 확률
+  backupWishes?: WishSelection; // 인사 농사 시작 직전의 희망 부서 원본 설정 (리셋 복원용)
 }

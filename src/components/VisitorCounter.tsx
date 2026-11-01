@@ -57,12 +57,15 @@ export const VisitorCounter: React.FC = () => {
   }, []);
 
   return (
-    <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-pixel shadow-inner select-none">
+    <div 
+      className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-pixel shadow-inner select-none"
+      title="기자님이 이 브라우저에서 진행한 가상 정기인사 시뮬레이션 플레이 기록입니다."
+    >
       <div className="flex items-center gap-1.5 text-slate-400">
         <Eye className="w-3.5 h-3.5 text-blue-400" />
-        <span>TODAY</span>
+        <span>오늘 플레이</span>
         <span className="font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.today.toLocaleString()}
+          {stats.today.toLocaleString()}회
         </span>
       </div>
 
@@ -70,9 +73,9 @@ export const VisitorCounter: React.FC = () => {
 
       <div className="flex items-center gap-1.5 text-slate-400">
         <Users className="w-3.5 h-3.5 text-emerald-400" />
-        <span>TOTAL</span>
+        <span>누적 도전</span>
         <span className="font-bold text-emerald-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.total.toLocaleString()}
+          {stats.total.toLocaleString()}회
         </span>
       </div>
     </div>

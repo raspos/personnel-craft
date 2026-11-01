@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Stage,
   CharacterProfile,
@@ -69,6 +69,15 @@ export const App: React.FC = () => {
   const setCareers = (c: CareerRecord[]) => {
     setCareersState(c);
     saveCareers(c);
+    // 현재 부서 단일 공급원 동기화: 경력이 있으면 마지막 부서를 profile.currentDept와 일치시킴
+    if (c.length > 0) {
+      const lastDept = c[c.length - 1].deptName;
+      if (profile.currentDept !== lastDept) {
+        const updated = { ...profile, currentDept: lastDept };
+        setProfileState(updated);
+        saveProfile(updated);
+      }
+    }
   };
 
   const setWishes = (w: WishSelection) => {
@@ -81,10 +90,17 @@ export const App: React.FC = () => {
     saveFarmingState(s);
   };
 
-  // 밭갈기(인사 농사)만 독립적으로 초기화하는 헬퍼
+  // 밭갈기(인사 농사)만 독립적으로 초기화하는 헬퍼 (농사 시작 전 희망 부서 설정까지 완전 복원)
   const handleResetFarming = () => {
+    if (farmingState.backupWishes) {
+      setWishesState(farmingState.backupWishes);
+      saveWishes(farmingState.backupWishes);
+    }
     const fresh = resetFarmingStorage();
+    // 현재 wishes를 백업으로 보존
+    fresh.backupWishes = JSON.parse(JSON.stringify(farmingState.backupWishes || wishes));
     setFarmingStateInternal(fresh);
+    saveFarmingState(fresh);
   };
 
   // 3. 스테이지 변경 시 캐릭터 기본 액션 세팅
@@ -95,6 +111,15 @@ export const App: React.FC = () => {
     else if (newStage === 3) setAction('idle');
     else if (newStage === 3.5) {
       setAction('idle');
+      // 인사 농사 진입 시점의 wishes를 백업 (리셋 시 완벽 복원용)
+      if (!farmingState.backupWishes) {
+        const withBackup: FarmingState = {
+          ...farmingState,
+          backupWishes: JSON.parse(JSON.stringify(wishes))
+        };
+        setFarmingStateInternal(withBackup);
+        saveFarmingState(withBackup);
+      }
       // 만약 이전 게임에서 행동력을 이미 다 썼거나 4턴을 마친 상태라면 자동으로 새 밭으로 리셋
       if (farmingState.remainingPoints <= 0 || farmingState.currentTurn > 4) {
         handleResetFarming();
@@ -117,10 +142,12 @@ export const App: React.FC = () => {
     }
   };
 
-  // 5. 시뮬레이션 계산 (현재 부서는 profile.currentDept를 최우선으로 일치)
-  const currentDept = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '');
-  const simulation = runSimulation(careers, wishes, activeEvent, 10000);
-  const analysis = analyzeCareer(careers);
+  // 5. 시뮬레이션 계산 (결정론적 PRNG 및 캐싱으로 렌더링 시 깜빡임 차단, 인사 농사 실시간 반영)
+  const currentDept = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
+  const simulation = useMemo(() => {
+    return runSimulation(careers, wishes, activeEvent, 10000, farmingState, currentDept);
+  }, [careers, wishes, activeEvent, farmingState, currentDept]);
+  const analysis = useMemo(() => analyzeCareer(careers), [careers]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
@@ -224,6 +251,8 @@ export const App: React.FC = () => {
                 onNext={() => handleStageChange(5)}
                 onPrev={() => handleStageChange(3.5)}
                 onOpenAssumptionsModal={() => setIsAssumptionsModalOpen(true)}
+                farmingState={farmingState}
+                currentDept={currentDept}
               />
             )}
 

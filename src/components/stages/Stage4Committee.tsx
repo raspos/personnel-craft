@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   CareerRecord,
   WishSelection,
-  SuddenEvent
+  SuddenEvent,
+  FarmingState
 } from '../../types/game';
 import { runSimulation } from '../../utils/simulationEngine';
 import { SUDDEN_EVENTS } from '../../data/events';
@@ -30,6 +31,8 @@ interface Stage4Props {
   onNext: () => void;
   onPrev: () => void;
   onOpenAssumptionsModal: () => void;
+  farmingState?: FarmingState;
+  currentDept?: string;
 }
 
 export const Stage4Committee: React.FC<Stage4Props> = ({
@@ -40,16 +43,22 @@ export const Stage4Committee: React.FC<Stage4Props> = ({
   setActiveEvent,
   onNext,
   onPrev,
-  onOpenAssumptionsModal
+  onOpenAssumptionsModal,
+  farmingState,
+  currentDept
 }) => {
   const [isSimulating, setIsSimulating] = useState(false);
 
-  // 1. 관계 변수 반영 상태(현재) 시뮬레이션 실행
-  const simCurrent = runSimulation(careers, wishes, activeEvent, 10000);
+  // 1. 관계 변수 반영 상태(현재) 시뮬레이션 실행 (결정론적 PRNG 캐싱)
+  const simCurrent = useMemo(() => {
+    return runSimulation(careers, wishes, activeEvent, 10000, farmingState, currentDept);
+  }, [careers, wishes, activeEvent, farmingState, currentDept]);
 
   // 2. 관계 변수 제외(OFF) 상태 비교 시뮬레이션
-  const wishesWithoutRelation = { ...wishes, applyBossRelation: false };
-  const simPureMerit = runSimulation(careers, wishesWithoutRelation, activeEvent, 10000);
+  const wishesWithoutRelation = useMemo(() => ({ ...wishes, applyBossRelation: false }), [wishes]);
+  const simPureMerit = useMemo(() => {
+    return runSimulation(careers, wishesWithoutRelation, activeEvent, 10000, farmingState, currentDept);
+  }, [careers, wishesWithoutRelation, activeEvent, farmingState, currentDept]);
 
   const prob = simCurrent.probabilities;
   const probPure = simPureMerit.probabilities;

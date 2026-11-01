@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CharacterProfile,
   CareerRecord,
@@ -53,32 +53,17 @@ export const Stage5Result: React.FC<Stage5Props> = ({
   const [countdown, setCountdown] = useState<number>(3);
   const [isOpening, setIsOpening] = useState<boolean>(false);
   const [result, setResult] = useState<FinalAppointmentResult | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const currentDeptName = careers.length > 0 ? careers[careers.length - 1].deptName : '사회부';
+  const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const analysis = analyzeCareer(careers);
 
-  // 인사발령 개봉 시작
-  const startEnvelopeCountdown = () => {
-    setPhase('envelope');
-    setCountdown(3);
-    setIsOpening(false);
-    onActionChange('nervous');
-
-    sound.playHeartbeat();
-    const interval = setInterval(() => {
-      sound.playHeartbeat();
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          revealResult();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
+  // 결과 개봉 함수 (타이머 중복 실행 완벽 방지)
   const revealResult = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
     setIsOpening(true);
     sound.playPaperDesk();
     const finalOutcome = drawFinalAppointment(probabilities, wishes, currentDeptName);
@@ -103,8 +88,42 @@ export const Stage5Result: React.FC<Stage5Props> = ({
     }, 400);
   };
 
+  // 인사발령 개봉 시작
+  const startEnvelopeCountdown = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setPhase('envelope');
+    setCountdown(3);
+    setIsOpening(false);
+    onActionChange('nervous');
+
+    sound.playHeartbeat();
+    timerRef.current = setInterval(() => {
+      sound.playHeartbeat();
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          revealResult();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   useEffect(() => {
     startEnvelopeCountdown();
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
