@@ -10,7 +10,7 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: #0b0f19;
+    background-color: #0f172a;
     color: #f8fafc;
     user-select: none;
     overflow-x: hidden;
@@ -22,83 +22,118 @@
   letter-spacing: -0.02em;
 }
 
+/* 마인크래프트 / 복셀 픽셀 게임 UI 시스템 */
+.pixel-card {
+  background: #1e293b;
+  border: 4px solid #020617;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0px #000000, inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+}
+
+.pixel-slot {
+  background: #0f172a;
+  border: 3px solid #020617;
+  border-radius: 2px;
+  box-shadow: inset 2px 2px 0px #000000, 1px 1px 0px rgba(255, 255, 255, 0.1);
+}
+
+.pixel-btn-mc {
+  font-family: 'DungGeunMo', monospace;
+  background: #334155;
+  border-top: 3px solid #64748b;
+  border-left: 3px solid #64748b;
+  border-right: 3px solid #0f172a;
+  border-bottom: 3px solid #0f172a;
+  box-shadow: 3px 3px 0px #000000;
+  transition: all 0.05s ease;
+}
+
+.pixel-btn-mc:hover {
+  background: #475569;
+}
+
+.pixel-btn-mc:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+  border-top: 3px solid #0f172a;
+  border-left: 3px solid #0f172a;
+  border-right: 3px solid #64748b;
+  border-bottom: 3px solid #64748b;
+}
+
 /* Voxel 3D buttons */
 .voxel-btn {
   font-family: 'DungGeunMo', monospace;
   position: relative;
-  transition: all 0.1s ease;
-  box-shadow: 0 4px 0 #1e293b, 0 6px 12px rgba(0,0,0,0.4);
+  transition: all 0.08s ease;
+  box-shadow: 0 4px 0 #020617, 3px 5px 0 #000000;
 }
 
 .voxel-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 #1e293b, 0 8px 16px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 0 #020617, 3px 7px 0 #000000;
 }
 
 .voxel-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #1e293b, 0 3px 6px rgba(0,0,0,0.4);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #020617, 1px 2px 0 #000000;
 }
 
 .voxel-btn-primary {
   background: #2563eb;
-  border: 2px solid #60a5fa;
+  border: 2px solid #93c5fd;
   color: white;
-  box-shadow: 0 5px 0 #1d4ed8, 0 8px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 0 #1e3a8a, 3px 5px 0 #000000;
 }
 .voxel-btn-primary:hover {
   background: #1d4ed8;
-  box-shadow: 0 6px 0 #1e40af, 0 10px 16px rgba(0,0,0,0.4);
 }
 .voxel-btn-primary:active {
   transform: translateY(3px);
-  box-shadow: 0 2px 0 #1e40af;
+  box-shadow: 0 1px 0 #1e3a8a;
 }
 
 .voxel-btn-emerald {
-  background: #059669;
-  border: 2px solid #34d399;
+  background: #15803d;
+  border: 2px solid #86efac;
   color: white;
-  box-shadow: 0 5px 0 #047857, 0 8px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 0 #14532d, 3px 5px 0 #000000;
 }
 .voxel-btn-emerald:hover {
-  background: #047857;
-  box-shadow: 0 6px 0 #065f46, 0 10px 16px rgba(0,0,0,0.4);
+  background: #166534;
 }
 .voxel-btn-emerald:active {
   transform: translateY(3px);
-  box-shadow: 0 2px 0 #065f46;
+  box-shadow: 0 1px 0 #14532d;
 }
 
 .voxel-btn-amber {
   background: #d97706;
-  border: 2px solid #fbbf24;
+  border: 2px solid #fde047;
   color: white;
-  box-shadow: 0 5px 0 #b45309, 0 8px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 0 #92400e, 3px 5px 0 #000000;
 }
 .voxel-btn-amber:hover {
   background: #b45309;
-  box-shadow: 0 6px 0 #92400e, 0 10px 16px rgba(0,0,0,0.4);
 }
 .voxel-btn-amber:active {
   transform: translateY(3px);
-  box-shadow: 0 2px 0 #92400e;
+  box-shadow: 0 1px 0 #92400e;
 }
 
-/* Voxel Panels & Cards */
+/* Voxel Panels & Cards (마인크래프트 블록 테마로 업그레이드) */
 .voxel-card {
-  background: rgba(15, 23, 42, 0.92);
-  border: 2px solid #334155;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
+  background: #1e293b;
+  border: 4px solid #020617;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px #000000, inset 1px 1px 0px rgba(255,255,255,0.12);
 }
 
 .voxel-card-gold {
-  background: rgba(30, 27, 14, 0.92);
-  border: 2px solid #d97706;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.25), inset 0 1px 0 rgba(251, 191, 36, 0.2);
+  background: #291e0a;
+  border: 4px solid #b45309;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px #000000, inset 1px 1px 0px rgba(251, 191, 36, 0.2);
 }
 
 /* Pixel speech bubble frame */

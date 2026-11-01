@@ -43,6 +43,7 @@ interface Stage3_5Props {
   onNext: () => void;
   onPrev: () => void;
   onActionChange: (action: CharacterAction) => void;
+  onSpeechBubble?: (speech: { text: string; speaker?: string }) => void;
 }
 
 export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
@@ -55,7 +56,8 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   onResetFarming,
   onNext,
   onPrev,
-  onActionChange
+  onActionChange,
+  onSpeechBubble
 }) => {
   const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const isSecondHalf = profile.currentHalf === '하반기';
@@ -90,6 +92,8 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
 
   // 부서장/동료 면담 시 타겟 부서 선택
   const [selectedTargetWish, setSelectedTargetWish] = useState<1 | 2 | 3>(1);
+  // 복잡한 세부 첩보 지표 아코디언 토글 (기본 접힘으로 시각적 인지 부하 대폭 절감)
+  const [showDetailedIntel, setShowDetailedIntel] = useState(false);
 
   // 선택된 접촉 대상이 '없음'인 경우 1지망으로 자동 복귀
   useEffect(() => {
@@ -137,6 +141,12 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
 
     if (result.popupDialogue) {
       setActiveDialogue(result.popupDialogue);
+      if (onSpeechBubble) {
+        onSpeechBubble({
+          text: result.popupDialogue.text,
+          speaker: result.popupDialogue.speaker
+        });
+      }
     }
 
     setTimeout(() => {
@@ -263,175 +273,181 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
         </div>
       )}
 
-      {/* 5대 인사 농사 현황 지표 & 블록 밭 새싹 */}
-      <div className="voxel-card p-5 border-slate-700 bg-slate-900/90 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div className="font-pixel text-sm text-slate-200 font-bold flex items-center gap-2">
+      {/* 3대 핵심 인사 농사 게임 HUD (시각적 과부하 해소 & 게임 감성 집중) */}
+      <div className="pixel-card p-4 sm:p-5 space-y-4">
+        <div className="flex items-center justify-between border-b-2 border-slate-950 pb-2">
+          <div className="font-pixel text-sm text-amber-300 font-bold flex items-center gap-2">
             <Sprout className="w-4 h-4 text-emerald-400" />
-            <span>나의 인사 농사 현황 지표 (HUD)</span>
+            <span>핵심 인사 농사 HUD</span>
           </div>
-          <span className="text-[11px] text-slate-500 font-pixel">* 편집국 가상 상태</span>
+          <div className="text-[11px] text-slate-400 font-pixel">
+            * 3대 핵심 지표 집중 모드
+          </div>
         </div>
 
-        {/* 5대 지표 게이지 */}
-        {(() => {
-          const rawBi = farmingState.metrics.bossInterest;
-          const currentBossInterest = typeof rawBi === 'number'
-            ? rawBi
-            : (selectedTargetWish === 1 ? rawBi.first : selectedTargetWish === 2 ? rawBi.second : rawBi.third) || 0;
+        {/* 3대 핵심 지표: [1. 희망 부서 영입 온난도 밭] + [2. 현 부서 잔류 압력] */}
+        <div className="space-y-3">
+          {/* ① 희망 부서 3곳의 영입 온난도 & 밭 재배 현황 (선택형 탭 카드) */}
+          <div>
+            <div className="flex items-center justify-between text-xs font-pixel mb-2">
+              <span className="text-emerald-300 flex items-center gap-1.5 font-bold">
+                🌾 [지표 1] 희망 부서 영입 온난도 & 밭 성장 (터치하여 접촉 대상 선택):
+              </span>
+              <span className="text-[11px] text-slate-400">
+                선택된 타겟: <strong className="text-amber-400">{selectedTargetWish}지망</strong>
+              </span>
+            </div>
 
-          const rawAw = farmingState.metrics.deptAwareness;
-          const currentAwareness = typeof rawAw === 'number'
-            ? rawAw
-            : (selectedTargetWish === 1 ? rawAw.first : selectedTargetWish === 2 ? rawAw.second : rawAw.third) || 0;
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                {
+                  num: 1,
+                  name: wishes.first.deptName,
+                  stage: farmingState.metrics.sproutStage.first,
+                  to: wishes.first.expectedTO,
+                  bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.first
+                },
+                {
+                  num: 2,
+                  name: wishes.second.deptName,
+                  stage: farmingState.metrics.sproutStage.second,
+                  to: wishes.second.expectedTO,
+                  bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.second
+                },
+                {
+                  num: 3,
+                  name: wishes.third.deptName,
+                  stage: farmingState.metrics.sproutStage.third,
+                  to: wishes.third.expectedTO,
+                  bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.third
+                }
+              ].map((item) => {
+                const isNone = item.name === '없음' || item.name === '선택 안 함';
+                const isSelected = selectedTargetWish === item.num;
 
-          return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              {/* ① 희망 부서장 관심도 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">① {selectedTargetWish}지망 부서장 관심도</span>
-                  <span className="font-pixel text-amber-400 font-bold">{currentBossInterest}%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-400 transition-all duration-300" style={{ width: `${currentBossInterest}%` }} />
+                return (
+                  <button
+                    key={item.num}
+                    type="button"
+                    disabled={isNone}
+                    onClick={() => {
+                      if (!isNone) {
+                        sound.playClick();
+                        setSelectedTargetWish(item.num as 1 | 2 | 3);
+                      }
+                    }}
+                    className={`p-3 rounded-lg border-2 text-left transition-all relative ${
+                      isNone
+                        ? 'opacity-40 bg-slate-950/60 border-slate-800 cursor-not-allowed'
+                        : isSelected
+                        ? 'bg-amber-950/40 border-amber-400 shadow-[2px_2px_0_#000] ring-1 ring-amber-400'
+                        : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className={`font-pixel text-xs font-bold ${isSelected ? 'text-amber-300' : 'text-slate-300'}`}>
+                        {item.num}지망 {item.name === currentDeptName && item.num === 1 ? `${item.name} (잔류)` : item.name}
+                      </span>
+                      <span className="text-base">
+                        {item.stage === 0 ? '🟫' : item.stage === 1 ? '🌱' : item.stage === 2 ? '🌿' : '🌾'}
+                      </span>
+                    </div>
+
+                    {!isNone ? (
+                      <div className="space-y-1.5 text-[11px]">
+                        <div className="flex justify-between text-slate-400">
+                          <span>호감 온난도</span>
+                          <span className="font-pixel text-amber-300 font-bold">{item.bi}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-300"
+                            style={{ width: `${item.bi}%` }}
+                          />
+                        </div>
+                        <div className="text-[10px] text-slate-500 flex justify-between pt-0.5">
+                          <span>밭: {item.stage === 0 ? '씨앗' : item.stage === 1 ? '새싹' : item.stage === 2 ? '성장' : '결실'}</span>
+                          <span>TO: {item.to}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-slate-500 italic py-2">지망 부서 없음</div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ② 현재 부서 잔류 압력 게이지 */}
+          <div className="bg-slate-950 p-3 rounded-lg border-2 border-slate-900">
+            <div className="flex items-center justify-between text-xs mb-1.5 font-pixel">
+              <span className="text-rose-300 font-bold flex items-center gap-1.5">
+                🛡️ [지표 2] 현재 부서 잔류 압력:
+              </span>
+              <span className="font-bold text-rose-400">
+                {farmingState.metrics.stayPressure}%
+                <span className="text-[10px] text-slate-400 font-normal ml-1">
+                  ({farmingState.metrics.stayPressure > 60 ? '잔류 위험' : farmingState.metrics.stayPressure > 35 ? '보통' : '이동 원활'})
+                </span>
+              </span>
+            </div>
+            <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  farmingState.metrics.stayPressure > 60 ? 'bg-rose-500' : farmingState.metrics.stayPressure > 35 ? 'bg-amber-400' : 'bg-emerald-400'
+                }`}
+                style={{ width: `${farmingState.metrics.stayPressure}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 📊 세부 첩보 지표 아코디언 토글 (인지 부하 다이어트) */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => {
+              sound.playClick();
+              setShowDetailedIntel(!showDetailedIntel);
+            }}
+            className="w-full py-1.5 px-3 rounded bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-pixel text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition-colors"
+          >
+            <span>{showDetailedIntel ? '▲ 편집국 세부 첩보 지표 접기' : '▼ [상세 정보] 편집국 6대 세부 첩보 지표 열기 (기사성과·인지도·소문·신뢰도)'}</span>
+          </button>
+
+          {showDetailedIntel && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3 text-xs animate-fade-in">
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">기사 성과 (묵묵한 실적)</div>
+                <div className="font-pixel text-emerald-400 font-bold text-sm">{farmingState.metrics.articleScore} P</div>
+              </div>
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">부서 내 인지도</div>
+                <div className="font-pixel text-blue-400 font-bold text-sm">
+                  {typeof farmingState.metrics.deptAwareness === 'number'
+                    ? farmingState.metrics.deptAwareness
+                    : (selectedTargetWish === 1 ? farmingState.metrics.deptAwareness.first : selectedTargetWish === 2 ? farmingState.metrics.deptAwareness.second : farmingState.metrics.deptAwareness.third)}%
                 </div>
               </div>
-
-              {/* ② 희망 부서 내 인지도 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">② {selectedTargetWish}지망 부서 내 인지도</span>
-                  <span className="font-pixel text-blue-400 font-bold">{currentAwareness}%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-400 transition-all duration-300" style={{ width: `${currentAwareness}%` }} />
-                </div>
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">편집국 소문 확산도</div>
+                <div className="font-pixel text-purple-400 font-bold text-sm">{farmingState.metrics.rumorSpread}%</div>
               </div>
-
-              {/* ③ 소문 확산도 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">③ 편집국 소문 확산도</span>
-                  <span className="font-pixel text-purple-400 font-bold">{farmingState.metrics.rumorSpread}%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-400 transition-all duration-300" style={{ width: `${farmingState.metrics.rumorSpread}%` }} />
-                </div>
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">정보 신뢰도 (TO 파악)</div>
+                <div className="font-pixel text-cyan-400 font-bold text-sm">{farmingState.metrics.infoConfidence}%</div>
               </div>
-
-              {/* ④ 현재 부서 잔류 압력 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">④ 현 부서 잔류 압력</span>
-                  <span className="font-pixel text-rose-400 font-bold">{farmingState.metrics.stayPressure}%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-rose-400 transition-all duration-300" style={{ width: `${farmingState.metrics.stayPressure}%` }} />
-                </div>
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">현재 부서 근속</div>
+                <div className="font-pixel text-slate-200 font-bold text-sm">{getConsecutiveTenureMonths(careers, currentDeptName)}개월</div>
               </div>
-
-              {/* ⑤ 인사 정보 신뢰도 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">⑤ 정보 신뢰도 (TO 파악)</span>
-                  <span className="font-pixel text-cyan-400 font-bold">{farmingState.metrics.infoConfidence}%</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-cyan-400 transition-all duration-300" style={{ width: `${farmingState.metrics.infoConfidence}%` }} />
-                </div>
-              </div>
-
-              {/* 기사 작성 성과 점수 */}
-              <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
-                <div className="flex justify-between mb-1">
-                  <span className="text-slate-400">⑥ 기사 성과 (묵묵한 실적)</span>
-                  <span className="font-pixel text-emerald-400 font-bold">{farmingState.metrics.articleScore} P</span>
-                </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-400 transition-all duration-300" style={{ width: `${farmingState.metrics.articleScore}%` }} />
-                </div>
+              <div className="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <div className="text-slate-400 text-[11px] mb-1">부서장 의사</div>
+                <div className="font-pixel text-amber-300 font-bold text-sm truncate">{wishes.currentBossIntent}</div>
               </div>
             </div>
-          );
-        })()}
-
-        {/* 희망 부서 3곳의 미니 블록 밭 상태 */}
-        <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-xs">
-          <div className="text-slate-300 mb-2.5 flex items-center justify-between font-pixel">
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <Sprout className="w-4 h-4 text-emerald-400" />
-              희망 부서 3곳의 개별 복셀 밭 재배 현황:
-            </span>
-            <span className="text-[11px] text-slate-500 font-sans">“각 부서에 들인 정성이 개별 밭에 분리되어 누적됩니다.”</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              {
-                num: 1,
-                name: wishes.first.deptName,
-                stage: farmingState.metrics.sproutStage.first,
-                to: wishes.first.expectedTO,
-                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.first,
-                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.first
-              },
-              {
-                num: 2,
-                name: wishes.second.deptName,
-                stage: farmingState.metrics.sproutStage.second,
-                to: wishes.second.expectedTO,
-                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.second,
-                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.second
-              },
-              {
-                num: 3,
-                name: wishes.third.deptName,
-                stage: farmingState.metrics.sproutStage.third,
-                to: wishes.third.expectedTO,
-                aw: typeof farmingState.metrics.deptAwareness === 'number' ? farmingState.metrics.deptAwareness : farmingState.metrics.deptAwareness.third,
-                bi: typeof farmingState.metrics.bossInterest === 'number' ? farmingState.metrics.bossInterest : farmingState.metrics.bossInterest.third
-              }
-            ].map((f) => {
-              const isNone = f.name === '없음' || f.name === '선택 안 함';
-              return (
-                <div
-                  key={f.num}
-                  className={`p-3 rounded-lg border-2 transition-all text-center flex flex-col items-center justify-between shadow-md ${
-                    isNone
-                      ? 'bg-slate-950/60 border-slate-850 opacity-60'
-                      : 'bg-gradient-to-b from-slate-900 to-slate-950 border-slate-800 hover:border-emerald-500/50'
-                  }`}
-                >
-                  <div className="w-full flex justify-between items-center text-[10px] text-slate-400 font-pixel mb-1">
-                    <span className="bg-slate-800 px-1.5 py-0.5 rounded text-sky-300 font-bold">{f.num}지망</span>
-                    <span>TO: {isNone ? '-' : (f.num === 1 && f.name === currentDeptName ? '잔류 지망' : f.to)}</span>
-                  </div>
-                  <div className={`font-pixel font-bold text-sm my-1 ${isNone ? 'text-slate-500 line-through' : 'text-slate-100'}`}>
-                    {isNone ? '미지원' : (f.num === 1 && f.name === currentDeptName ? `${f.name} (잔류) 밭` : `${f.name} 밭`)}
-                  </div>
-                  <div className="my-1 px-2.5 py-1 bg-slate-950 rounded-full border border-slate-800 text-[11px] font-pixel flex items-center gap-1">
-                    {isNone ? (
-                      <span className="text-slate-500">📭 (미지원)</span>
-                    ) : (
-                      <span className="text-emerald-300">{getSproutEmoji(f.stage)}</span>
-                    )}
-                  </div>
-                  {!isNone && (
-                    <div className="flex justify-between w-full text-[10px] text-slate-400 px-1 my-0.5 font-pixel">
-                      <span>부장관심: <strong className="text-amber-400">{f.bi}%</strong></span>
-                      <span>인지도: <strong className="text-blue-400">{f.aw}%</strong></span>
-                    </div>
-                  )}
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-                    <div
-                      className={`h-full transition-all duration-300 ${isNone ? 'bg-slate-700' : 'bg-emerald-400'}`}
-                      style={{ width: `${isNone ? 0 : (f.stage / 3) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          )}
         </div>
       </div>
 
@@ -467,15 +483,15 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
         </div>
       )}
 
-      {/* 7가지 인사 농사 행동 선택 패널 */}
-      <div className="voxel-card p-5 border-blue-500/30 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
-          <h3 className="font-pixel text-base text-slate-100 font-bold flex items-center gap-2">
-            <span>🎯</span> 이번 주에 취할 인사 행동 선택 (1P 소모)
+      {/* 7가지 인사 농사 행동 선택 패널 (마인크래프트 게임 스타일 핫바) */}
+      <div className="pixel-card p-4 sm:p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-slate-950 pb-2">
+          <h3 className="font-pixel text-sm sm:text-base text-amber-300 font-bold flex items-center gap-2">
+            <span>🎮</span> 이번 주 인사 행동 선택 (1 AP 소모)
           </h3>
 
           {/* 대상 희망 부서 선택 (A, B 행동용) */}
-          <div className="flex items-center gap-1.5 text-xs">
+          <div className="flex items-center gap-1.5 text-xs font-pixel">
             <span className="text-slate-400">접촉 대상:</span>
             {[1, 2, 3].map((num) => {
               const deptName = num === 1 ? wishes.first.deptName : num === 2 ? wishes.second.deptName : wishes.third.deptName;
@@ -485,12 +501,12 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
                   key={num}
                   disabled={isNone}
                   onClick={() => setSelectedTargetWish(num as 1 | 2 | 3)}
-                  className={`px-2 py-0.5 rounded text-xs font-pixel transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-pixel transition-all border ${
                     isNone
-                      ? 'bg-slate-900 text-slate-600 line-through cursor-not-allowed border border-slate-800'
+                      ? 'bg-slate-950 text-slate-600 line-through cursor-not-allowed border-slate-900'
                       : selectedTargetWish === num
-                      ? 'bg-blue-600 text-white font-bold'
-                      : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-amber-500 text-slate-950 font-bold border-amber-300 shadow-[1px_1px_0_#000]'
+                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 border-slate-800'
                   }`}
                 >
                   {num}지망 ({isNone ? '없음' : deptName})
@@ -500,20 +516,20 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           </div>
         </div>
 
-        {/* 행동 버튼 그리드 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* 행동 버튼 그리드 (마인크래프트 슬롯 스타일) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {/* 행동 A: 희망 부서장 만나기 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('meet_boss')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-blue-500/40 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded"
           >
-            <div className="flex items-center gap-2 font-pixel text-blue-300 font-bold text-xs mb-1">
-              <Users className="w-4 h-4 text-blue-400" />
+            <div className="flex items-center gap-2 font-pixel text-sky-300 font-bold text-xs mb-1">
+              <Users className="w-4 h-4 text-sky-400" />
               <span>A. 희망 부서장 면담 ({selectedTargetWish}지망 부장)</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              부장실을 찾아가 이동 의사를 전달하고 관심을 이끌어냅니다. (너무 잦으면 부담)
+              부장실을 찾아가 영입 의사를 묻고 관심을 이끌어냅니다. (캐릭터가 직접 이동)
             </p>
           </button>
 
@@ -521,22 +537,22 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('meet_peer')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-slate-700 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded"
           >
-            <div className="flex items-center gap-2 font-pixel text-slate-200 font-bold text-xs mb-1">
+            <div className="flex items-center gap-2 font-pixel text-amber-300 font-bold text-xs mb-1">
               <Coffee className="w-4 h-4 text-amber-400" />
               <span>B. 희망 부서 동료와 티타임</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              내부 분위기, 장기근무자의 이동 의향, 부서장의 선호 인재상 소문을 캡처합니다.
+              내부 분위기, 장기근무자의 이동 의향, 부서장의 선호 인재상 소문을 파악합니다.
             </p>
           </button>
 
-          {/* 행동 C: 팀 안에 소문 내기 (인사 소문 흘리기) */}
+          {/* 행동 C: 편집국에 소문 흘리기 */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('spread_rumor')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-purple-500/40 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded"
           >
             <div className="flex items-center gap-2 font-pixel text-purple-300 font-bold text-xs mb-1">
               <MessageSquareShare className="w-4 h-4 text-purple-400" />
@@ -551,7 +567,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('explore_board')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-slate-700 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded"
           >
             <div className="flex items-center gap-2 font-pixel text-cyan-300 font-bold text-xs mb-1">
               <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -566,29 +582,29 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('meet_cur_boss')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-amber-500/40 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded"
           >
             <div className="flex items-center gap-2 font-pixel text-amber-300 font-bold text-xs mb-1">
               <UserCheck className="w-4 h-4 text-amber-400" />
               <span>E. 현재 부서장과 솔직한 면담</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              "부장님, 이번엔 다른 분야를 경험해보고 싶습니다." 방출 의사를 직접 확인합니다.
+              "부장님, 이번엔 다른 분야를 경험해보고 싶습니다." 부서장의 본심을 확률적으로 확인합니다.
             </p>
           </button>
 
-          {/* 행동 F: 묵묵히 기사 쓰기 */}
+          {/* 행동 F: 묵묵히 기사 쓰기 (실력 승부) */}
           <button
             disabled={farmingState.remainingPoints <= 0}
             onClick={() => handleAction('write_article')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-emerald-500/40 p-3 rounded-lg text-left transition-all disabled:opacity-40"
+            className="pixel-btn-mc p-3 text-left transition-all disabled:opacity-40 rounded border-emerald-600"
           >
             <div className="flex items-center gap-2 font-pixel text-emerald-300 font-bold text-xs mb-1">
               <FileEdit className="w-4 h-4 text-emerald-400" />
-              <span>F. 인사 농사 대신 특종 기사 집필</span>
+              <span>F. 인사 농사 대신 특종 기사 집필 (실력파)</span>
             </div>
             <p className="text-[11px] text-slate-300">
-              사내 정치 대신 실력으로 승부합니다. 기사 성과 점수 상승 및 데스크 호평 획득.
+              사내 정치 대신 실력으로 승부합니다. 기사 성과 대폭 상승 및 1지망 데스크 호평 획득.
             </p>
           </button>
         </div>

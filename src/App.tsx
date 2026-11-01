@@ -57,6 +57,7 @@ export const App: React.FC = () => {
   const [farmingState, setFarmingStateInternal] = useState<FarmingState>(loadFarmingState());
   const [activeEvent, setActiveEvent] = useState<SuddenEvent>(SUDDEN_EVENTS[0]);
   const [action, setAction] = useState<CharacterAction>('idle');
+  const [activeSpeech, setActiveSpeech] = useState<{ text: string; speaker?: string } | undefined>(undefined);
 
   // 모달 상태
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
@@ -164,17 +165,17 @@ export const App: React.FC = () => {
         onReset={handleReset}
       />
 
-      {/* 메인 게임 영역 (3D 뷰어 + 스테이지 컨트롤) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* 좌측(데스크톱: 고정) / 상단(모바일: 스크롤 시 함께 위로 훌쩍 올라감) */}
-          <div className="lg:col-span-5 xl:col-span-5 relative lg:sticky lg:top-24 z-10 w-full">
-            <div className="h-[250px] sm:h-[340px] lg:h-[580px] w-full">
+      {/* 메인 게임 영역 (3D 뷰어가 주인공인 레이아웃: 데스크톱 65% : 35%) */}
+      <main className="flex-1 max-w-[1440px] w-full mx-auto p-3 sm:p-5 lg:p-6 flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+          {/* 좌측(데스크톱: 65% 고정 메인 뷰어) / 상단(모바일: 320px 뷰어) */}
+          <div className="lg:col-span-7 xl:col-span-7 relative lg:sticky lg:top-24 z-10 w-full">
+            <div className="h-[300px] sm:h-[420px] lg:h-[640px] xl:h-[700px] w-full">
               <Suspense
                 fallback={
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900/40 rounded-2xl border border-slate-800 text-slate-400 font-pixel gap-3">
-                    <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-xs">3D 편집국 뷰어 로딩 중...</span>
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 rounded-2xl border-4 border-slate-800 text-slate-300 font-pixel gap-3 shadow-[4px_4px_0_#000]">
+                    <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-bold text-amber-300">3D 편집국 월드 로딩 중...</span>
                   </div>
                 }
               >
@@ -185,32 +186,33 @@ export const App: React.FC = () => {
                   wishes={wishes}
                   action={action}
                   farmingSprouts={farmingState.metrics.sproutStage}
+                  activeSpeech={activeSpeech}
                 />
               </Suspense>
             </div>
 
             {/* 3D 뷰어 하단 상태 브리핑 칩 (신상정보가 모두 입력되었을 때만 표시) */}
             {stage > 1 && profile.nickname && profile.currentDept ? (
-              <div className="mt-3 bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs flex items-center justify-between animate-fade-in">
+              <div className="mt-3 bg-slate-900/95 p-3 rounded-xl border-2 border-slate-800 text-xs flex flex-wrap items-center justify-between gap-2 shadow-[2px_2px_0_#000] animate-fade-in font-pixel">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
-                  <span className="font-pixel text-slate-200">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-slate-100 font-bold">
                     {profile.nickname} ({profile.hireYear}년 입사 · {analysis.totalYearsText})
                   </span>
                 </div>
-                <div className="font-pixel text-amber-300">
-                  현재 부서: {currentDept}
+                <div className="text-amber-300 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
+                  현재 소속: {currentDept}
                 </div>
               </div>
             ) : (
-              <div className="mt-3 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50 text-[11px] text-center text-slate-500 font-pixel">
+              <div className="mt-3 bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 text-[11px] text-center text-slate-400 font-pixel">
                 기자 캐릭터 및 소속 부서 설정 중...
               </div>
             )}
           </div>
 
-          {/* 우측(데스크톱) / 하단(모바일): 스테이지별 상호작용 패널 */}
-          <div className="lg:col-span-7 xl:col-span-7">
+          {/* 우측(데스크톱: 35% 게임 컨트롤/HUD 패널) / 하단(모바일) */}
+          <div className="lg:col-span-5 xl:col-span-5">
             {stage === 1 && (
               <Stage1CharacterCreate
                 profile={profile}
@@ -253,6 +255,7 @@ export const App: React.FC = () => {
                 onNext={() => handleStageChange(4)}
                 onPrev={() => handleStageChange(3)}
                 onActionChange={setAction}
+                onSpeechBubble={setActiveSpeech}
               />
             )}
 
