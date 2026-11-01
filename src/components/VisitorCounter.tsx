@@ -6,7 +6,7 @@ const STORAGE_TODAY_RUNS = 'pcraft_today_runs_v3';
 const STORAGE_TOTAL_RUNS = 'pcraft_total_runs_v3';
 
 // 실제 인사발령 완주(STAGE 5 결과 개봉) 시 호출하는 함수
-export function recordCompletedRun(): void {
+export function recordCompletedRun(): number {
   try {
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -29,58 +29,59 @@ export function recordCompletedRun(): void {
 
     // 이벤트 디스패치로 화면 동기화
     window.dispatchEvent(new Event('pcraft_run_completed'));
+    return totalRuns;
   } catch (e) {
     console.error('Failed to record completed run', e);
+    return 1;
   }
 }
 
-export const VisitorCounter: React.FC = () => {
-  const [stats, setStats] = useState<{ today: number; total: number }>({ today: 0, total: 0 });
+export function getPersonalRuns(): { today: number; total: number } {
+  try {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const storedDate = localStorage.getItem(STORAGE_TODAY_DATE);
 
-  const loadStats = () => {
-    try {
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const storedDate = localStorage.getItem(STORAGE_TODAY_DATE);
+    const todayRuns = storedDate === dateStr ? parseInt(localStorage.getItem(STORAGE_TODAY_RUNS) || '0', 10) : 0;
+    const totalRuns = parseInt(localStorage.getItem(STORAGE_TOTAL_RUNS) || '0', 10);
 
-      const todayRuns = storedDate === dateStr ? parseInt(localStorage.getItem(STORAGE_TODAY_RUNS) || '0', 10) : 0;
-      const totalRuns = parseInt(localStorage.getItem(STORAGE_TOTAL_RUNS) || '0', 10);
+    return { today: todayRuns, total: totalRuns };
+  } catch {
+    return { today: 0, total: 0 };
+  }
+}
 
-      setStats({ today: todayRuns, total: totalRuns });
-    } catch {
-      setStats({ today: 0, total: 0 });
-    }
-  };
+// 5단계 결과 화면에 들어가는 정직한 나의 시뮬레이션 완주 배지
+export const PersonalRunBadge: React.FC = () => {
+  const [stats, setStats] = useState<{ today: number; total: number }>(getPersonalRuns());
 
   useEffect(() => {
-    loadStats();
-    const handleUpdate = () => loadStats();
+    setStats(getPersonalRuns());
+    const handleUpdate = () => setStats(getPersonalRuns());
     window.addEventListener('pcraft_run_completed', handleUpdate);
     return () => window.removeEventListener('pcraft_run_completed', handleUpdate);
   }, []);
 
+  if (stats.total === 0) return null;
+
   return (
     <div 
-      className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 text-xs font-pixel shadow-inner select-none"
-      title="기자님이 5단계 최종 인사발령 결과까지 완주한 실제 시뮬레이션 기록입니다."
+      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs font-pixel shadow-sm select-none"
+      title="기자님이 이 브라우저에서 인사발령 결과까지 완주한 총 시뮬레이션 횟수입니다."
     >
-      <div className="flex items-center gap-1.5 text-slate-400">
-        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-        <span>오늘 완주</span>
-        <span className="font-bold text-amber-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.today}회
+      <Award className="w-3.5 h-3.5 text-amber-400" />
+      <span className="text-slate-400">나의 시뮬레이션 도전 기록:</span>
+      <span className="font-bold text-amber-300">
+        제{stats.total}회차 완주
+      </span>
+      {stats.today > 1 && (
+        <span className="text-[10px] text-slate-500 font-normal">
+          (오늘 {stats.today}번째)
         </span>
-      </div>
-
-      <span className="text-slate-700">|</span>
-
-      <div className="flex items-center gap-1.5 text-slate-400">
-        <Award className="w-3.5 h-3.5 text-emerald-400" />
-        <span>누적 완주</span>
-        <span className="font-bold text-emerald-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-          {stats.total}회
-        </span>
-      </div>
+      )}
     </div>
   );
 };
+
+// 기존 하위 호환성 유지용 (App 푸터에서 사용하지 않더라도 export 유지)
+export const VisitorCounter = PersonalRunBadge;

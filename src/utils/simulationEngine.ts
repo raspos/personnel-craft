@@ -90,19 +90,19 @@ export function runSimulation(
     movePressure = 0.90; // 3년 이상 장기근속: 이동 압력 극대 (90% 이동)
   }
 
-  // 현재 부서장의 이동 의사 반영 (영향력 강화)
+  // 현재 부서장의 이동 의사 반영 (완화된 현실적 가중치)
   switch (wishes.currentBossIntent) {
     case '적극적으로 보내주려 한다':
-      movePressure += 0.25;
+      movePressure += 0.15;
       break;
     case '이동을 허용할 가능성이 높다':
-      movePressure += 0.12;
+      movePressure += 0.08;
       break;
     case '잔류를 원하는 분위기다':
-      movePressure -= 0.22;
+      movePressure -= 0.12;
       break;
     case '반드시 남기려고 한다':
-      movePressure -= 0.40;
+      movePressure -= 0.20;
       break;
     default:
       break;
@@ -111,27 +111,24 @@ export function runSimulation(
   // 인사 농사 지표 반영: 현재 부서 잔류 압력(stayPressure) 및 소문 과열
   if (farmingState) {
     const sp = farmingState.metrics.stayPressure;
-    if (sp > 50) {
-      movePressure -= (sp - 50) * 0.006;
-    } else {
-      movePressure += (50 - sp) * 0.005;
-    }
+    movePressure -= (sp - 50) * 0.003;
 
     // 소문이 70점 이상으로 과열되면 사내 정치적 반발로 이동 압력 감소
     if (farmingState.metrics.rumorSpread >= 70) {
-      movePressure -= 0.08;
+      movePressure -= 0.06;
     }
   }
 
   // 돌발 이벤트 반영
   if (activeEvent?.id === 'event_reorg') {
-    movePressure += 0.25; // 조직개편: 대규모 순환
+    movePressure += 0.15; // 조직개편: 대규모 순환
   } else if (activeEvent?.id === 'event_downsize') {
-    movePressure -= 0.30; // 인사 최소화: 잔류 대폭 증가
+    movePressure -= 0.18; // 인사 최소화: 잔류 대폭 증가
   } else if (activeEvent?.id === 'event_senior_move') {
-    movePressure -= 0.15; // 선배 대거 복귀: 내 자리 좁아짐
+    movePressure -= 0.10; // 선배 대거 복귀: 내 자리 좁아짐
   }
-  movePressure = Math.max(0.05, Math.min(0.95, movePressure));
+  // 극단값 방지 (최소 15% 잔류, 최대 85% 이동) -> E 한 번에 5%로 폭락하는 현상 완벽 방지
+  movePressure = Math.max(0.15, Math.min(0.85, movePressure));
 
   // 2. 부서별 가중치 평가 함수
   const evaluateDept = (
@@ -252,40 +249,40 @@ export function runSimulation(
     // E. 인사 농사 성과 및 행동의 실질적 가중치 반영
     let farmingBonus = 0;
     if (farmingState) {
-      // 1) 기사 작성 실적 (articleScore: 0 ~ 100) -> careerFit에 직접 실적 가산! (최대 +15점)
-      const articleBonus = Math.round((farmingState.metrics.articleScore / 100) * 15);
+      // 1) 기사 작성 실적 (articleScore: 0 ~ 100) -> careerFit에 직접 실적 가산! (최대 +26점 - 실력파 기자의 확실한 특종 보상!)
+      const articleBonus = Math.round((farmingState.metrics.articleScore / 100) * 26);
       farmingBonus += articleBonus;
 
-      // 2) 밭갈기 새싹 단계 (sproutStage: 0 ~ 3) -> 해당 지망 부서에 정성 들인 결실 (단계당 +5점, 최대 +15점)
+      // 2) 밭갈기 새싹 단계 (sproutStage: 0 ~ 3) -> 해당 지망 부서에 정성 들인 결실 (단계당 +6점, 최대 +18점)
       const currentSprout = wishRank === 1 
         ? farmingState.metrics.sproutStage.first 
         : wishRank === 2 
         ? farmingState.metrics.sproutStage.second 
         : farmingState.metrics.sproutStage.third;
-      farmingBonus += currentSprout * 5;
+      farmingBonus += currentSprout * 6;
 
-      // 3) 희망 부서 내 인지도 (지망별 완벽 분리 적용!) -> 해당 부서원들의 환영도 (최대 +10점)
+      // 3) 희망 부서 내 인지도 (지망별 완벽 분리 적용!) -> 해당 부서원들의 환영도 (최대 +12점)
       const rawAw = farmingState.metrics.deptAwareness;
       const targetAwareness = typeof rawAw === 'number'
         ? rawAw
         : (wishRank === 1 ? rawAw.first : wishRank === 2 ? rawAw.second : rawAw.third) || 0;
-      const awarenessBonus = Math.round((targetAwareness / 100) * 10);
+      const awarenessBonus = Math.round((targetAwareness / 100) * 12);
       farmingBonus += awarenessBonus;
 
-      // 4) 희망 부서장 관심도 (지망별 완벽 분리 적용!) -> 해당 부서장의 영입 추진력 (최대 +10점)
+      // 4) 희망 부서장 관심도 (지망별 완벽 분리 적용!) -> 해당 부서장의 영입 추진력 (최대 +12점)
       const rawBi = farmingState.metrics.bossInterest;
       const targetBossInterest = typeof rawBi === 'number'
         ? rawBi
         : (wishRank === 1 ? rawBi.first : wishRank === 2 ? rawBi.second : rawBi.third) || 0;
-      const bossInterestBonus = Math.round((targetBossInterest / 100) * 10);
+      const bossInterestBonus = Math.round((targetBossInterest / 100) * 12);
       farmingBonus += bossInterestBonus;
 
       // 5) 소문 확산도 (rumorSpread: 0 ~ 100)
       const rumor = farmingState.metrics.rumorSpread;
-      if (rumor >= 30 && rumor <= 65) {
-        farmingBonus += 4; // 적정 공론화 이득
+      if (rumor >= 35 && rumor <= 65) {
+        farmingBonus += 5; // 적정 공론화 이득
       } else if (rumor > 70) {
-        farmingBonus -= 6; // 과열 정치질 역풍
+        farmingBonus -= 8; // 과열 정치질 역풍
       }
     }
 

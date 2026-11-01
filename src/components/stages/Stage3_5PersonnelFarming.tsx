@@ -60,17 +60,25 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   const currentDeptName = profile.currentDept || (careers.length > 0 ? careers[careers.length - 1].deptName : '사회부');
   const isSecondHalf = profile.currentHalf === '하반기';
 
-  // 인사 농사 전 기준 확률 기록 (농사 전후 일관된 동일 초기 상태 기반)
-  if (!farmingState.initialProbabilities) {
-    const initialSim = runSimulation(careers, wishes, null, 5000, farmingState, currentDeptName);
-    farmingState.initialProbabilities = initialSim.probabilities;
-  }
-
-  // 현재 농사 상태(기사 작성 성과, 밭가꾸기, 인지도, 소문)가 즉시 반영된 실시간 시뮬레이션 확률
+  // 현재 농사 상태가 실시간 반영된 시뮬레이션 확률
   const currentSim = useMemo(() => {
     return runSimulation(careers, wishes, null, 5000, farmingState, currentDeptName);
   }, [careers, wishes, farmingState, currentDeptName]);
-  const probBefore = farmingState.initialProbabilities || currentSim.probabilities;
+
+  // 인사 농사 전 기준 확률 기록 (행동 0회일 때는 초기 확률과 현재 확률이 100% 일치하도록 보장)
+  useEffect(() => {
+    if (!farmingState.initialProbabilities || farmingState.remainingPoints === 8) {
+      setFarmingState({
+        ...farmingState,
+        initialProbabilities: currentSim.probabilities
+      });
+    }
+  }, [wishes, careers, currentDeptName]);
+
+  // 행동을 한 번도 안 한 상태(8P 잔여)에서는 전/후 확률이 완벽히 동일하게 일치
+  const probBefore = farmingState.remainingPoints === 8
+    ? currentSim.probabilities
+    : (farmingState.initialProbabilities || currentSim.probabilities);
   const probNow = currentSim.probabilities;
 
   // 대화 팝업 알림 상태

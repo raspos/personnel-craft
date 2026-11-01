@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   WishSelection,
   WishDeptConfig,
@@ -87,12 +87,46 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
     }
   };
 
+  // 초기 마운트 시 2·3지망의 현재 부서 충돌 및 기피 부서 공란 자동 해소
+  useEffect(() => {
+    let needsUpdate = false;
+    let newWishes = { ...wishes };
+
+    // 2지망이 현재 부서와 겹칠 경우 자동 변경
+    if (newWishes.second.deptName !== '없음' && newWishes.second.deptName === currentDeptName) {
+      const alt = DEFAULT_DEPARTMENTS.find(d => d.name !== currentDeptName && d.name !== newWishes.first.deptName)?.name || '경제부';
+      newWishes.second = { ...newWishes.second, deptName: alt };
+      needsUpdate = true;
+    }
+    // 3지망이 현재 부서와 겹칠 경우 자동 변경
+    if (newWishes.third.deptName !== '없음' && newWishes.third.deptName === currentDeptName) {
+      const alt = DEFAULT_DEPARTMENTS.find(d => d.name !== currentDeptName && d.name !== newWishes.first.deptName && d.name !== newWishes.second.deptName)?.name || '산업부';
+      newWishes.third = { ...newWishes.third, deptName: alt };
+      needsUpdate = true;
+    }
+    // 기피 부서가 공란이거나 지망과 겹칠 경우 자동 설정
+    const chosen = [newWishes.first.deptName, newWishes.second.deptName, newWishes.third.deptName];
+    if (!newWishes.avoidDept || chosen.includes(newWishes.avoidDept)) {
+      const altAvoid = DEFAULT_DEPARTMENTS.find(d => !chosen.includes(d.name))?.name || '문화부';
+      newWishes.avoidDept = altAvoid;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      setWishes(newWishes);
+    }
+  }, [currentDeptName]);
+
   // 중복 부서 검증 ('없음'은 제외)
   const validDepartments = [wishes.first.deptName, wishes.second.deptName, wishes.third.deptName].filter(
     (name) => name && name !== '없음' && name !== '선택 안 함'
   );
   const hasDuplicateWish = new Set(validDepartments).size !== validDepartments.length;
   const hasAvoidConflict = validDepartments.includes(wishes.avoidDept);
+  const hasAvoidEmpty = !wishes.avoidDept || wishes.avoidDept.trim() === '';
+  const hasSecondWishCurrentConflict = wishes.second.deptName !== '없음' && wishes.second.deptName === currentDeptName;
+  const hasThirdWishCurrentConflict = wishes.third.deptName !== '없음' && wishes.third.deptName === currentDeptName;
+  const isFormInvalid = hasDuplicateWish || hasAvoidConflict || hasAvoidEmpty || hasSecondWishCurrentConflict || hasThirdWishCurrentConflict;
 
   return (
     <div className="flex flex-col gap-6">
@@ -104,19 +138,23 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             <span>STAGE 3. 희망 부서 선택 및 부서장 접촉</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            1지망은 필수이며, 2지망과 3지망은 '없음(1지망 올인 / 미지원)'을 선택할 수 있습니다.
+            1지망은 '현 부서 잔류' 또는 희망 부서를 선택하며, 2·3지망은 이동 희망 부서 또는 '없음(미지원)'을 선택합니다.
           </p>
         </div>
       </div>
 
-      {/* 중복 경고 알림 */}
-      {(hasDuplicateWish || hasAvoidConflict) && (
+      {/* 중복 & 오류 경고 알림 */}
+      {isFormInvalid && (
         <div className="p-3 bg-rose-950/80 border border-rose-500 rounded-lg text-xs text-rose-200 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-          <span>
-            {hasDuplicateWish && '희망 부서에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요. '}
-            {hasAvoidConflict && '기피 부서는 희망 부서(1·2·3지망)와 중복될 수 없습니다.'}
-          </span>
+          <div className="space-y-0.5">
+            {hasDuplicateWish && <div>• 희망 지망 부서 간에 중복 선택된 부서가 있습니다. 서로 다른 부서를 선택해 주세요.</div>}
+            {(hasSecondWishCurrentConflict || hasThirdWishCurrentConflict) && (
+              <div>• 2지망과 3지망에는 현재 소속 부서({currentDeptName})를 선택할 수 없습니다. (현재 부서 잔류 희망은 1지망에서만 가능)</div>
+            )}
+            {hasAvoidConflict && <div>• 기피 부서는 희망 지망 부서(1·2·3지망)와 중복될 수 없습니다.</div>}
+            {hasAvoidEmpty && <div>• 기피 부서를 1곳 반드시 선택해 주세요. (절대 가고 싶지 않은 부서)</div>}
+          </div>
         </div>
       )}
 
@@ -187,7 +225,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                   {activeTab === 2 ? '없음 (1지망 올인 / 미지원)' : '없음 (선택 안 함 / 미지원)'}
                 </option>
               )}
-              {DEFAULT_DEPARTMENTS.map((d) => (
+              {DEFAULT_DEPARTMENTS.filter(d => activeTab === 1 || d.name !== currentDeptName).map((d) => (
                 <option key={d.id} value={d.name}>
                   {d.name} {activeTab === 1 && d.name === currentDeptName ? '(현재 소속 부서)' : ''}
                 </option>
@@ -440,13 +478,13 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
         </button>
 
         <button
-          disabled={hasDuplicateWish || hasAvoidConflict}
+          disabled={isFormInvalid}
           onClick={() => {
             sound.playClick();
             onNext();
           }}
           className={`voxel-btn voxel-btn-primary flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 ${
-            hasDuplicateWish || hasAvoidConflict ? 'opacity-50 cursor-not-allowed' : ''
+            isFormInvalid ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           <span>추석 이후 인사 농사 시작하기 (STAGE 3.5)</span>

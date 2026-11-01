@@ -53,7 +53,7 @@ export const DEFAULT_WISHES: WishSelection = {
     recruitIntent: '전혀 모름',
     competitors: '모름'
   },
-  avoidDept: '',
+  avoidDept: '문화부',
   currentBossIntent: '잘 모르겠다',
   applyBossRelation: false // 기본은 객관적 역량 중심 (OFF)
 };
@@ -65,8 +65,8 @@ export const DEFAULT_FARMING_STATE: FarmingState = {
     bossInterest: { first: 0, second: 0, third: 0 },
     deptAwareness: { first: 0, second: 0, third: 0 },
     rumorSpread: 0,
-    stayPressure: 30,
-    infoConfidence: 20,
+    stayPressure: 50,
+    infoConfidence: 0,
     articleScore: 0,
     sproutStage: {
       first: 0,

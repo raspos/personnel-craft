@@ -11,28 +11,38 @@ const REPORTER_PROFILE_CATALOG: Record<string, ReporterProfileTemplate> = {
   // 1. 단일/주력 전문 유형
   '사건캡 출신 야전사령관': {
     reporterType: '사건캡 출신 야전사령관',
-    detailedSpecialty: '경찰서 마와리부터 다져진 동물적 취재 감각과 돌파력',
-    description: '수습 시절 팩스방과 당직실을 전전하며 경찰서 라인을 뚫었던 야전형 기자입니다. 사건 냄새를 맡으면 물불 안 가리고 현장으로 뛰어가며, 취재원의 굳게 닫힌 입도 소주 한잔과 끈질긴 설득으로 열어젖히는 편집국의 든든한 돌격대장입니다.'
+    detailedSpecialty: '경찰서 라인부터 다져진 동물적 취재 감각과 데스크 지휘력',
+    description: '수습 시절 팩스방과 당직실을 거쳐 시경캡까지 역임한 야전 지휘관입니다. 사건 냄새를 맡으면 물불 안 가리고 후배들을 진두지휘하며, 취재원의 굳게 닫힌 입도 소주 한잔과 끈질긴 설득으로 열어젖히는 편집국의 든든한 돌격대장입니다.'
+  },
+  '열혈 사건팀 막내·현장 기동형': {
+    reporterType: '열혈 사건팀 막내·현장 기동형',
+    detailedSpecialty: '경찰서 당직실과 사건 사고 현장을 누비는 발빠른 기동력',
+    description: '수습 팩스방을 거쳐 일선 경찰서 라인을 종횡무진 누비는 기동취재반의 주역입니다. 사건 냄새를 맡으면 가장 먼저 현장에 도착해 목격자를 찾고 취재원의 굳게 닫힌 문을 끈질기게 두드리는 편집국의 활력소입니다.'
   },
   '서초동 법조 라인 단독 제조기': {
     reporterType: '서초동 법조 라인 단독 제조기',
     detailedSpecialty: '영장실질심사와 공소장 행간을 털어내는 법조통',
     description: '서울중앙지검과 대법원 기자실을 주 무대로 활약하는 엘리트 법조 기자입니다. 판·검사, 대형 로펌 변호사들과의 깊은 네트워크를 바탕으로 복잡한 법리 싸움 이면에 숨은 권력의 암투와 비리를 칼같이 단독 보도해 냅니다.'
   },
-  '여의도 참새·정치 낭인형': {
-    reporterType: '여의도 참새·정치 낭인형',
-    detailedSpecialty: '의원회관 복도 죽돌이이자 백브리핑·지라시 판독의 신',
-    description: '국회 본청과 여야 당사를 내 집처럼 드나들며 여의도 정가의 내밀한 귓속말을 실시간으로 낚아챕니다. 당 대표실 문고리부터 보좌진 네트워크까지 꽉 쥐고 있어 총선 공천이나 계파 갈등의 판세를 동물적으로 읽어냅니다.'
+  '의사당 베테랑 정치통': {
+    reporterType: '의사당 베테랑 정치통',
+    detailedSpecialty: '의원회관과 정당 당사를 누비며 정국 판세를 꿰뚫는 정치 베테랑',
+    description: '국회 본청과 여야 당사를 내 집처럼 드나들며 여의도 정가의 내밀한 기류와 막전막후를 실시간으로 낚아챕니다. 당 지도부부터 보좌진 네트워크까지 꽉 쥐고 있어 총선 공천이나 계파 갈등의 판세를 입체적으로 읽어냅니다.'
   },
   '관가 저승사자·세종시 정책통': {
     reporterType: '관가 저승사자·세종시 정책통',
     detailedSpecialty: '정부세종청사 보도자료의 허점을 까발리는 숫자 저격수',
-    description: '기획재정부, 금융위, 복지부 등 관가 관료들이 가장 껄끄러워하는 분석가입니다. 복잡한 통계 수치와 정책 용어 뒤에 숨겨진 세수 펑크나 예산 낭비를 귀신같이 찾아내 1면 톱기사로 꽂아 넣는 냉철한 정책 감시자입니다.'
+    description: '기획재정부, 산업부, 복지부 등 관가 관료들이 가장 껄끄러워하는 분석가입니다. 복잡한 통계 수치와 정책 용어 뒤에 숨겨진 세수 펑크나 예산 낭비를 귀신같이 찾아내 1면 톱기사로 꽂아 넣는 냉철한 정책 감시자입니다.'
   },
-  '대기업 홍보실의 친구? 산업부 에이스': {
-    reporterType: '대기업 홍보실의 친구? 산업부 에이스',
-    detailedSpecialty: '삼성·현대차 재벌 승계구도와 글로벌 공급망을 해부하는 기업통',
-    description: '주요 그룹 총수의 일거수일투족과 IR 재무제표를 훤히 꿰뚫고 있습니다. 대기업 임원들과의 고급 조찬부터 공장 현장의 기름 냄새까지 넘나들며 글로벌 반도체·배터리 패권 전쟁의 숨은 속사정을 입체적으로 전합니다.'
+  '통화정책 & 거시경제 분석통': {
+    reporterType: '통화정책 & 거시경제 분석통',
+    detailedSpecialty: '한국은행 기준금리와 외환시장·거시금융의 맥을 짚는 금융통',
+    description: '한국은행 본관과 금융당국을 출입하며 금리 결정과 환율 변동, 글로벌 금융 리스크의 인과관계를 날카롭게 분석합니다. 난해한 통화정책과 거시 지표를 명쾌하게 풀어내는 금융 저널리즘의 엘리트입니다.'
+  },
+  '재계 밸류체인을 꿰뚫는 산업 전략가': {
+    reporterType: '재계 밸류체인을 꿰뚫는 산업 전략가',
+    detailedSpecialty: '글로벌 공급망과 기업 지배구조를 해부하는 산업 전문기자',
+    description: '주요 그룹의 사업 구조 개편과 재무제표, 글로벌 공급망을 훤히 꿰뚫고 있습니다. 기업 총수와 임원진의 결단부터 생산 공장의 제조 현장까지 넘나들며 반도체·배터리 등 국가 핵심 먹거리의 현주소를 입체적으로 전합니다.'
   },
   '여의도 자본시장 파수꾼 (개미들의 구원투수)': {
     reporterType: '여의도 자본시장 파수꾼 (개미들의 구원투수)',
@@ -74,9 +84,9 @@ const REPORTER_PROFILE_CATALOG: Record<string, ReporterProfileTemplate> = {
     detailedSpecialty: '지방 시·도청 토착 권력과 지역 현안의 숨은 내막을 아는 터줏대감',
     description: '서울 중심의 뉴스 프레임을 깨고 전국 각지의 생생한 현장 목소리를 전달합니다. 지역 단체장과 토착 유지들의 은밀한 결탁부터 지방 소멸의 아픈 현실까지 발로 뛰어 기록하는 풀뿌리 저널리즘의 버팀목입니다.'
   },
-  '편집국 마당발 올라운더 (인사 땜빵 전문)': {
-    reporterType: '편집국 마당발 올라운더 (인사 땜빵 전문)',
-    detailedSpecialty: '어느 부서에 던져놓아도 첫날부터 1인분 하는 만능 생존왕',
+  '편집국 마당발 올라운더 (멀티플레이어)': {
+    reporterType: '편집국 마당발 올라운더 (멀티플레이어)',
+    detailedSpecialty: '어느 부서에 던져놓아도 첫날부터 1인분 이상 해내는 만능 생존왕',
     description: '사회부 현장 취재부터 산업부 기업 기사, 정치부 백브리핑까지 안 해본 출입처가 없는 베테랑입니다. 급작스러운 공석이나 대형 이슈가 터졌을 때 편집국장이 가장 먼저 찾는 구원투수이자 적응력의 끝판왕입니다.'
   },
   '새 영역 개척하는 호기심 천국형': {
@@ -334,13 +344,14 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
 
   // 특화 키워드 체크
   const isLawFocus = sortedSubFields.some(s => s.field.includes('검찰') || s.field.includes('법원') || s.field.includes('사법'));
-  const isSejongFocus = sortedSubFields.some(s => s.field.includes('세종') || s.field.includes('기재부'));
+  const isSejongFocus = sortedSubFields.some(s => s.field.includes('세종') || s.field.includes('기재부') || s.field.includes('세종정책') || s.field.includes('예산'));
+  const isBokMacroFocus = sortedSubFields.some(s => s.field.includes('한국은행') || s.field.includes('금리') || s.field.includes('금융') || s.field.includes('통화') || s.field.includes('거시'));
 
   // 2. 부서 간 연계 시너지 분석 도출
   const careerSynergy = analyzeSynergy(careers, uniqueDepts, deptRawMonths, totalMonths, isLawFocus, isSejongFocus);
 
   // 3. 유형 매칭 로직 (최신성 가중치 기반 + 부서 간 연계 반영)
-  let catalogKey = '편집국 마당발 올라운더 (인사 땜빵 전문)';
+  let catalogKey = '편집국 마당발 올라운더 (멀티플레이어)';
 
   // 부서 간 연계 특화가 뚜렷한 경우 최우선 매칭!
   if (careerSynergy?.title.includes('금융범죄')) {
@@ -359,6 +370,8 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     catalogKey = '시사회 단골·대중문화 비평가';
   } else if (isSejongFocus && (deptWeightedMonths['경제부'] || 0) >= 12) {
     catalogKey = '관가 저승사자·세종시 정책통';
+  } else if (isBokMacroFocus && (deptWeightedMonths['경제부'] || 0) >= 12) {
+    catalogKey = '통화정책 & 거시경제 분석통';
   } else if ((deptWeightedMonths['증권부'] || 0) / totalWeighted >= 0.35) {
     catalogKey = '여의도 자본시장 파수꾼 (개미들의 구원투수)';
   } else if (investDataW / totalWeighted >= 0.25) {
@@ -367,7 +380,7 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     if ((deptWeightedMonths['외교안보부'] || 0) >= (deptWeightedMonths['정치부'] || 0)) {
       catalogKey = '외교관보다 바쁜 국제부 번역·분석 머신';
     } else {
-      catalogKey = '여의도 참새·정치 낭인형';
+      catalogKey = '의사당 베테랑 정치통';
     }
   } else if (globalW / totalWeighted >= 0.40) {
     catalogKey = '외교관보다 바쁜 국제부 번역·분석 머신';
@@ -377,7 +390,8 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     } else if ((deptWeightedMonths['전국부'] || 0) > (deptWeightedMonths['사회부'] || 0)) {
       catalogKey = '지역 민심 꿰뚫는 로컬 맹주 전국부';
     } else {
-      catalogKey = '사건캡 출신 야전사령관';
+      // 5년(60개월) 이상이면 사건캡/시경캡, 그 미만이면 현장 기동형
+      catalogKey = totalMonths >= 60 ? '사건캡 출신 야전사령관' : '열혈 사건팀 막내·현장 기동형';
     }
   } else if (techDigitalW / totalWeighted >= 0.38) {
     if ((deptWeightedMonths['디지털뉴스부'] || 0) > (deptWeightedMonths['IT산업부'] || 0)) {
@@ -387,18 +401,20 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     }
   } else if (ecoIndustryW / totalWeighted >= 0.40) {
     if ((deptWeightedMonths['산업부'] || 0) >= (deptWeightedMonths['경제부'] || 0)) {
-      catalogKey = '대기업 홍보실의 친구? 산업부 에이스';
+      catalogKey = '재계 밸류체인을 꿰뚫는 산업 전략가';
+    } else if (isBokMacroFocus) {
+      catalogKey = '통화정책 & 거시경제 분석통';
     } else {
       catalogKey = '관가 저승사자·세종시 정책통';
     }
   } else if (careers.length >= 3) {
-    catalogKey = '편집국 마당발 올라운더 (인사 땜빵 전문)';
+    catalogKey = '편집국 마당발 올라운더 (멀티플레이어)';
   } else {
     catalogKey = '새 영역 개척하는 호기심 천국형';
   }
 
   // 카탈로그에서 매칭 문구 가져오기
-  const matchedTemplate = REPORTER_PROFILE_CATALOG[catalogKey] || REPORTER_PROFILE_CATALOG['편집국 마당발 올라운더 (인사 땜빵 전문)'];
+  const matchedTemplate = REPORTER_PROFILE_CATALOG[catalogKey] || REPORTER_PROFILE_CATALOG['편집국 마당발 올라운더 (멀티플레이어)'];
   const reporterType = matchedTemplate.reporterType;
   const detailedSpecialty = matchedTemplate.detailedSpecialty;
   const description = matchedTemplate.description;

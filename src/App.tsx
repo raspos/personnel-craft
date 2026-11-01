@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import {
   Stage,
   CharacterProfile,
@@ -31,7 +31,6 @@ import { SUDDEN_EVENTS } from './data/events';
 import { runSimulation } from './utils/simulationEngine';
 import { analyzeCareer } from './utils/careerAnalysis';
 import { CharacterAction } from './components/3d/VoxelCharacter';
-import { VoxelWorldCanvas } from './components/3d/VoxelWorldCanvas';
 import { Navbar } from './components/Navbar';
 import { Stage1CharacterCreate } from './components/stages/Stage1CharacterCreate';
 import { Stage2CareerInput } from './components/stages/Stage2CareerInput';
@@ -43,7 +42,11 @@ import { CareerSkillsModal } from './components/CareerSkillsModal';
 import { ModelAssumptionsModal } from './components/ModelAssumptionsModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { TenYearSimulationModal } from './components/TenYearSimulationModal';
-import { VisitorCounter } from './components/VisitorCounter';
+
+// Three.js 및 3D 뷰어 비동기 동적 분리 (Code Splitting)
+const VoxelWorldCanvas = lazy(() =>
+  import('./components/3d/VoxelWorldCanvas').then(m => ({ default: m.VoxelWorldCanvas }))
+);
 
 export const App: React.FC = () => {
   // 1. 상태 선언 (새로고침 시 진행 단계까지 복원)
@@ -167,14 +170,23 @@ export const App: React.FC = () => {
           {/* 좌측(데스크톱: 고정) / 상단(모바일: 스크롤 시 함께 위로 훌쩍 올라감) */}
           <div className="lg:col-span-5 xl:col-span-5 relative lg:sticky lg:top-24 z-10 w-full">
             <div className="h-[250px] sm:h-[340px] lg:h-[580px] w-full">
-              <VoxelWorldCanvas
-                stage={stage}
-                profile={profile}
-                careers={careers}
-                wishes={wishes}
-                action={action}
-                farmingSprouts={farmingState.metrics.sproutStage}
-              />
+              <Suspense
+                fallback={
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900/40 rounded-2xl border border-slate-800 text-slate-400 font-pixel gap-3">
+                    <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs">3D 편집국 뷰어 로딩 중...</span>
+                  </div>
+                }
+              >
+                <VoxelWorldCanvas
+                  stage={stage}
+                  profile={profile}
+                  careers={careers}
+                  wishes={wishes}
+                  action={action}
+                  farmingSprouts={farmingState.metrics.sproutStage}
+                />
+              </Suspense>
             </div>
 
             {/* 3D 뷰어 하단 상태 브리핑 칩 (신상정보가 모두 입력되었을 때만 표시) */}
@@ -289,11 +301,6 @@ export const App: React.FC = () => {
 
       {/* 푸터 */}
       <footer className="w-full bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-400 font-pixel space-y-3">
-        {/* 방문자 수 카운터 (TODAY / TOTAL) */}
-        <div className="flex justify-center">
-          <VisitorCounter />
-        </div>
-
         <div>
           <p className="font-bold text-slate-300">인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기</p>
           <p className="text-[11px] text-slate-500 mt-0.5">

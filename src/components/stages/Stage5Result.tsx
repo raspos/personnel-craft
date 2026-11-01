@@ -10,7 +10,7 @@ import {
 import { drawFinalAppointment } from '../../utils/simulationEngine';
 import { analyzeCareer } from '../../utils/careerAnalysis';
 import { sound } from '../../utils/sound';
-import { recordCompletedRun } from '../VisitorCounter';
+import { recordCompletedRun, PersonalRunBadge } from '../VisitorCounter';
 import confetti from 'canvas-confetti';
 import {
   RotateCcw,
@@ -206,8 +206,11 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 <span className="bg-red-600 text-white font-black px-2 py-0.5 rounded text-[11px]">호외 (號外)</span>
                 <span className="font-bold text-slate-200">편집국 인사 특별 속보</span>
               </div>
-              <div>
-                발행: {profile.hireYear + Math.floor(analysis.totalMonths / 12)}년 {profile.currentHalf} 정기인사위원회
+              <div className="flex items-center gap-3">
+                <PersonalRunBadge />
+                <span>
+                  발행: {profile.hireYear + Math.floor(analysis.totalMonths / 12)}년 {profile.currentHalf} 정기인사위원회
+                </span>
               </div>
             </div>
 
