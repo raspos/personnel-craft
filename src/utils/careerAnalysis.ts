@@ -173,10 +173,13 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
   // 1. 유형 매칭 로직 (현실적 카탈로그 키 매칭)
   let catalogKey = '편집국 마당발 올라운더 (인사 땜빵 전문)';
 
-  // 법조 특화 체크 (사회부 세부 분야 중 검찰, 법원 키워드)
+  // 세부 분야 특화 체크
   const isLawFocus = sortedSubFields.some(s => s.field.includes('검찰') || s.field.includes('법원') || s.field.includes('사법'));
+  const isSejongFocus = sortedSubFields.some(s => s.field.includes('세종') || s.field.includes('기재부'));
 
-  if (sportsMonths / totalMonths >= 0.35) {
+  if (isSejongFocus && (deptMonths['경제부'] || 0) >= 6) {
+    catalogKey = '관가 저승사자·세종시 정책통';
+  } else if (sportsMonths / totalMonths >= 0.35) {
     catalogKey = '더그아웃의 하이에나·스포츠 현장 승부사';
   } else if (cultureMonths / totalMonths >= 0.35) {
     catalogKey = '시사회 단골·대중문화 비평가';

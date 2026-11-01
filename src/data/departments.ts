@@ -36,7 +36,7 @@ export const DEFAULT_DEPARTMENTS: DepartmentDef[] = [
     name: '경제부',
     category: '경제',
     color: '#10b981', // 에메랄드
-    subFields: ['한국은행·금리', '금융·은행', '거시경제정책', '재정·세제', '부동산·가계부채', '경제통계·데이터'],
+    subFields: ['세종정책', '한국은행·금리', '금융·은행', '거시경제정책', '재정·세제', '부동산·가계부채', '경제통계·데이터'],
     bossTitle: '경제부장',
     bossCostume: { accessory: 'laptop', shirtColor: '#065f46', hairColor: '#475569' }
   },
