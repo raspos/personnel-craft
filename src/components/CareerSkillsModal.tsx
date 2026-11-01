@@ -1,6 +1,6 @@
 import React from 'react';
 import { CareerAnalysisResult } from '../types/game';
-import { X, Award, Compass, ShieldAlert, Sparkles, Hexagon } from 'lucide-react';
+import { X, Award, Compass, ShieldAlert, Sparkles, Hexagon, Zap } from 'lucide-react';
 import { SkillRadarChart } from './SkillRadarChart';
 import { sound } from '../utils/sound';
 
@@ -46,6 +46,29 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
           </p>
         </div>
 
+        {/* [신규] 부서 간 연계 시너지 카드 */}
+        {analysis.careerSynergy && (
+          <div className="bg-gradient-to-r from-blue-950/70 to-indigo-950/70 p-4 rounded-lg border border-cyan-500/40 space-y-1.5 shadow-md">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[11px] font-pixel font-bold bg-cyan-900/80 text-cyan-300 border border-cyan-500/50 flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-cyan-400" />
+                  <span>부서 간 연계 시너지</span>
+                </span>
+                <span className="font-pixel text-sm text-cyan-200 font-bold">
+                  {analysis.careerSynergy.title}
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-pixel">
+                {analysis.careerSynergy.combination}
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed pt-0.5">
+              {analysis.careerSynergy.description}
+            </p>
+          </div>
+        )}
+
         {/* RPG 스타일 다각형 레이더 그래프 & 스킬트리 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -53,7 +76,7 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
               <Hexagon className="w-4 h-4 text-cyan-400" />
               <span>기자 역량 다각형 레이더 그래프 (스킬트리)</span>
             </h3>
-            <span className="text-[11px] text-cyan-400 font-pixel">9대 핵심 취재 영역</span>
+            <span className="text-[11px] text-cyan-400 font-pixel">9대 핵심 취재 영역 (최신 경력 가중치 반영)</span>
           </div>
 
           {/* 중앙 다각형 레이더 차트 */}
@@ -82,7 +105,7 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
           <div className="p-2.5 bg-slate-950/60 rounded border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
-              * 위 점수 및 다각형 레이더 차트는 근무 부서 및 취재 분야에 따른 가상의 상대적 경험 축적치이며, 기자의 실제 업무 역량이나 특종 능력을 평가한 점수가 아닙니다.
+              * 역량 수치는 최근 근무 부서에 더 높은 가중치(최대 1.55배)가 반영된 상대적 경험 축적치이며, 기자의 실제 기사 작성 능력을 평가한 점수가 아닙니다.
             </span>
           </div>
         </div>

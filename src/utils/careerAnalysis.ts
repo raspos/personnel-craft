@@ -1,4 +1,4 @@
-import { CareerRecord, CareerAnalysisResult, CareerPathRecommendation } from '../types/game';
+import { CareerRecord, CareerAnalysisResult, CareerPathRecommendation, CareerSynergy } from '../types/game';
 
 interface ReporterProfileTemplate {
   reporterType: string;
@@ -6,8 +6,9 @@ interface ReporterProfileTemplate {
   description: string;
 }
 
-// 현업 언론사 100% 현실 고증 기자 유형 카탈로그
+// 현업 언론사 현실 고증 기자 유형 카탈로그
 const REPORTER_PROFILE_CATALOG: Record<string, ReporterProfileTemplate> = {
+  // 1. 단일/주력 전문 유형
   '사건캡 출신 야전사령관': {
     reporterType: '사건캡 출신 야전사령관',
     detailedSpecialty: '경찰서 마와리부터 다져진 동물적 취재 감각과 돌파력',
@@ -82,8 +83,148 @@ const REPORTER_PROFILE_CATALOG: Record<string, ReporterProfileTemplate> = {
     reporterType: '새 영역 개척하는 호기심 천국형',
     detailedSpecialty: '출입처 경계를 허물며 새로운 융합 기획을 파고드는 탐험가',
     description: '기존 출입처의 관행에 얽매이지 않고 인접 분야와의 시너지를 창출하는 다재다능한 기자입니다. 사회부 시각으로 경제를 보고, IT 감각으로 문화를 취재하며 차별화된 하이브리드 기사를 생산해 냅니다.'
+  },
+
+  // 2. 부서 간 연계 시너지 특화 유형
+  '금융범죄·기업비리 추적 스페셜리스트': {
+    reporterType: '금융범죄·기업비리 추적 스페셜리스트',
+    detailedSpecialty: '서초동 검찰 라인과 자본시장 자금 흐름을 동시에 꿰뚫는 특수통',
+    description: '사회부 법조 출입으로 다진 수사 기밀 취재력과 증권·경제부의 재무제표 공시 분석력을 결합했습니다. 대형 경제 비리 게이트와 주가조작 세력의 꼬리를 가장 집요하게 물어뜯는 편집국의 강력한 사냥꾼입니다.'
+  },
+  '반도체부터 AI까지, 테크 패권 전략가': {
+    reporterType: '반도체부터 AI까지, 테크 패권 전략가',
+    detailedSpecialty: '하드웨어 제조 공급망과 빅테크 플랫폼 소프트웨어를 아우르는 산업 분석가',
+    description: '산업부 대기업(반도체·모빌리티) 취재와 IT산업부(AI·플랫폼·스타트업) 취재를 연계하여, 글로벌 기술 패권 경쟁의 전선과 국내 산업 생태계의 대전환을 입체적으로 해부하는 에이스입니다.'
+  },
+  '글로벌 통상전쟁 & 공급망 분석가': {
+    reporterType: '글로벌 통상전쟁 & 공급망 분석가',
+    detailedSpecialty: '미·중 지정학 패권 갈등과 국내 수출 기업의 나비효과를 읽는 전략가',
+    description: '국제부의 외신 모니터링 감각과 산업·경제부의 실물 현장 취재를 융합했습니다. 워싱턴과 베이징의 통상 규제가 국내 반도체, 배터리 공장에 미치는 파급력을 날카롭게 짚어냅니다.'
+  },
+  '국가 재정·연금 개혁의 메스, 거시정책 설계자': {
+    reporterType: '국가 재정·연금 개혁의 메스, 거시정책 설계자',
+    detailedSpecialty: '기재부의 국가 재정 곳간과 복지·노동 현장의 고통을 잇는 정책통',
+    description: '경제부(세종 관가)의 예산·세제 분석력과 사회정책부(노동·연금·복지)의 현장 감각을 결합했습니다. 선심성 포퓰리즘 정책의 허점을 숫자로 까발리고 지속 가능한 대안을 제시하는 정통 정책 기자입니다.'
+  },
+  '한 우물만 판 외길 외골수 장인': {
+    reporterType: '한 우물만 판 외길 외골수 장인',
+    detailedSpecialty: '출입처의 살아있는 족보이자 대체 불가능한 1타 전문기자',
+    description: '순환 보직의 유혹을 뿌리치고 한 분야에서 10년 가까이 명맥을 지켜왔습니다. 해당 분야의 20년 역사와 주요 취재원의 계보를 훤히 꿰뚫고 있어, 타사 기자들이 기사를 쓰기 전에 먼저 자문을 구하는 장인입니다.'
   }
 };
+
+// 부서 간 연계 시너지 분석 함수
+function analyzeSynergy(
+  careers: CareerRecord[],
+  uniqueDepts: string[],
+  deptMonths: Record<string, number>,
+  totalMonths: number,
+  isLawFocus: boolean,
+  isSejongFocus: boolean
+): CareerSynergy | undefined {
+  if (careers.length < 2) {
+    if (careers.length === 1 && careers[0].periodMonths >= 48) {
+      return {
+        title: '단일 부서 집중 장인형',
+        combination: `${careers[0].deptName} 단독 장기 근속`,
+        description: `다른 부서로 한눈팔지 않고 [${careers[0].deptName}]에 깊게 천착하여 출입처 최고의 전문성을 확보했습니다.`
+      };
+    }
+    return undefined;
+  }
+
+  const hasEconomy = (deptMonths['경제부'] || 0) > 0;
+  const hasIndustry = (deptMonths['산업부'] || 0) > 0;
+  const hasStock = (deptMonths['증권부'] || 0) > 0;
+  const hasIT = (deptMonths['IT산업부'] || 0) > 0;
+  const hasPolitics = (deptMonths['정치부'] || 0) > 0;
+  const hasSociety = (deptMonths['사회부'] || 0) > 0;
+  const hasGlobal = (deptMonths['국제부'] || 0) > 0;
+  const hasInvest = (deptMonths['기획취재부'] || 0) > 0;
+  const hasPolicy = (deptMonths['사회정책부'] || 0) > 0;
+  const hasSports = (deptMonths['스포츠부'] || 0) > 0;
+  const hasCulture = (deptMonths['문화부'] || 0) > 0;
+
+  // 1. 법조(사회부) + 경제/증권
+  if (hasSociety && isLawFocus && (hasEconomy || hasStock)) {
+    return {
+      title: '법조 수사 × 자본시장 추적 시너지',
+      combination: '사회부(검찰·법원) + 경제·증권부',
+      description: '검찰 특수부 수사 기밀 취재력에 기업 재무제표와 공시 해독력을 결합하여, 대형 경제 비리 게이트를 정조준하는 강력한 융합 역량을 발휘합니다.'
+    };
+  }
+
+  // 2. 산업부 + IT산업부
+  if (hasIndustry && hasIT) {
+    return {
+      title: '제조업 공급망 × 빅테크 AI 생태계 시너지',
+      combination: '산업부 + IT산업부',
+      description: '반도체·모빌리티 등 국가 기간 제조업부터 판교 스타트업과 생성형 AI 플랫폼까지 수직 계열화된 테크 패권 분석력을 보유하고 있습니다.'
+    };
+  }
+
+  // 3. 사회부 + 정치부
+  if (hasSociety && hasPolitics) {
+    return {
+      title: '사건 현장 야전 근성 × 여의도 정국 판세 시너지',
+      combination: '사회부 + 정치부',
+      description: '경찰서 마와리 시절 체득한 집요한 돌파력으로 여의도 의원회관의 은밀한 밀실 야합과 지라시의 진위를 날카롭게 가려냅니다.'
+    };
+  }
+
+  // 4. 국제부 + 산업/경제부
+  if (hasGlobal && (hasIndustry || hasEconomy)) {
+    return {
+      title: '글로벌 외신 인사이트 × 국내 산업 현장 시너지',
+      combination: '국제부 + 산업·경제부',
+      description: '미·중 패권 갈등과 글로벌 관세, 환율 변동이 국내 주력 수출 기업들의 공급망에 미치는 실질적 파급력을 입체 조망합니다.'
+    };
+  }
+
+  // 5. 기획취재부 + 사회/경제부
+  if (hasInvest && (hasSociety || hasEconomy)) {
+    return {
+      title: '심층 데이터 탐사 × 날것의 현장 취재력 시너지',
+      combination: '기획취재부 + 사회·경제부',
+      description: '방대한 정보공개 청구 데이터 분석과 현장 취재원의 입을 여는 대면 취재력을 결합해 제도를 바꾸는 특종을 생산합니다.'
+    };
+  }
+
+  // 6. 경제부(세종) + 사회정책부
+  if (hasEconomy && isSejongFocus && hasPolicy) {
+    return {
+      title: '국가 재정 거시 분석 × 복지·노동 현장 시너지',
+      combination: '경제부(세종정책) + 사회정책부',
+      description: '정부 곳간(예산·세제)의 현실과 복지·연금 현장의 절박함을 동시에 검증하여 포퓰리즘을 걸러내는 정통 정책 분석 역량을 갖추었습니다.'
+    };
+  }
+
+  // 7. 스포츠부 + 문화부
+  if (hasSports && hasCulture) {
+    return {
+      title: '대중 감수성 × 그라운드 승부사 엔터 시너지',
+      combination: '스포츠부 + 문화부',
+      description: '경기장의 박진감 넘치는 호흡과 K-컬처 엔터테인먼트의 트렌드를 감각적인 필력으로 녹여내는 대중 친화적 콘텐츠 전문가입니다.'
+    };
+  }
+
+  // 단일 부서 비중 75% 이상
+  const maxDeptRatio = Math.max(...Object.values(deptMonths)) / Math.max(1, totalMonths);
+  if (maxDeptRatio >= 0.75) {
+    const mainDept = Object.entries(deptMonths).sort((a, b) => b[1] - a[1])[0][0];
+    return {
+      title: '출입처 외길 집중형',
+      combination: `${mainDept} 집중 특화`,
+      description: `전체 경력의 75% 이상을 [${mainDept}]에 쏟아부어 해당 분야의 대체 불가능한 족보이자 전문기자로 자리잡았습니다.`
+    };
+  }
+
+  return {
+    title: '다변화 순환 시너지',
+    combination: uniqueDepts.slice(0, 3).join(' → '),
+    description: '여러 부서를 두루 거치며 취재 영역의 경계를 허물고, 복합적인 관점으로 뉴스의 이면을 입체적으로 조명합니다.'
+  };
+}
 
 export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
   const totalMonths = careers.reduce((sum, c) => sum + c.periodMonths, 0);
@@ -139,79 +280,113 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     };
   }
 
-  // 부서별 개월수 및 선택된 세부 분야 카운트
-  const deptMonths: Record<string, number> = {};
+  // 1. [핵심 혁신] 최근 경력에 가중치(Recency Weight) 부여!
+  // 과거 10년 전 한 것보다 최근 2~3년에 근무한 부서가 기자의 현재 전문성을 강력하게 대변함!
+  const deptRawMonths: Record<string, number> = {};
+  const deptWeightedMonths: Record<string, number> = {};
   const subFieldCounts: Record<string, number> = {};
+  const uniqueDepts: string[] = [];
 
-  careers.forEach(c => {
-    deptMonths[c.deptName] = (deptMonths[c.deptName] || 0) + c.periodMonths;
+  careers.forEach((c, idx) => {
+    if (!uniqueDepts.includes(c.deptName)) {
+      uniqueDepts.push(c.deptName);
+    }
+    deptRawMonths[c.deptName] = (deptRawMonths[c.deptName] || 0) + c.periodMonths;
+
+    // 최신성 가중치: 과거 블록은 0.75, 가장 최근 블록은 1.55배로 가중!
+    const recencyFactor = careers.length <= 1
+      ? 1.0
+      : 0.75 + (idx / (careers.length - 1)) * 0.80; // 0.75 ~ 1.55
+
+    const weightedPeriod = c.periodMonths * recencyFactor;
+    deptWeightedMonths[c.deptName] = (deptWeightedMonths[c.deptName] || 0) + weightedPeriod;
+
     if (c.subFields && c.subFields.length > 0) {
       c.subFields.forEach(sf => {
-        const actualMonths = typeof sf.months === 'number' && sf.months > 0 ? sf.months : Math.round(c.periodMonths / c.subFields.length);
-        subFieldCounts[sf.name] = (subFieldCounts[sf.name] || 0) + actualMonths;
+        const actualMonths = typeof sf.months === 'number' && sf.months > 0 
+          ? sf.months 
+          : Math.round(c.periodMonths / c.subFields.length);
+        // 세부 분야에도 최신성 가중치 반영
+        subFieldCounts[sf.name] = (subFieldCounts[sf.name] || 0) + (actualMonths * recencyFactor);
       });
     }
   });
+
+  const totalWeighted = Object.values(deptWeightedMonths).reduce((sum, v) => sum + v, 0);
 
   const sortedSubFields = Object.entries(subFieldCounts)
     .sort((a, b) => b[1] - a[1])
     .map(([field, months]) => ({
       field,
       months: Math.round(months),
-      ratio: Math.round((months / totalMonths) * 1000) / 10
+      ratio: Math.round((months / totalWeighted) * 1000) / 10
     }));
 
-  // 주요 도메인별 비중 계산
-  const ecoIndustryMonths = (deptMonths['경제부'] || 0) + (deptMonths['산업부'] || 0) + (deptMonths['증권부'] || 0) + (deptMonths['부동산부'] || 0) + (deptMonths['IT산업부'] || 0);
-  const politicsPolicyMonths = (deptMonths['정치부'] || 0) + (deptMonths['외교안보부'] || 0) + (deptMonths['사회정책부'] || 0);
-  const societyMonths = (deptMonths['사회부'] || 0) + (deptMonths['전국부'] || 0);
-  const investDataMonths = (deptMonths['기획취재부'] || 0);
-  const globalMonths = (deptMonths['국제부'] || 0) + (deptMonths['외교안보부'] || 0);
-  const cultureMonths = (deptMonths['문화부'] || 0);
-  const sportsMonths = (deptMonths['스포츠부'] || 0);
-  const techDigitalMonths = (deptMonths['IT산업부'] || 0) + (deptMonths['디지털뉴스부'] || 0);
+  // 가중치가 적용된 주요 도메인별 영향력 계산
+  const ecoIndustryW = (deptWeightedMonths['경제부'] || 0) + (deptWeightedMonths['산업부'] || 0) + (deptWeightedMonths['증권부'] || 0) + (deptWeightedMonths['부동산부'] || 0) + (deptWeightedMonths['IT산업부'] || 0);
+  const politicsPolicyW = (deptWeightedMonths['정치부'] || 0) + (deptWeightedMonths['외교안보부'] || 0) + (deptWeightedMonths['사회정책부'] || 0);
+  const societyW = (deptWeightedMonths['사회부'] || 0) + (deptWeightedMonths['전국부'] || 0);
+  const investDataW = (deptWeightedMonths['기획취재부'] || 0);
+  const globalW = (deptWeightedMonths['국제부'] || 0) + (deptWeightedMonths['외교안보부'] || 0);
+  const cultureW = (deptWeightedMonths['문화부'] || 0);
+  const sportsW = (deptWeightedMonths['스포츠부'] || 0);
+  const techDigitalW = (deptWeightedMonths['IT산업부'] || 0) + (deptWeightedMonths['디지털뉴스부'] || 0);
 
-  // 1. 유형 매칭 로직 (현실적 카탈로그 키 매칭)
-  let catalogKey = '편집국 마당발 올라운더 (인사 땜빵 전문)';
-
-  // 세부 분야 특화 체크
+  // 특화 키워드 체크
   const isLawFocus = sortedSubFields.some(s => s.field.includes('검찰') || s.field.includes('법원') || s.field.includes('사법'));
   const isSejongFocus = sortedSubFields.some(s => s.field.includes('세종') || s.field.includes('기재부'));
 
-  if (isSejongFocus && (deptMonths['경제부'] || 0) >= 6) {
-    catalogKey = '관가 저승사자·세종시 정책통';
-  } else if (sportsMonths / totalMonths >= 0.35) {
+  // 2. 부서 간 연계 시너지 분석 도출
+  const careerSynergy = analyzeSynergy(careers, uniqueDepts, deptRawMonths, totalMonths, isLawFocus, isSejongFocus);
+
+  // 3. 유형 매칭 로직 (최신성 가중치 기반 + 부서 간 연계 반영)
+  let catalogKey = '편집국 마당발 올라운더 (인사 땜빵 전문)';
+
+  // 부서 간 연계 특화가 뚜렷한 경우 최우선 매칭!
+  if (careerSynergy?.title.includes('금융범죄')) {
+    catalogKey = '금융범죄·기업비리 추적 스페셜리스트';
+  } else if (careerSynergy?.title.includes('제조업 공급망')) {
+    catalogKey = '반도체부터 AI까지, 테크 패권 전략가';
+  } else if (careerSynergy?.title.includes('글로벌 외신')) {
+    catalogKey = '글로벌 통상전쟁 & 공급망 분석가';
+  } else if (careerSynergy?.title.includes('국가 재정 거시')) {
+    catalogKey = '국가 재정·연금 개혁의 메스, 거시정책 설계자';
+  } else if (careerSynergy?.title.includes('외길 집중형')) {
+    catalogKey = '한 우물만 판 외길 외골수 장인';
+  } else if (sportsW / totalWeighted >= 0.35) {
     catalogKey = '더그아웃의 하이에나·스포츠 현장 승부사';
-  } else if (cultureMonths / totalMonths >= 0.35) {
+  } else if (cultureW / totalWeighted >= 0.35) {
     catalogKey = '시사회 단골·대중문화 비평가';
-  } else if ((deptMonths['증권부'] || 0) / totalMonths >= 0.40 || ((deptMonths['증권부'] || 0) >= 24 && (deptMonths['증권부'] || 0) > (deptMonths['경제부'] || 0))) {
+  } else if (isSejongFocus && (deptWeightedMonths['경제부'] || 0) >= 12) {
+    catalogKey = '관가 저승사자·세종시 정책통';
+  } else if ((deptWeightedMonths['증권부'] || 0) / totalWeighted >= 0.35) {
     catalogKey = '여의도 자본시장 파수꾼 (개미들의 구원투수)';
-  } else if (investDataMonths / totalMonths >= 0.25) {
+  } else if (investDataW / totalWeighted >= 0.25) {
     catalogKey = '상복 터진 탐사보도 헌터';
-  } else if (politicsPolicyMonths / totalMonths >= 0.45) {
-    if ((deptMonths['외교안보부'] || 0) >= (deptMonths['정치부'] || 0)) {
+  } else if (politicsPolicyW / totalWeighted >= 0.40) {
+    if ((deptWeightedMonths['외교안보부'] || 0) >= (deptWeightedMonths['정치부'] || 0)) {
       catalogKey = '외교관보다 바쁜 국제부 번역·분석 머신';
     } else {
       catalogKey = '여의도 참새·정치 낭인형';
     }
-  } else if (globalMonths / totalMonths >= 0.45) {
+  } else if (globalW / totalWeighted >= 0.40) {
     catalogKey = '외교관보다 바쁜 국제부 번역·분석 머신';
-  } else if (societyMonths / totalMonths >= 0.4) {
+  } else if (societyW / totalWeighted >= 0.40) {
     if (isLawFocus) {
       catalogKey = '서초동 법조 라인 단독 제조기';
-    } else if ((deptMonths['전국부'] || 0) > (deptMonths['사회부'] || 0)) {
+    } else if ((deptWeightedMonths['전국부'] || 0) > (deptWeightedMonths['사회부'] || 0)) {
       catalogKey = '지역 민심 꿰뚫는 로컬 맹주 전국부';
     } else {
       catalogKey = '사건캡 출신 야전사령관';
     }
-  } else if (techDigitalMonths / totalMonths >= 0.4) {
-    if ((deptMonths['디지털뉴스부'] || 0) > (deptMonths['IT산업부'] || 0)) {
+  } else if (techDigitalW / totalWeighted >= 0.38) {
+    if ((deptWeightedMonths['디지털뉴스부'] || 0) > (deptWeightedMonths['IT산업부'] || 0)) {
       catalogKey = '포털 랭킹 1위의 제왕·트래픽 폭격기';
     } else {
       catalogKey = '판교 테크 덕후·스타트업 사냥꾼';
     }
-  } else if (ecoIndustryMonths / totalMonths >= 0.45) {
-    if ((deptMonths['산업부'] || 0) >= (deptMonths['경제부'] || 0)) {
+  } else if (ecoIndustryW / totalWeighted >= 0.40) {
+    if ((deptWeightedMonths['산업부'] || 0) >= (deptWeightedMonths['경제부'] || 0)) {
       catalogKey = '대기업 홍보실의 친구? 산업부 에이스';
     } else {
       catalogKey = '관가 저승사자·세종시 정책통';
@@ -222,41 +397,41 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     catalogKey = '새 영역 개척하는 호기심 천국형';
   }
 
-  // 카탈로그에서 완성형 문구 매칭
+  // 카탈로그에서 매칭 문구 가져오기
   const matchedTemplate = REPORTER_PROFILE_CATALOG[catalogKey] || REPORTER_PROFILE_CATALOG['편집국 마당발 올라운더 (인사 땜빵 전문)'];
   const reporterType = matchedTemplate.reporterType;
   const detailedSpecialty = matchedTemplate.detailedSpecialty;
   const description = matchedTemplate.description;
 
-  // 2. 스킬트리 계산 (완만한 로그 성장 곡선 적용: 3년에 95점 포화 버그 완전 해결)
-  // 1년(12개월): 약 40점, 3년(36개월): 약 60점, 5년(60개월): 약 70점, 10년(120개월): 약 85점, 20년(240개월): 98점
-  const calcScore = (rawMonths: number, baseWeight: number = 1.0) => {
-    if (rawMonths <= 0) return 15;
-    const effectiveMonths = rawMonths * baseWeight;
-    const curve = Math.round(15 + 23 * Math.log(1 + effectiveMonths / 6));
+  // 4. 스킬트리 계산 (최신성 가중치 적용 & 완만한 로그 성장 곡선)
+  // 최근에 근무한 영역일수록 스킬트리에서 날카롭게 확장됨!
+  const calcScore = (weightedMonths: number, baseWeight: number = 1.0) => {
+    if (weightedMonths <= 0) return 15;
+    const effective = weightedMonths * baseWeight;
+    const curve = Math.round(15 + 23 * Math.log(1 + effective / 6));
     return Math.max(15, Math.min(98, curve));
   };
 
   const skillTree: Record<string, number> = {
-    '정치·정책': calcScore((deptMonths['정치부'] || 0) * 1.0 + (deptMonths['사회정책부'] || 0) * 0.6),
-    '경제·금융': calcScore((deptMonths['경제부'] || 0) * 1.0 + (deptMonths['증권부'] || 0) * 0.9),
-    '기업·산업': calcScore((deptMonths['산업부'] || 0) * 1.0 + (deptMonths['IT산업부'] || 0) * 0.8),
-    '외교·국제': calcScore((deptMonths['국제부'] || 0) * 1.0 + (deptMonths['외교안보부'] || 0) * 1.0),
-    '현장취재': calcScore((deptMonths['사회부'] || 0) * 1.1 + (deptMonths['전국부'] || 0) * 0.8),
-    '탐사·기획': calcScore((deptMonths['기획취재부'] || 0) * 1.2 + (deptMonths['오피니언부'] || 0) * 0.5),
-    '데이터 분석': calcScore((deptMonths['기획취재부'] || 0) * 0.8 + (deptMonths['디지털뉴스부'] || 0) * 0.6),
-    '기술·디지털': calcScore((deptMonths['IT산업부'] || 0) * 1.0 + (deptMonths['디지털뉴스부'] || 0) * 1.0),
-    '콘텐츠·편집': calcScore((deptMonths['편집부'] || 0) * 1.2 + (deptMonths['사진영상부'] || 0) * 0.8),
+    '정치·정책': calcScore((deptWeightedMonths['정치부'] || 0) * 1.0 + (deptWeightedMonths['사회정책부'] || 0) * 0.6),
+    '경제·금융': calcScore((deptWeightedMonths['경제부'] || 0) * 1.0 + (deptWeightedMonths['증권부'] || 0) * 0.9),
+    '기업·산업': calcScore((deptWeightedMonths['산업부'] || 0) * 1.0 + (deptWeightedMonths['IT산업부'] || 0) * 0.8),
+    '외교·국제': calcScore((deptWeightedMonths['국제부'] || 0) * 1.0 + (deptWeightedMonths['외교안보부'] || 0) * 1.0),
+    '현장취재': calcScore((deptWeightedMonths['사회부'] || 0) * 1.1 + (deptWeightedMonths['전국부'] || 0) * 0.8),
+    '탐사·기획': calcScore((deptWeightedMonths['기획취재부'] || 0) * 1.2 + (deptWeightedMonths['오피니언부'] || 0) * 0.5),
+    '데이터 분석': calcScore((deptWeightedMonths['기획취재부'] || 0) * 0.8 + (deptWeightedMonths['디지털뉴스부'] || 0) * 0.6),
+    '기술·디지털': calcScore((deptWeightedMonths['IT산업부'] || 0) * 1.0 + (deptWeightedMonths['디지털뉴스부'] || 0) * 1.0),
+    '콘텐츠·편집': calcScore((deptWeightedMonths['편집부'] || 0) * 1.2 + (deptWeightedMonths['사진영상부'] || 0) * 0.8),
   };
 
-  // 3. 커리어패스 3가지 (A, B, C) 추천 생성
+  // 5. 커리어패스 3가지 추천 생성
   const recentDept = careers[careers.length - 1].deptName;
 
   let pathA: CareerPathRecommendation;
   let pathB: CareerPathRecommendation;
   let pathC: CareerPathRecommendation;
 
-  if (ecoIndustryMonths > politicsPolicyMonths && ecoIndustryMonths > societyMonths) {
+  if (ecoIndustryW > politicsPolicyW && ecoIndustryW > societyW) {
     pathA = {
       type: 'A',
       title: '거시경제 & 여의도 자본시장 전문가 코스',
@@ -278,7 +453,7 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
       description: '기업 재무제표와 공공 데이터를 무기로 빈부격차, 연금 개혁, 노동 현안을 깊숙이 파헤치는 탐사보도 경로입니다.',
       steps: [recentDept, '기획취재부', '사회정책부']
     };
-  } else if (politicsPolicyMonths >= societyMonths) {
+  } else if (politicsPolicyW >= societyW) {
     pathA = {
       type: 'A',
       title: '정치부 터줏대감 & 논설위원 코스',
@@ -330,6 +505,7 @@ export function analyzeCareer(careers: CareerRecord[]): CareerAnalysisResult {
     reporterType,
     detailedSpecialty,
     description,
+    careerSynergy,
     topFields: sortedSubFields.slice(0, 3),
     skillTree,
     careerPaths: [pathA, pathB, pathC]

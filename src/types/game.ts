@@ -104,12 +104,19 @@ export interface CareerPathRecommendation {
   steps: string[];
 }
 
+export interface CareerSynergy {
+  title: string;
+  combination: string;
+  description: string;
+}
+
 export interface CareerAnalysisResult {
   totalMonths: number;
   totalYearsText: string;
   reporterType: string;
   detailedSpecialty: string;
   description: string;
+  careerSynergy?: CareerSynergy; // 부서 간 연계 시너지 분석
   topFields: { field: string; months: number; ratio: number }[];
   skillTree: Record<string, number>; // 0 ~ 100
   careerPaths: CareerPathRecommendation[];

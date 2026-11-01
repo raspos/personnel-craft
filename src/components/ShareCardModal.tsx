@@ -106,6 +106,12 @@ export const ShareCardModal: React.FC<Props> = ({
               <div className="text-[11px] text-slate-300 mt-0.5">
                 총 경력 {analysis.totalYearsText} · 주력 분야 [{topField}]
               </div>
+              {analysis.careerSynergy && (
+                <div className="text-[10px] text-cyan-300 font-pixel mt-1 flex items-center gap-1">
+                  <span>⚡</span>
+                  <span className="font-bold">{analysis.careerSynergy.title}</span>
+                </div>
+              )}
             </div>
           </div>
 

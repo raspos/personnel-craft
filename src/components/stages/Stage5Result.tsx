@@ -320,6 +320,15 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               <div>기자 닉네임: <strong className="text-white">{profile.nickname}</strong></div>
               <div>기자 연차: <strong className="text-white">{analysis.totalYearsText}</strong></div>
               <div>기자 유형: <strong className="text-amber-300">{analysis.reporterType}</strong></div>
+              {analysis.careerSynergy && (
+                <div className="col-span-full pt-2 border-t border-slate-800 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/50 font-bold">
+                    ⚡ 시너지
+                  </span>
+                  <span className="text-cyan-200 font-bold">{analysis.careerSynergy.title}</span>
+                  <span className="text-slate-400">({analysis.careerSynergy.combination})</span>
+                </div>
+              )}
             </div>
           </div>
 
