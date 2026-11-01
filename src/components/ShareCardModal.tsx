@@ -56,7 +56,7 @@ export const ShareCardModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="voxel-card bg-slate-900 border-blue-500/60 max-w-md w-full p-5 space-y-4">
+      <div className="pixel-card bg-slate-950 border-4 border-cyan-500/80 max-w-md w-full p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
           <div className="flex items-center gap-2">
             <Share2 className="w-4 h-4 text-blue-400" />
@@ -157,7 +157,7 @@ export const ShareCardModal: React.FC<Props> = ({
           <button
             onClick={handleDownload}
             disabled={isExporting}
-            className="voxel-btn voxel-btn-primary flex-1 py-2.5 rounded-lg text-xs font-pixel flex items-center justify-center gap-1.5"
+            className="pixel-btn-mc pixel-btn-mc-primary flex-1 py-2.5 text-xs font-pixel flex items-center justify-center gap-1.5"
           >
             {downloadSuccess ? (
               <>
@@ -176,7 +176,7 @@ export const ShareCardModal: React.FC<Props> = ({
               sound.playBlip();
               onClose();
             }}
-            className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 py-2.5 px-4 rounded-lg text-xs font-pixel"
+            className="pixel-btn-mc text-slate-300 py-2.5 px-4 text-xs font-pixel"
           >
             닫기
           </button>

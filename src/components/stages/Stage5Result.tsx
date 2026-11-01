@@ -150,12 +150,12 @@ export const Stage5Result: React.FC<Stage5Props> = ({
     <div className="flex flex-col gap-6">
       {phase === 'envelope' ? (
         // 황금 실링 왁스 비밀 봉투 연출
-        <div className="voxel-card p-8 border-2 border-amber-500/60 bg-gradient-to-b from-slate-950 via-slate-900 to-black text-center space-y-6 shadow-2xl relative overflow-hidden">
+        <div className="pixel-card p-8 border-4 border-amber-500/80 bg-gradient-to-b from-slate-950 via-slate-900 to-black text-center space-y-6 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 animate-pulse"></div>
 
-          <div className="inline-block p-5 rounded-2xl bg-amber-950/40 border-2 border-amber-500/60 shadow-xl relative">
+          <div className="inline-block p-5 pixel-card border-2 border-amber-500/80 shadow-xl relative bg-amber-950/40">
             <Mail className="w-16 h-16 text-amber-400 mx-auto animate-bounce" />
-            <div className="w-8 h-8 rounded-full bg-red-600 border-2 border-red-300 absolute -bottom-2 -right-2 flex items-center justify-center text-xs font-bold text-white shadow">
+            <div className="w-8 h-8 rounded bg-red-600 border-2 border-red-300 absolute -bottom-2 -right-2 flex items-center justify-center text-xs font-bold text-white shadow font-pixel">
               封
             </div>
           </div>
@@ -173,7 +173,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
           </div>
 
           <div className="py-4">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-slate-900/90 border-4 border-amber-400/80 font-pixel text-5xl text-amber-300 shadow-2xl">
+            <div className="inline-flex items-center justify-center w-24 h-24 pixel-card border-4 border-amber-400/90 font-pixel text-5xl text-amber-300 shadow-2xl bg-slate-950">
               {countdown}
             </div>
             <div className="text-xs text-slate-400 mt-3 font-pixel">
@@ -191,7 +191,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
       ) : result ? (
         // 최종 결과: 특별 호외 신문(THE NEWSROOM EXTRA) 1면 스타일 결과 카드
         <div className="space-y-6">
-          <div className={`voxel-card p-6 sm:p-8 border-4 text-center relative overflow-hidden transition-all shadow-2xl ${
+          <div className={`pixel-card p-6 sm:p-8 border-4 text-center relative overflow-hidden transition-all shadow-2xl ${
             result.resultType === 'first'
               ? 'border-blue-400 bg-gradient-to-b from-blue-950/80 via-slate-900 to-slate-950'
               : result.resultType === 'avoid'
@@ -203,7 +203,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             {/* 호외 신문 상단 헤더 바 */}
             <div className="border-b-2 border-slate-700/80 pb-3 mb-5 flex flex-wrap items-center justify-between gap-2 text-xs font-pixel text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="bg-red-600 text-white font-black px-2 py-0.5 rounded text-[11px]">호외 (號外)</span>
+                <span className="bg-red-600 text-white font-black px-2 py-0.5 border border-red-300 text-[11px]">호외 (號外)</span>
                 <span className="font-bold text-slate-200">편집국 인사 특별 속보</span>
               </div>
               <div className="flex items-center gap-3">
@@ -225,10 +225,10 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             })()}
 
             {/* 상단 뱃지 */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-950 border border-slate-700 text-xs font-pixel mb-3">
-              {result.resultType === 'first' && <span className="text-blue-400 font-bold">🎉 1지망 대성공</span>}
-              {result.resultType === 'second' && <span className="text-cyan-400 font-bold">✨ 2지망 안착</span>}
-              {result.resultType === 'third' && <span className="text-indigo-400 font-bold">🛡️ 3지망 턱걸이</span>}
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 pixel-slot text-xs font-pixel mb-3">
+              {result.resultType === 'first' && <span className="text-cyan-400 font-bold">🎉 1지망 대성공</span>}
+              {result.resultType === 'second' && <span className="text-blue-300 font-bold">✨ 2지망 안착</span>}
+              {result.resultType === 'third' && <span className="text-indigo-300 font-bold">🛡️ 3지망 턱걸이</span>}
               {result.resultType === 'avoid' && <span className="text-red-400 font-bold">⚠️ 기피 부서 유입</span>}
               {result.resultType === 'stay' && <span className="text-amber-400 font-bold">📌 현 부서 잔류</span>}
               {result.resultType === 'other' && <span className="text-purple-400 font-bold">🎲 기타 부서 발령</span>}
@@ -246,34 +246,34 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             </p>
 
             {/* 풍자적인 한마디 명언 */}
-            <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-slate-200 text-xs sm:text-sm font-pixel italic max-w-md mx-auto mb-5 shadow-inner">
+            <div className="pixel-slot p-3.5 text-slate-200 text-xs sm:text-sm font-pixel italic max-w-md mx-auto mb-5">
               "{result.flavorQuote}"
             </div>
 
             {/* 인사 확률 리뷰 배지 바 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 max-w-lg mx-auto">
-              <div className="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 shadow">
-                <div className="text-slate-400 text-[10px]">1지망 확률</div>
-                <div className="font-pixel text-blue-400 font-bold text-sm mt-0.5">{probabilities.firstWish}%</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[10px] font-pixel">1지망 확률</div>
+                <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">{probabilities.firstWish}%</div>
               </div>
-              <div className="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 shadow">
-                <div className="text-slate-400 text-[10px]">희망부서 합산</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[10px] font-pixel">희망부서 합산</div>
                 <div className="font-pixel text-emerald-400 font-bold text-sm mt-0.5">{probabilities.totalWish}%</div>
               </div>
-              <div className="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 shadow">
-                <div className="text-slate-400 text-[10px]">현부서 잔류</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[10px] font-pixel">현부서 잔류</div>
                 <div className="font-pixel text-amber-400 font-bold text-sm mt-0.5">{probabilities.stayCurrent}%</div>
               </div>
-              <div className="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 shadow">
-                <div className="text-slate-400 text-[10px]">기피부서 위험</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[10px] font-pixel">기피부서 위험</div>
                 <div className="font-pixel text-red-400 font-bold text-sm mt-0.5">{probabilities.avoidDept}%</div>
               </div>
             </div>
           </div>
 
           {/* 인사 농사 종합 성적표 */}
-          <div className="voxel-card p-5 bg-slate-900/90 border-amber-500/40 text-xs space-y-3">
-            <div className="font-pixel text-sm text-amber-300 font-bold flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="pixel-card p-5 border-amber-500/50 text-xs space-y-3">
+            <div className="font-pixel text-sm text-amber-300 font-bold flex items-center justify-between border-b-2 border-slate-800 pb-2">
               <div className="flex items-center gap-2">
                 <span>🌾</span>
                 <span>나의 인사 농사 성적표 종합 리포트</span>
@@ -284,32 +284,32 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-slate-300">
-              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">부서장 면담</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[11px] font-pixel">부서장 면담</div>
                 <div className="font-pixel text-blue-400 font-bold text-sm mt-0.5">
                   {Object.values(farmingState.bossVisitCount).reduce((a, b) => a + b, 0)}회 접촉
                 </div>
               </div>
-              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">1지망 부서 인지도</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[11px] font-pixel">1지망 부서 인지도</div>
                 <div className="font-pixel text-cyan-400 font-bold text-sm mt-0.5">
                   {typeof farmingState.metrics.deptAwareness === 'number'
                     ? farmingState.metrics.deptAwareness
                     : farmingState.metrics.deptAwareness.first}%
                 </div>
               </div>
-              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">현 부서 잔류 압력</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[11px] font-pixel">현 부서 잔류 압력</div>
                 <div className="font-pixel text-rose-400 font-bold text-sm mt-0.5">{farmingState.metrics.stayPressure}%</div>
               </div>
-              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">기사 작성 성과</div>
+              <div className="pixel-slot p-2.5">
+                <div className="text-slate-400 text-[11px] font-pixel">기사 작성 성과</div>
                 <div className="font-pixel text-emerald-400 font-bold text-sm mt-0.5">{farmingState.metrics.articleScore}P</div>
               </div>
             </div>
 
             {/* 농사 최종 유머 평가 문구 */}
-            <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-200 text-xs italic font-pixel leading-relaxed">
+            <div className="p-3 pixel-slot text-slate-200 text-xs italic font-pixel leading-relaxed">
               {result.resultType === 'first' && (
                 wishes.first.deptName === currentDeptName
                   ? '“당신의 강력한 잔류 의지가 마침내 관철되었습니다! 진행 중이던 대형 기획 취재를 성공적으로 마무리할 무대를 지켜냈습니다.”'
@@ -330,9 +330,9 @@ export const Stage5Result: React.FC<Stage5Props> = ({
           </div>
 
           {/* 기자 커리어 요약 브리핑 */}
-          <div className="voxel-card p-4 bg-slate-900/90 border-slate-700 text-xs space-y-2">
-            <div className="font-pixel text-sm text-slate-200 font-bold flex items-center gap-1.5 border-b border-slate-800 pb-2">
-              <Briefcase className="w-4 h-4 text-blue-400" />
+          <div className="pixel-card p-4 text-xs space-y-2">
+            <div className="font-pixel text-sm text-slate-200 font-bold flex items-center gap-1.5 border-b-2 border-slate-800 pb-2">
+              <Briefcase className="w-4 h-4 text-cyan-400" />
               <span>기자 프로필 요약</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-slate-300 font-pixel">
@@ -341,7 +341,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               <div>기자 유형: <strong className="text-amber-300">{analysis.reporterType}</strong></div>
               {analysis.careerSynergy && (
                 <div className="col-span-full pt-2 border-t border-slate-800 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/50 font-bold">
+                  <span className="px-2 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-500 font-bold font-pixel">
                     ⚡ 시너지
                   </span>
                   <span className="text-cyan-200 font-bold">{analysis.careerSynergy.title}</span>
@@ -358,9 +358,9 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 sound.playClick();
                 startEnvelopeCountdown();
               }}
-              className="voxel-btn bg-slate-800 hover:bg-slate-750 border border-slate-600 text-slate-200 py-3.5 px-4 rounded-lg text-xs font-pixel flex items-center justify-center gap-2"
+              className="pixel-btn-mc text-slate-200 py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
-              <RotateCcw className="w-4 h-4 text-blue-400" />
+              <RotateCcw className="w-4 h-4 text-cyan-400" />
               <span>동일 조건으로 다시 뽑기</span>
             </button>
 
@@ -369,7 +369,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 sound.playClick();
                 onOpenShareModal(result);
               }}
-              className="voxel-btn voxel-btn-primary py-3.5 px-4 rounded-lg text-xs font-pixel flex items-center justify-center gap-2"
+              className="pixel-btn-mc pixel-btn-mc-primary py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
               <Share2 className="w-4 h-4 text-white" />
               <span>결과 카드 이미지 저장</span>
@@ -380,9 +380,9 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                 sound.playClick();
                 onOpenTenYearModal();
               }}
-              className="voxel-btn bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-white py-3.5 px-4 rounded-lg text-xs font-pixel flex items-center justify-center gap-2"
+              className="pixel-btn-mc text-amber-300 py-3.5 px-4 text-xs font-pixel flex items-center justify-center gap-2"
             >
-              <Clock className="w-4 h-4 text-amber-300" />
+              <Clock className="w-4 h-4 text-amber-400" />
               <span>10년 기자 인생 모드</span>
             </button>
           </div>

@@ -164,7 +164,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
   return (
     <div className="flex flex-col gap-6">
       {/* 🌕 추석 이후 인사 격언 인트로 배너 */}
-      <div className="voxel-card p-5 border-amber-500/50 bg-gradient-to-r from-amber-950/60 via-slate-900 to-slate-900 shadow-xl">
+      <div className="pixel-card p-5 border-amber-500/70 bg-gradient-to-r from-amber-950/60 via-slate-900 to-slate-900">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-2xl">{isSecondHalf ? '🌕' : '🌸'}</span>
           <span className="font-pixel text-xs text-amber-400 font-bold tracking-wider">
@@ -184,9 +184,9 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
       </div>
 
       {/* 인사 농사 턴 및 행동 포인트 상태 HUD */}
-      <div className="voxel-card p-4 border-blue-500/40 bg-slate-900/90 flex flex-wrap items-center justify-between gap-4">
+      <div className="pixel-card p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400 flex items-center justify-center font-pixel text-xl text-amber-300">
+          <div className="w-10 h-10 pixel-slot flex items-center justify-center font-pixel text-xl text-amber-300">
             {farmingState.currentTurn}턴
           </div>
           <div>
@@ -623,10 +623,10 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
       </div>
 
       {/* 인사 농사 전 / 후 확률 변화 비교 카드 */}
-      <div className="voxel-card p-5 border-indigo-500/40 bg-slate-900/90 space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+      <div className="pixel-card p-5 space-y-3">
+        <div className="flex items-center justify-between border-b-2 border-slate-800 pb-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-indigo-400" />
+            <TrendingUp className="w-4 h-4 text-cyan-400" />
             <h4 className="font-pixel text-sm text-slate-100 font-bold">
               인사 농사 전 / 후 예상 확률 비교
             </h4>
@@ -636,62 +636,62 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           {/* 1지망 */}
-          <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-            <div className="text-slate-400 text-[11px]">1지망 {wishes.first.deptName}</div>
+          <div className="pixel-slot p-2.5">
+            <div className="text-slate-400 text-[11px] font-pixel">1지망 {wishes.first.deptName}</div>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-slate-500 line-through text-[11px]">{probBefore.firstWish}%</span>
+              <span className="text-slate-500 line-through text-[11px] font-pixel">{probBefore.firstWish}%</span>
               <span className="text-slate-400">➔</span>
-              <span className="font-pixel text-blue-400 font-bold text-sm">{probNow.firstWish}%</span>
+              <span className="font-pixel text-cyan-400 font-bold text-sm">{probNow.firstWish}%</span>
             </div>
           </div>
 
           {/* 2지망 */}
-          <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-            <div className="text-slate-400 text-[11px]">2지망 {wishes.second.deptName}</div>
+          <div className="pixel-slot p-2.5">
+            <div className="text-slate-400 text-[11px] font-pixel">2지망 {wishes.second.deptName}</div>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-slate-500 line-through text-[11px]">{probBefore.secondWish}%</span>
+              <span className="text-slate-500 line-through text-[11px] font-pixel">{probBefore.secondWish}%</span>
               <span className="text-slate-400">➔</span>
               <span className="font-pixel text-slate-200 font-bold text-sm">{probNow.secondWish}%</span>
             </div>
           </div>
 
           {/* 희망 부서 합산 */}
-          <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-            <div className="text-slate-400 text-[11px]">희망부서 합산</div>
+          <div className="pixel-slot p-2.5">
+            <div className="text-slate-400 text-[11px] font-pixel">희망부서 합산</div>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-slate-500 line-through text-[11px]">{probBefore.totalWish}%</span>
+              <span className="text-slate-500 line-through text-[11px] font-pixel">{probBefore.totalWish}%</span>
               <span className="text-slate-400">➔</span>
               <span className="font-pixel text-emerald-400 font-bold text-sm">{probNow.totalWish}%</span>
             </div>
           </div>
 
           {/* 잔류 확률 */}
-          <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-            <div className="text-slate-400 text-[11px]">현 부서 잔류</div>
+          <div className="pixel-slot p-2.5">
+            <div className="text-slate-400 text-[11px] font-pixel">현 부서 잔류</div>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-slate-500 line-through text-[11px]">{probBefore.stayCurrent}%</span>
+              <span className="text-slate-500 line-through text-[11px] font-pixel">{probBefore.stayCurrent}%</span>
               <span className="text-slate-400">➔</span>
               <span className="font-pixel text-amber-400 font-bold text-sm">{probNow.stayCurrent}%</span>
             </div>
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-500 pt-1">
+        <div className="text-[11px] text-slate-500 pt-1 font-pixel">
           * 행동 결과에 따라 부서장 영입 의사 및 현재 부서장의 이동 의향 상태가 갱신되어 확률이 재계산됩니다.
         </div>
       </div>
 
       {/* 나의 인사 농사 일지 */}
       {farmingState.logs.length > 0 && (
-        <div className="voxel-card p-4 border-slate-800 bg-slate-950/80 space-y-2">
-          <div className="font-pixel text-xs text-slate-400 flex items-center gap-1.5 border-b border-slate-800 pb-2">
-            <Clock className="w-3.5 h-3.5" />
+        <div className="pixel-card p-4 space-y-2">
+          <div className="font-pixel text-xs text-slate-400 flex items-center gap-1.5 border-b-2 border-slate-800 pb-2">
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
             <span>나의 인사 농사 일지 (최근 활동 내역)</span>
           </div>
 
           <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
             {farmingState.logs.map((lg, idx) => (
-              <div key={idx} className="bg-slate-900/90 p-2.5 rounded border border-slate-800 text-xs">
+              <div key={idx} className="pixel-slot p-2.5 text-xs">
                 <div className="flex items-center justify-between text-[11px] text-amber-400 mb-0.5 font-pixel">
                   <span>{lg.weekName} · {lg.actionTitle}</span>
                   <span className="text-slate-400">{lg.impactText}</span>
@@ -710,7 +710,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
             sound.playBlip();
             onPrev();
           }}
-          className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
+          className="pixel-btn-mc text-slate-300 py-3 px-5 text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>희망 부서로 돌아가기</span>
@@ -721,10 +721,10 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
             sound.playClick();
             onNext();
           }}
-          className="voxel-btn voxel-btn-primary flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2"
+          className="pixel-btn-mc pixel-btn-mc-primary flex-1 py-3 px-6 text-base font-bold flex items-center justify-center gap-2"
         >
           <span>인사 농사 마치고 인사위원회로 입장</span>
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight className="w-5 h-5 text-amber-300" />
         </button>
       </div>
     </div>

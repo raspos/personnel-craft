@@ -128,6 +128,37 @@ export function createSpeechBubbleSprite(text: string, speakerName?: string): TH
   return sprite;
 }
 
+// 부서장 NPC 머리 위 플로팅 이름표 스프라이트 (마인크래프트 네임태그 스타일)
+export function createNameTagSprite(bossName: string, deptName: string): THREE.Sprite {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // 마인크래프트 플레이어 이름표 스타일 (어두운 반투명 박스 + 픽셀 보더)
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.fillRect(4, 4, 248, 56);
+
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(4, 4, 248, 56);
+
+  ctx.fillStyle = '#fde047';
+  ctx.font = 'bold 20px "Pretendard", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`[${deptName}장] ${bossName}`, 128, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+
+  const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(1.9, 0.48, 1.0);
+  return sprite;
+}
+
 // 1. 뉴스룸 본관 빌딩
 export function createNewsroomBuilding(): THREE.Group {
   const group = new THREE.Group();
@@ -582,7 +613,11 @@ export function createBossNPC(deptDef: DepartmentDef): { group: THREE.Group; ani
     armR.add(mic);
   }
 
-  group.add(headGroup, body, legL, legR, armL, armR);
+  // 머리 위 플로팅 이름표 부착
+  const nameTag = createNameTagSprite(deptDef.bossTitle, deptDef.name);
+  nameTag.position.set(0, 2.35, 0);
+
+  group.add(headGroup, body, legL, legR, armL, armR, nameTag);
 
   const animate = (t: number) => {
     headGroup.rotation.y = Math.sin(t * 1.5) * 0.2;

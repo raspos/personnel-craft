@@ -12,7 +12,7 @@ export const ModelAssumptionsModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="voxel-card bg-slate-900 border-indigo-500/60 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5">
+      <div className="pixel-card bg-slate-950 border-4 border-amber-500/80 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-indigo-400" />
@@ -95,7 +95,7 @@ export const ModelAssumptionsModal: React.FC<Props> = ({ isOpen, onClose }) => {
               sound.playClick();
               onClose();
             }}
-            className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 py-2 px-5 rounded text-xs font-pixel"
+            className="pixel-btn-mc text-slate-200 py-2 px-5 text-xs font-pixel"
           >
             닫기
           </button>

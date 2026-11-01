@@ -118,7 +118,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
   return (
     <div className="flex flex-col gap-6">
       {/* 인트로 스토리 배너 */}
-      <div className="voxel-card p-5 border-blue-500/50 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950">
+      <div className="pixel-card p-5 border-blue-500/50 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950">
         <h2 className="font-pixel text-xl sm:text-2xl text-blue-400 font-bold mb-2 flex items-center gap-2">
           <span>📰</span> "편집국에 오신 것을 환영합니다."
         </h2>
@@ -129,7 +129,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       </div>
 
       {/* 프리셋 버튼 */}
-      <div className="voxel-card p-4">
+      <div className="pixel-card p-4">
         <div className="text-xs font-pixel text-slate-400 mb-2.5 flex items-center gap-1.5">
           <Sparkles className="w-4 h-4 text-amber-400" />
           <span>캐릭터 프리셋 선택 (원클릭)</span>
@@ -137,19 +137,19 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => applyPreset('rookie')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-blue-500/40 text-blue-300 py-2 px-3 rounded text-xs text-center"
+            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-blue-300 font-pixel"
           >
             🔥 열정 신입형
           </button>
           <button
             onClick={() => applyPreset('veteran')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 py-2 px-3 rounded text-xs text-center"
+            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-slate-300 font-pixel"
           >
             ☕ 야근 베테랑형
           </button>
           <button
             onClick={() => applyPreset('investigative')}
-            className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 py-2 px-3 rounded text-xs text-center"
+            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-emerald-300 font-pixel"
           >
             🕵️ 특종 탐사형
           </button>
@@ -157,15 +157,15 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       </div>
 
       {/* 기본 정보 입력 */}
-      <div className="voxel-card p-5 space-y-4">
-        <h3 className="font-pixel text-base text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
+      <div className="pixel-card p-5 space-y-4">
+        <h3 className="font-pixel text-base text-amber-300 border-b-2 border-slate-950 pb-2 flex items-center gap-2">
           <User className="w-4 h-4 text-blue-400" />
           <span>기자 신상 정보</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5">기자 닉네임</label>
+            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">기자 닉네임</label>
             <input
               type="text"
               value={profile.nickname}
@@ -176,9 +176,9 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
             />
           </div>
 
-          {/* [신규] 현재 소속 부서 선택 */}
+          {/* 현재 소속 부서 선택 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+            <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1 font-pixel">
               <Building2 className="w-3.5 h-3.5 text-blue-400" />
               <span>현재 소속 부서</span>
             </label>
@@ -197,7 +197,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+            <label className="block text-xs text-slate-400 mb-1.5 flex items-center gap-1 font-pixel">
               <Calendar className="w-3.5 h-3.5" />
               <span>입사 연도</span>
             </label>
@@ -215,7 +215,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1.5">이번 인사 시점</label>
+            <label className="block text-xs text-slate-400 mb-1.5 font-pixel">이번 인사 시점</label>
             <div className="grid grid-cols-2 gap-2">
               {(['상반기', '하반기'] as const).map((half) => (
                 <button
@@ -225,10 +225,10 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
                     sound.playBlip();
                     setProfile({ ...profile, currentHalf: half });
                   }}
-                  className={`py-2 text-xs rounded font-pixel transition-all ${
+                  className={`py-2 text-xs rounded font-pixel transition-all border ${
                     profile.currentHalf === half
-                      ? 'bg-blue-600 text-white font-bold border border-blue-400 shadow-md'
-                      : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-200'
+                      ? 'bg-amber-500 text-slate-950 font-bold border-amber-300 shadow-[1px_1px_0_#000]'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
                   }`}
                 >
                   {half}
@@ -240,8 +240,8 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       </div>
 
       {/* 외형 커스터마이징 */}
-      <div className="voxel-card p-5 space-y-4">
-        <h3 className="font-pixel text-base text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
+      <div className="pixel-card p-5 space-y-4">
+        <h3 className="font-pixel text-base text-amber-300 border-b-2 border-slate-950 pb-2 flex items-center gap-2">
           <span>🎨</span>
           <span>3D 블록 외형 커스터마이징</span>
         </h3>
@@ -249,7 +249,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {/* 머리 스타일 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">머리 모양</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">머리 모양</label>
             <select
               value={profile.appearance.hairStyle}
               onChange={(e) => updateApp({ hairStyle: e.target.value as any })}
@@ -264,14 +264,14 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 
           {/* 머리 색상 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">머리 색상</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">머리 색상</label>
             <div className="flex gap-2 items-center">
               {['#0f172a', '#451a03', '#475569', '#b45309'].map((c) => (
                 <button
                   key={c}
                   onClick={() => updateApp({ hairColor: c })}
                   className={`w-7 h-7 rounded border-2 transition-transform ${
-                    profile.appearance.hairColor === c ? 'border-blue-400 scale-110 shadow' : 'border-slate-600'
+                    profile.appearance.hairColor === c ? 'border-amber-400 scale-110 shadow' : 'border-slate-800'
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -281,14 +281,14 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 
           {/* 상의 색상 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1">옷(셔츠) 색상</label>
+            <label className="block text-xs text-slate-400 mb-1 font-pixel">옷(셔츠) 색상</label>
             <div className="flex gap-2 items-center">
               {['#2563eb', '#dc2626', '#16a34a', '#475569', '#0f172a'].map((c) => (
                 <button
                   key={c}
                   onClick={() => updateApp({ shirtColor: c })}
                   className={`w-7 h-7 rounded border-2 transition-transform ${
-                    profile.appearance.shirtColor === c ? 'border-white scale-110 shadow' : 'border-slate-600'
+                    profile.appearance.shirtColor === c ? 'border-amber-400 scale-110 shadow' : 'border-slate-800'
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -298,7 +298,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 
           {/* 기자증 줄 색상 */}
           <div>
-            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1 font-pixel">
               <Award className="w-3.5 h-3.5 text-blue-400" />
               <span>기자증 색상</span>
             </label>
@@ -308,7 +308,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
                   key={c}
                   onClick={() => updateApp({ pressCardColor: c })}
                   className={`w-7 h-7 rounded border-2 transition-transform ${
-                    profile.appearance.pressCardColor === c ? 'border-white scale-110 shadow' : 'border-slate-600'
+                    profile.appearance.pressCardColor === c ? 'border-amber-400 scale-110 shadow' : 'border-slate-800'
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -319,7 +319,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
 
         {/* 안경 착용 토글 */}
         <div className="flex items-center gap-3 pt-2">
-          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer font-pixel">
             <input
               type="checkbox"
               checked={profile.appearance.glasses}
@@ -335,7 +335,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
       {/* 다음 단계 버튼 */}
       <button
         onClick={handleProceed}
-        className="voxel-btn voxel-btn-primary w-full py-3.5 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 mt-2"
+        className="pixel-btn-mc w-full py-3.5 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 mt-2 text-white bg-blue-600 hover:bg-blue-500"
       >
         <span>편집국 입장 (나의 커리어 구성)</span>
         <ArrowRight className="w-5 h-5" />

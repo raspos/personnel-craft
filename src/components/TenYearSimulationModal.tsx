@@ -138,7 +138,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="voxel-card bg-slate-900 border-indigo-500/60 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5">
+      <div className="pixel-card bg-slate-950 border-4 border-indigo-500/80 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-400" />
@@ -170,7 +170,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
             <button
               onClick={runTenYears}
               disabled={isRunning}
-              className="voxel-btn bg-indigo-600 hover:bg-indigo-500 text-white py-3 px-6 rounded-lg text-xs font-pixel flex items-center gap-2 mx-auto"
+              className="pixel-btn-mc pixel-btn-mc-primary text-white py-3 px-6 text-xs font-pixel flex items-center gap-2 mx-auto"
             >
               <Play className="w-4 h-4" />
               <span>10년 (20회) 시뮬레이션 가동</span>
@@ -219,7 +219,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
             <div className="flex gap-2">
               <button
                 onClick={runTenYears}
-                className="voxel-btn bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-4 rounded text-xs font-pixel flex items-center justify-center gap-1.5 flex-1"
+                className="pixel-btn-mc text-slate-200 py-2.5 px-4 text-xs font-pixel flex items-center justify-center gap-1.5 flex-1"
               >
                 <span>다시 시뮬레이션</span>
               </button>
@@ -228,7 +228,7 @@ export const TenYearSimulationModal: React.FC<Props> = ({
                   sound.playBlip();
                   onClose();
                 }}
-                className="voxel-btn voxel-btn-primary py-2.5 px-5 rounded text-xs font-pixel"
+                className="pixel-btn-mc pixel-btn-mc-primary py-2.5 px-5 text-xs font-pixel"
               >
                 닫기
               </button>

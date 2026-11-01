@@ -50,6 +50,11 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
   const targetPosRef = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 2.8 });
   const targetRotYRef = useRef<number>(Math.PI);
 
+  // 카메라 다이내믹 줌인/줌아웃 목표 위치 & 시선 타겟
+  const cameraTargetPosRef = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 4.2, z: 10.5 });
+  const cameraLookAtRef = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 1.6, z: 0 });
+  const currentLookAtRef = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 1.6, z: 0 });
+
   // 회전 드래그 상호작용
   const isDraggingRef = useRef(false);
   const prevMousePosRef = useRef({ x: 0, y: 0 });
@@ -188,6 +193,19 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
         scene.rotation.y = THREE.MathUtils.lerp(scene.rotation.y, rotationOffsetRef.current.x, 0.1);
       }
 
+      // 다이내믹 카메라 위치 및 시선 부드러운 보간 (Cinematic Zoom in / out)
+      const cTarget = cameraTargetPosRef.current;
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, cTarget.x, 0.05);
+      camera.position.y = THREE.MathUtils.lerp(camera.position.y, cTarget.y, 0.05);
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, cTarget.z, 0.05);
+
+      const lookTarget = cameraLookAtRef.current;
+      const curLook = currentLookAtRef.current;
+      curLook.x = THREE.MathUtils.lerp(curLook.x, lookTarget.x, 0.06);
+      curLook.y = THREE.MathUtils.lerp(curLook.y, lookTarget.y, 0.06);
+      curLook.z = THREE.MathUtils.lerp(curLook.z, lookTarget.z, 0.06);
+      camera.lookAt(curLook.x, curLook.y, curLook.z);
+
       renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(renderLoop);
     };
@@ -200,28 +218,48 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
     };
   }, []);
 
-  // 2. 외형 및 액션 업데이트 & 위치 이동 타겟팅
+  // 2. 외형 및 액션 업데이트 & 위치 이동 타겟팅 & 카메라 줌인 시네마틱
   useEffect(() => {
     if (!characterRef.current) return;
     characterRef.current.updateAppearance(profile.appearance);
     characterRef.current.setAction(action);
 
-    // 행동(Action)에 따른 캐릭터의 3D 공간 내 실제 위치 이동!
+    // 행동(Action)에 따른 캐릭터의 3D 공간 내 실제 위치 이동 및 카메라 연출!
     if (stage === 3 || stage === 3.5) {
       if (action === 'walk') {
-        // 1지망 부서장 앞으로 이동
+        // 1지망 부서장 앞으로 이동 및 카메라 줌인!
         targetPosRef.current = { x: -3.4, y: 0, z: 0.5 };
         targetRotYRef.current = Math.PI; // 부서장을 마주봄
+
+        cameraTargetPosRef.current = { x: -2.0, y: 3.0, z: 5.5 };
+        cameraLookAtRef.current = { x: -3.4, y: 1.5, z: 0.0 };
+
+        const zoomTimer = setTimeout(() => {
+          cameraTargetPosRef.current = { x: 0, y: 4.0, z: 9.8 };
+          cameraLookAtRef.current = { x: 0, y: 1.6, z: 0 };
+        }, 3600);
+        return () => clearTimeout(zoomTimer);
+
       } else if (action === 'stay_desk') {
-        // 기사 작성 책상 앞
+        // 기사 작성 책상 앞으로 이동 및 클로즈업
         targetPosRef.current = { x: 0, y: 0, z: 2.0 };
         targetRotYRef.current = Math.PI;
+
+        cameraTargetPosRef.current = { x: 0, y: 3.2, z: 5.8 };
+        cameraLookAtRef.current = { x: 0, y: 1.2, z: 2.0 };
+
+        const zoomTimer = setTimeout(() => {
+          cameraTargetPosRef.current = { x: 0, y: 4.0, z: 9.8 };
+          cameraLookAtRef.current = { x: 0, y: 1.6, z: 0 };
+        }, 3600);
+        return () => clearTimeout(zoomTimer);
+
       } else if (action === 'nervous' || action === 'frustrated') {
         // 현 부서 고민 (오른쪽 뒤편)
         targetPosRef.current = { x: 1.8, y: 0, z: 2.2 };
         targetRotYRef.current = Math.PI * 0.8;
       } else {
-        // 중앙 마당
+        // 기본 유휴 대기 위치
         targetPosRef.current = { x: 0, y: 0, z: 2.8 };
         targetRotYRef.current = Math.PI;
       }
@@ -280,8 +318,8 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
 
     if (stage === 1) {
       // 메인 화면: 화사한 신문사 본관 타워와 푸른 공원
-      camera.position.set(0, 3.4, 9.2);
-      camera.lookAt(0, 1.8, 0);
+      cameraTargetPosRef.current = { x: 0, y: 3.4, z: 9.2 };
+      cameraLookAtRef.current = { x: 0, y: 1.8, z: 0 };
 
       const newsroom = createNewsroomBuilding();
       worldGroup.add(newsroom);
@@ -297,8 +335,8 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
 
     } else if (stage === 2) {
       // 커리어 지도: 알록달록한 부서 복셀 계단 로드
-      camera.position.set(3.8, 4.8, 8.2);
-      camera.lookAt(0, 1.6, 0);
+      cameraTargetPosRef.current = { x: 3.8, y: 4.8, z: 8.2 };
+      cameraLookAtRef.current = { x: 0, y: 1.6, z: 0 };
 
       const careerMap = createCareerVoxelMap(careers);
       careerMap.position.set(0, 0, -2);
@@ -310,8 +348,8 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
 
     } else if (stage === 3 || stage === 3.5) {
       // 희망 부서 3곳의 개성 넘치는 시그니처 랜드마크 건물 & 부서장 NPC
-      camera.position.set(0, 4.0, 9.8);
-      camera.lookAt(0, 1.6, 0);
+      cameraTargetPosRef.current = { x: 0, y: 4.0, z: 9.8 };
+      cameraLookAtRef.current = { x: 0, y: 1.6, z: 0 };
 
       const deptList = [wishes.first.deptName, wishes.second.deptName, wishes.third.deptName];
       const rankLabels = ['[1지망]', '[2지망]', '[3지망]'];
@@ -363,16 +401,16 @@ export const VoxelWorldCanvas: React.FC<VoxelWorldCanvasProps> = ({
 
     } else if (stage === 4) {
       // 인사위원회 세트
-      camera.position.set(0, 4.0, 7.8);
-      camera.lookAt(0, 1.5, 0);
+      cameraTargetPosRef.current = { x: 0, y: 4.0, z: 7.8 };
+      cameraLookAtRef.current = { x: 0, y: 1.5, z: 0 };
 
       const committee = createCommitteeRoom();
       worldGroup.add(committee);
 
     } else if (stage === 5) {
       // 최종 결과 발표 단상
-      camera.position.set(0, 3.2, 7.2);
-      camera.lookAt(0, 1.4, 0);
+      cameraTargetPosRef.current = { x: 0, y: 3.2, z: 7.2 };
+      cameraLookAtRef.current = { x: 0, y: 1.4, z: 0 };
 
       const podiumGeo = new THREE.BoxGeometry(2.6, 0.5, 2.6);
       const podiumMat = new THREE.MeshLambertMaterial({ color: 0x2563eb });

@@ -164,7 +164,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
   return (
     <div className="flex flex-col gap-6">
       {/* 상단 안내 */}
-      <div className="voxel-card p-4 border-amber-500/40 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="pixel-card p-4 border-amber-500/40 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
             <Layers className="w-5 h-5 text-amber-400" />
@@ -175,13 +175,13 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             <span>블록 좌측 핸들을 마우스나 터치로 끌어다 놓으면 순서가 바로 <strong>스와프(교체)</strong>됩니다.</span>
           </p>
         </div>
-        <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-pixel text-slate-300 flex-shrink-0">
+        <div className="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 text-xs font-pixel text-slate-300 flex-shrink-0 shadow-[1px_1px_0_#000]">
           총 경력: <span className="text-amber-400 font-bold text-sm">{analysis.totalYearsText}</span>
         </div>
       </div>
 
       {/* 부서 추가 바 */}
-      <div className="voxel-card p-4 bg-slate-900/80">
+      <div className="pixel-card p-4 bg-slate-900/80">
         <div className="flex flex-wrap items-center gap-2">
           {!isCustomDept ? (
             <select
@@ -223,7 +223,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
 
           <button
             onClick={handleAddCareer}
-            className="voxel-btn voxel-btn-emerald text-xs py-2 px-3.5 rounded flex items-center gap-1 font-pixel"
+            className="pixel-btn-mc pixel-btn-mc-primary text-xs py-2 px-3.5 flex items-center gap-1 font-pixel"
           >
             <Plus className="w-4 h-4" />
             <span>근무 부서 블록 추가</span>
@@ -234,7 +234,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
       {/* 근무 부서 타임라인 리스트 (드래그 앤 드롭 스와프) */}
       <div className="space-y-3">
         {careers.length === 0 ? (
-          <div className="voxel-card p-8 text-center text-slate-400 font-pixel space-y-3 bg-slate-900/60 border-2 border-dashed border-slate-700">
+          <div className="pixel-card p-8 text-center text-slate-400 font-pixel space-y-3 bg-slate-900/60 border-2 border-dashed border-slate-700">
             <div className="text-4xl animate-bounce">🧱</div>
             <p className="text-base text-slate-200 font-bold">등록된 기자 커리어 블록이 없습니다.</p>
             <p className="text-xs text-slate-400 font-sans max-w-md mx-auto leading-relaxed">
@@ -256,7 +256,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
                 onDragOver={(e) => handleDragOver(e, idx)}
                 onDrop={(e) => handleDrop(e, idx)}
                 onDragEnd={handleDragEnd}
-                className={`voxel-card p-4 border-l-4 transition-all select-none ${
+                className={`pixel-card p-4 border-l-4 transition-all select-none ${
                   isDragging
                     ? 'opacity-40 scale-[0.98] border-dashed border-sky-400 ring-2 ring-sky-500/50 shadow-2xl'
                     : isDragOver
@@ -360,18 +360,18 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
       </div>
 
       {/* 실시간 전문성 분석 요약 카드 (다각형 레이더 차트 포함) */}
-      <div className="voxel-card p-5 border-blue-500/40 bg-gradient-to-br from-slate-900 via-slate-850 to-blue-950/60 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="pixel-card p-5 border-blue-500/40 bg-gradient-to-br from-slate-900 via-slate-850 to-blue-950/60 space-y-4">
+        <div className="flex items-center justify-between border-b-2 border-slate-950 pb-3">
           <div className="flex items-center gap-2">
             <Hexagon className="w-5 h-5 text-cyan-400" />
-            <h3 className="font-pixel text-base text-slate-100 font-bold">기자 역량 다각형 레이더 & 전문성 분석</h3>
+            <h3 className="font-pixel text-base text-amber-300 font-bold">기자 역량 다각형 레이더 & 전문성 분석</h3>
           </div>
           <button
             onClick={() => {
               sound.playClick();
               onOpenSkillsModal();
             }}
-            className="voxel-btn bg-blue-700/80 hover:bg-blue-600 text-blue-100 border border-blue-400 text-xs py-1.5 px-3 rounded flex items-center gap-1 font-pixel"
+            className="pixel-btn-mc text-blue-100 text-xs py-1.5 px-3 rounded flex items-center gap-1 font-pixel"
           >
             <Compass className="w-3.5 h-3.5" />
             <span>스킬트리 & 커리어패스 상세</span>
@@ -410,7 +410,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             sound.playBlip();
             onPrev();
           }}
-          className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
+          className="pixel-btn-mc text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>이전</span>
@@ -425,7 +425,7 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
             sound.playClick();
             onNext();
           }}
-          className="voxel-btn voxel-btn-primary flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2"
+          className="pixel-btn-mc flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-500"
         >
           <span>희망 부서 선택 및 부서장 접촉</span>
           <ArrowRight className="w-5 h-5" />

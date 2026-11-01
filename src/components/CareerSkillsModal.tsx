@@ -15,7 +15,7 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="voxel-card bg-slate-900 border-blue-500/60 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6">
+      <div className="pixel-card bg-slate-950 border-4 border-cyan-500/80 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6">
         {/* 모달 헤더 */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export const CareerSkillsModal: React.FC<Props> = ({ isOpen, onClose, analysis }
               sound.playClick();
               onClose();
             }}
-            className="voxel-btn voxel-btn-primary py-2 px-5 rounded text-xs font-pixel"
+            className="pixel-btn-mc pixel-btn-mc-primary py-2 px-5 text-xs font-pixel"
           >
             확인 및 닫기
           </button>

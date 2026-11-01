@@ -131,10 +131,10 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
   return (
     <div className="flex flex-col gap-6">
       {/* 상단 안내 */}
-      <div className="voxel-card p-4 border-blue-500/40 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="pixel-card p-4 border-amber-500/40 bg-slate-900/90 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="font-pixel text-lg text-blue-300 font-bold flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-blue-400" />
+          <h2 className="font-pixel text-lg text-amber-300 font-bold flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-amber-400" />
             <span>STAGE 3. 희망 부서 선택 및 부서장 접촉</span>
           </h2>
           <p className="text-xs text-slate-400 mt-1">
@@ -171,19 +171,19 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                 sound.playClick();
                 setActiveTab(num as 1 | 2 | 3);
               }}
-              className={`voxel-btn py-3 px-2 rounded-lg text-center transition-all ${
+              className={`pixel-btn-mc py-3 px-2 rounded text-center transition-all ${
                 isActive
-                  ? 'bg-blue-600 border-2 border-blue-300 text-white font-bold shadow-lg'
-                  : 'bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-750'
+                  ? 'border-amber-400 bg-amber-950/50 text-amber-300 font-bold shadow-[2px_2px_0_#000]'
+                  : 'text-slate-300'
               }`}
             >
-              <div className="font-pixel text-xs text-blue-200">
+              <div className="font-pixel text-xs text-slate-400">
                 {num}지망 {isNone ? '(미지원)' : (num === 1 && cfg.deptName === currentDeptName ? '(현 부서 잔류)' : '희망부서')}
               </div>
               <div className={`font-pixel text-sm sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
                 {isNone ? '없음' : (num === 1 && cfg.deptName === currentDeptName ? `잔류 (${cfg.deptName})` : cfg.deptName)}
               </div>
-              <div className="text-[10px] text-slate-300 mt-0.5">
+              <div className="text-[10px] text-slate-400 mt-0.5">
                 {isNone ? '가중치 0% (제외)' : (num === 1 && cfg.deptName === currentDeptName ? '잔류 지망' : `TO: ${cfg.expectedTO}`)}
               </div>
             </button>
@@ -192,7 +192,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
       </div>
 
       {/* 선택된 지망 부서 상세 설정 카드 */}
-      <div className="voxel-card p-5 space-y-5 border-blue-500/30">
+      <div className="pixel-card p-5 space-y-5 border-blue-500/30">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded bg-blue-600 text-white flex items-center justify-center font-pixel text-sm font-bold">
@@ -410,7 +410,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
       {/* ⑦ 현재 부서장 이동 의사 & ⑧ 기피 부서 설정 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* ⑦ 현재 부서장의 이동 의사 */}
-        <div className="voxel-card p-4 border-amber-500/40 bg-slate-900/90">
+        <div className="pixel-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <UserCheck className="w-4 h-4 text-amber-400" />
             <h3 className="font-pixel text-sm text-slate-100 font-bold">
@@ -437,10 +437,10 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
         </div>
 
         {/* ⑧ 기피 부서 (1곳) */}
-        <div className="voxel-card p-4 border-rose-500/40 bg-slate-900/90">
+        <div className="pixel-card p-4 border-rose-500/40 bg-slate-900/90">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="w-4 h-4 text-rose-400" />
-            <h3 className="font-pixel text-sm text-slate-100 font-bold">
+            <h3 className="font-pixel text-sm text-amber-300 font-bold">
               ⑧ 절대 가고 싶지 않은 기피 부서 (1곳)
             </h3>
           </div>
@@ -471,7 +471,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             sound.playBlip();
             onPrev();
           }}
-          className="voxel-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
+          className="pixel-btn-mc text-slate-300 py-3 px-5 rounded-lg text-sm font-pixel flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>이전</span>
@@ -483,7 +483,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
             sound.playClick();
             onNext();
           }}
-          className={`voxel-btn voxel-btn-primary flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 ${
+          className={`pixel-btn-mc flex-1 py-3 px-6 rounded-lg text-base font-bold flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-500 ${
             isFormInvalid ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
