@@ -43,6 +43,7 @@ import { CareerSkillsModal } from './components/CareerSkillsModal';
 import { ModelAssumptionsModal } from './components/ModelAssumptionsModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { TenYearSimulationModal } from './components/TenYearSimulationModal';
+import { VisitorCounter } from './components/VisitorCounter';
 import { useLanguage } from './i18n/LanguageContext';
 
 // Three.js 및 3D 뷰어 비동기 동적 분리 (Code Splitting)
@@ -308,6 +309,11 @@ export const App: React.FC = () => {
 
       {/* 푸터 */}
       <footer className="w-full bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-400 font-pixel space-y-3">
+        {/* 실제 전체 접속자 수 공용 카운터 */}
+        <div className="flex justify-center pb-1">
+          <VisitorCounter />
+        </div>
+
         <div>
           <p className="font-bold text-slate-300">
             {isEn ? 'PERSONNEL CRAFT — Newsroom Reshuffle Survival Simulator' : '인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기'}
