@@ -207,3 +207,24 @@ export interface FarmingState {
   initialProbabilities: SimulationProbabilities | null; // 인사 농사 전 확률
   backupWishes?: WishSelection; // 인사 농사 시작 직전의 희망 부서 원본 설정 (리셋 복원용)
 }
+
+/* ========================================================
+   [신규] STAGE 5 연동 — 편집국 대나무숲 (사내 익명 게시판)
+   ======================================================== */
+export type BoardCategory = 'all' | 'triumph' | 'retention' | 'behind' | 'quit';
+
+export interface BoardPost {
+  id: string;
+  authorNickname: string;
+  reporterArchetype?: string;
+  assignedDept?: string;
+  resultType?: 'first' | 'second' | 'third' | 'avoid' | 'stay' | 'other';
+  category: 'triumph' | 'retention' | 'behind' | 'quit';
+  content: string;
+  createdAt: number;
+  reactions: {
+    beer: number;    // 🍺 소주 한잔 (위로)
+    cheer: number;   // 🎉 축하해요 (격려)
+    fire: number;    // 🔥 부장 소환 (분노/황당)
+  };
+}

@@ -43,6 +43,7 @@ import { CareerSkillsModal } from './components/CareerSkillsModal';
 import { ModelAssumptionsModal } from './components/ModelAssumptionsModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { TenYearSimulationModal } from './components/TenYearSimulationModal';
+import { CommunityBoardModal } from './components/CommunityBoardModal';
 import { VisitorCounter } from './components/VisitorCounter';
 import { useLanguage } from './i18n/LanguageContext';
 
@@ -69,7 +70,9 @@ export const App: React.FC = () => {
   const [isAssumptionsModalOpen, setIsAssumptionsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isTenYearModalOpen, setIsTenYearModalOpen] = useState(false);
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
   const [shareResult, setShareResult] = useState<FinalAppointmentResult | null>(null);
+  const [boardResultContext, setBoardResultContext] = useState<FinalAppointmentResult | null>(null);
 
   // 2. 동기화 및 저장
   const setProfile = (p: CharacterProfile) => {
@@ -168,6 +171,7 @@ export const App: React.FC = () => {
         currentStage={stage}
         setStage={handleStageChange}
         onReset={handleReset}
+        onOpenBoard={() => setIsBoardModalOpen(true)}
       />
 
       {/* 메인 게임 영역 (3D 뷰어가 주인공인 레이아웃: 데스크톱 65% : 35%) */}
@@ -300,6 +304,10 @@ export const App: React.FC = () => {
                   setIsShareModalOpen(true);
                 }}
                 onOpenTenYearModal={() => setIsTenYearModalOpen(true)}
+                onOpenBoardModal={(res) => {
+                  setBoardResultContext(res);
+                  setIsBoardModalOpen(true);
+                }}
                 onActionChange={setAction}
               />
             )}
@@ -370,6 +378,13 @@ export const App: React.FC = () => {
         careers={careers}
         wishes={wishes}
         hireYear={profile.hireYear}
+      />
+
+      <CommunityBoardModal
+        isOpen={isBoardModalOpen}
+        onClose={() => setIsBoardModalOpen(false)}
+        initialResult={boardResultContext}
+        profile={profile}
       />
     </div>
   );

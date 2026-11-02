@@ -26,7 +26,8 @@ import {
   Clock,
   Stamp,
   Mail,
-  FileCheck
+  FileCheck,
+  MessageSquareText
 } from 'lucide-react';
 
 interface Stage5Props {
@@ -38,6 +39,7 @@ interface Stage5Props {
   onRestart: () => void;
   onOpenShareModal: (result: FinalAppointmentResult) => void;
   onOpenTenYearModal: () => void;
+  onOpenBoardModal?: (result: FinalAppointmentResult) => void;
   onActionChange: (action: 'nervous' | 'celebrate' | 'frustrated' | 'stay_desk') => void;
 }
 
@@ -50,6 +52,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
   onRestart,
   onOpenShareModal,
   onOpenTenYearModal,
+  onOpenBoardModal,
   onActionChange
 }) => {
   const { language } = useLanguage();
@@ -360,6 +363,36 @@ export const Stage5Result: React.FC<Stage5Props> = ({
               )}
             </div>
           </div>
+
+          {/* 편집국 익명 대나무숲 (사내 게시판) 바로가기 배너 */}
+          {onOpenBoardModal && (
+            <div className="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/80 p-4 rounded-xl border-2 border-emerald-500/60 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-left animate-fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-600/30 border border-emerald-400 flex items-center justify-center text-xl shadow-inner flex-shrink-0">
+                  🎋
+                </div>
+                <div>
+                  <div className="font-pixel text-sm text-emerald-300 font-bold flex items-center gap-1.5">
+                    <span>{isEn ? 'Newsroom Anonymous Lounge' : '편집국 익명 대나무숲 게시판'}</span>
+                    <span className="text-[10px] bg-emerald-900 text-emerald-200 px-1.5 py-0.5 rounded border border-emerald-700 font-pixel animate-pulse">LIVE</span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    {isEn ? 'Share your reshuffle reactions and see what other journalists are whispering!' : '나의 인사발령 소감을 남기고 다른 기자들의 실시간 넋두리와 썰을 확인하세요!'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  onOpenBoardModal(result);
+                }}
+                className="pixel-btn-mc bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 px-4 text-xs font-pixel whitespace-nowrap flex items-center gap-1.5 shadow-md flex-shrink-0"
+              >
+                <MessageSquareText className="w-4 h-4" />
+                <span>{isEn ? 'Post & View Lounge ➔' : '소감 남기기 & 글 보기 ➔'}</span>
+              </button>
+            </div>
+          )}
 
           {/* 조작 버튼 액션 그룹 */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Stage } from '../types/game';
-import { Volume2, VolumeX, RotateCcw, Newspaper, Globe } from 'lucide-react';
+import { Volume2, VolumeX, RotateCcw, Newspaper, Globe, MessageSquareText } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -8,9 +8,10 @@ interface Props {
   currentStage: Stage;
   setStage: (s: Stage) => void;
   onReset: () => void;
+  onOpenBoard?: () => void;
 }
 
-export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => {
+export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset, onOpenBoard }) => {
   const [isMuted, setIsMuted] = useState(!sound.enabled);
   const { language, toggleLanguage, t } = useLanguage();
 
@@ -83,6 +84,21 @@ export const Navbar: React.FC<Props> = ({ currentStage, setStage, onReset }) => 
 
         {/* 유틸리티 버튼들 */}
         <div className="flex items-center gap-2">
+          {/* 편집국 익명 대나무숲 게시판 버튼 */}
+          {onOpenBoard && (
+            <button
+              onClick={() => {
+                sound.playClick();
+                onOpenBoard();
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-600/70 hover:border-emerald-400 text-xs font-pixel text-emerald-300 flex items-center gap-1.5 transition-all shadow-sm"
+              title={language === 'en' ? "Newsroom Anonymous Lounge" : "편집국 익명 대나무숲 게시판"}
+            >
+              <MessageSquareText className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-bold">{language === 'en' ? 'Lounge' : '대나무숲'}</span>
+            </button>
+          )}
+
           {/* 다국어 언어 전환 [KO | EN] 픽셀 토글 스위치 */}
           <button
             onClick={() => {
