@@ -88,8 +88,9 @@ export const CommunityBoardModal: React.FC<Props> = ({
       if (profile?.nickname && !authorName) {
         setAuthorName(profile.nickname);
       }
-      // 결과 종류에 따라 기본 카테고리 추천
+      // 결과 화면에서 넘어온 경우 바로 글쓰기 폼을 열어줌
       if (initialResult) {
+        setIsWriting(true);
         if (initialResult.resultType === 'first' || initialResult.resultType === 'second') {
           setCategory('triumph');
         } else if (initialResult.resultType === 'avoid') {
@@ -444,12 +445,23 @@ export const CommunityBoardModal: React.FC<Props> = ({
         {/* 게시글 피드 목록 */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
           {filteredPosts.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 font-pixel space-y-2">
-              <div className="text-3xl">📭</div>
-              <p>{isEn ? 'No whispers found in this category.' : '해당 카테고리에 등록된 글이 없습니다.'}</p>
-              <p className="text-xs text-slate-400">
-                {isEn ? 'Be the first journalist to break the silence!' : '첫 번째 넋두리를 남겨보세요!'}
+            <div className="text-center py-12 text-slate-500 font-pixel space-y-3">
+              <div className="text-4xl">🎋</div>
+              <p className="text-sm font-bold text-slate-300">
+                {isEn ? 'No posts yet.' : '아직 등록된 소감이 없습니다.'}
               </p>
+              <p className="text-xs text-slate-400">
+                {isEn ? 'Be the first journalist to leave a reaction!' : '가장 먼저 나의 인사발령 소감을 남겨보세요!'}
+              </p>
+              {!isWriting && (
+                <button
+                  onClick={() => setIsWriting(true)}
+                  className="pixel-btn-mc pixel-btn-mc-primary text-xs py-2 px-4 font-pixel mx-auto mt-2 flex items-center gap-1.5"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>{isEn ? 'Write First Post' : '첫 소감 남기기'}</span>
+                </button>
+              )}
             </div>
           ) : (
             filteredPosts.map(post => {

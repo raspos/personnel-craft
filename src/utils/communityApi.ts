@@ -1,11 +1,18 @@
 import { BoardPost } from '../types/game';
 
-const STORAGE_POSTS_KEY = 'pcraft_community_posts_v1';
-const STORAGE_USER_REACTIONS_KEY = 'pcraft_user_reactions_v1';
+const STORAGE_POSTS_KEY = 'pcraft_community_posts_v3';
+const STORAGE_USER_REACTIONS_KEY = 'pcraft_user_reactions_v3';
 const STORAGE_CUSTOM_FIREBASE_KEY = 'pcraft_firebase_db_url';
 
-// 기본 Firebase Realtime Database URL (필요 시 사용자 지정 URL로 교체 가능)
+// 기본 Firebase Realtime Database URL
 export const DEFAULT_FIREBASE_URL = 'https://personnel-craft-default-rtdb.firebaseio.com';
+
+// 구버전 로컬 캐시 잔재 청소
+try {
+  localStorage.removeItem('pcraft_community_posts_v1');
+  localStorage.removeItem('pcraft_community_posts_v2');
+  localStorage.removeItem('pcraft_user_reactions_v1');
+} catch {}
 
 export function getFirebaseUrl(): string {
   try {
@@ -24,92 +31,20 @@ export function setFirebaseUrl(url: string): void {
   }
 }
 
-// 현업 언론사 현실 고증 기본 프리셋 게시글
-export const INITIAL_PRESET_POSTS: BoardPost[] = [
-  {
-    id: 'preset_1',
-    authorNickname: '마와리탈출꿈나무',
-    reporterArchetype: '열혈 사건팀 막내·현장 기동형',
-    assignedDept: '사회부',
-    resultType: 'stay',
-    category: 'retention',
-    content: '사회부만 벌써 3년차인데 이번에도 또 잔류 통보 받았습니다... 부장님 지난 추석 때 면담하면서 "다음 인사 땐 네가 원하는 곳 1순위로 밀어준다"고 하셨잖아요 ㅠㅠ 소주 땡기는 밤입니다.',
-    createdAt: Date.now() - 1000 * 60 * 18,
-    reactions: { beer: 68, cheer: 4, fire: 24 }
-  },
-  {
-    id: 'preset_2',
-    authorNickname: '여의도신입',
-    reporterArchetype: '의사당 베테랑 정치통',
-    assignedDept: '정치부',
-    resultType: 'first',
-    category: 'triumph',
-    content: '2·3지망 다 비우고 1지망 정치부 올인 배수의 진 쳤는데 통했습니다!! 인사 농사 때 정치부장님 2번 뵙고 티타임 때 공천 취재 기획안 보여드린 게 결정타였던 것 같아요. 동기들아 축하해줘!',
-    createdAt: Date.now() - 1000 * 60 * 45,
-    reactions: { cheer: 84, beer: 5, fire: 2 }
-  },
-  {
-    id: 'preset_3',
-    authorNickname: '세종시저승사자',
-    reporterArchetype: '관가 저승사자·세종시 정책통',
-    assignedDept: '문화부',
-    resultType: 'avoid',
-    category: 'quit',
-    content: '기재부 예산 파헤치겠다고 거시경제 데이터 분석 2년 동안 빡세게 갈았는데... 기피 부서로 찍어뒀던 문화부 깜짝 직권 발령 떴습니다. 넷플릭스 리뷰 쓰러 갑니다. 사직서 양식 사내 인트라넷 어디서 받나요?',
-    createdAt: Date.now() - 1000 * 60 * 120,
-    reactions: { beer: 112, fire: 45, cheer: 3 }
-  },
-  {
-    id: 'preset_4',
-    authorNickname: '자판기앞요정',
-    reporterArchetype: '편집국 마당발 올라운더 (멀티플레이어)',
-    assignedDept: '경제부',
-    resultType: 'second',
-    category: 'behind',
-    content: '이번 인사철 휴게실 자판기 앞에서 들은 건데 모 부서장님이 자기 라인 후배들 잔류시키려고 인사위에 락(Lock) 걸었다는 썰이 돌더군요 ㅋㅋㅋ 눈치싸움 살벌합니다 진짜.',
-    createdAt: Date.now() - 1000 * 60 * 240,
-    reactions: { cheer: 39, beer: 14, fire: 19 }
-  },
-  {
-    id: 'preset_5',
-    authorNickname: '데이터헌터',
-    reporterArchetype: '상복 터진 탐사보도 헌터',
-    assignedDept: '기획취재부',
-    resultType: 'first',
-    category: 'triumph',
-    content: '정보공개청구 데이터 기획서 들고 찾아간 보람이 있네요. 1지망 기획취재부 입성 성공! 올해 한국기자상 꼭 타서 편집국장 코를 납작하게 해주겠습니다.',
-    createdAt: Date.now() - 1000 * 60 * 400,
-    reactions: { cheer: 95, beer: 7, fire: 1 }
-  },
-  {
-    id: 'preset_6',
-    authorNickname: '밤샘당직러',
-    reporterArchetype: '사건캡 출신 야전사령관',
-    assignedDept: '사회부',
-    resultType: 'stay',
-    category: 'behind',
-    content: '부서장이 면담 자리에서 "자네 없으면 우리 캡 누가 하냐"며 눈빛으로 붙잡을 때부터 쎄했습니다. 결국 원직 잔류 조치... 역시 인사는 실력보다 결원 타이밍이네요.',
-    createdAt: Date.now() - 1000 * 60 * 600,
-    reactions: { beer: 73, cheer: 8, fire: 31 }
-  }
-];
-
-// 로컬 저장소에서 글 목록 불러오기
+// 로컬 캐시 글 목록 불러오기 (실제 사용자 글만)
 export function getLocalPosts(): BoardPost[] {
   try {
     const raw = localStorage.getItem(STORAGE_POSTS_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(INITIAL_PRESET_POSTS));
-      return INITIAL_PRESET_POSTS;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : INITIAL_PRESET_POSTS;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(p => p && typeof p === 'object' && typeof p.content === 'string' && p.content.trim().length > 0);
   } catch {
-    return INITIAL_PRESET_POSTS;
+    return [];
   }
 }
 
-// 실시간 글 목록 가져오기 (Firebase 연동 또는 로컬 캐시)
+// 실시간 글 목록 가져오기 (실제 사용자 글만 엄격 필터링)
 export async function fetchCommunityPosts(): Promise<BoardPost[]> {
   const firebaseUrl = getFirebaseUrl();
   if (firebaseUrl) {
@@ -120,23 +55,39 @@ export async function fetchCommunityPosts(): Promise<BoardPost[]> {
       if (res.ok) {
         const data = await res.json();
         if (data && typeof data === 'object') {
-          const list: BoardPost[] = Object.entries(data).map(([key, val]: [string, any]) => ({
-            ...val,
-            id: key,
-            createdAt: typeof val.createdAt === 'number' ? val.createdAt : Date.now(),
-            reactions: val.reactions || { beer: 0, cheer: 0, fire: 0 }
-          }));
+          const list: BoardPost[] = [];
+          for (const [key, val] of Object.entries(data)) {
+            // 유효한 본문(content)이 있는 실제 사용자 글만 엄격 필터링 (가짜/빈 프리셋 엔트리 완벽 차단)
+            if (
+              val &&
+              typeof val === 'object' &&
+              typeof (val as any).content === 'string' &&
+              (val as any).content.trim().length > 0
+            ) {
+              const p = val as any;
+              list.push({
+                id: key,
+                authorNickname: p.authorNickname || '익명의 기자',
+                reporterArchetype: p.reporterArchetype || undefined,
+                assignedDept: p.assignedDept || undefined,
+                resultType: p.resultType || undefined,
+                category: p.category || 'behind',
+                content: p.content.trim(),
+                createdAt: typeof p.createdAt === 'number' ? p.createdAt : Date.now(),
+                reactions: {
+                  beer: Number(p.reactions?.beer) || 0,
+                  cheer: Number(p.reactions?.cheer) || 0,
+                  fire: Number(p.reactions?.fire) || 0
+                }
+              });
+            }
+          }
           // 최신순 정렬
           list.sort((a, b) => b.createdAt - a.createdAt);
 
-          // 프리셋 글들과 병합 (Firebase에 아직 글이 적을 때도 풍성하게 유지)
-          const liveIds = new Set(list.map(p => p.id));
-          const merged = [...list, ...INITIAL_PRESET_POSTS.filter(p => !liveIds.has(p.id))];
-          merged.sort((a, b) => b.createdAt - a.createdAt);
-
-          // 로컬에도 백업 캐시
-          localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(merged));
-          return merged;
+          // 로컬 캐시 백업
+          localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(list));
+          return list;
         }
       }
     } catch (err) {
@@ -151,6 +102,7 @@ export async function fetchCommunityPosts(): Promise<BoardPost[]> {
 export async function submitCommunityPost(newPost: Omit<BoardPost, 'id' | 'createdAt' | 'reactions'>): Promise<BoardPost> {
   const post: BoardPost = {
     ...newPost,
+    content: newPost.content.trim(),
     id: `post_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     createdAt: Date.now(),
     reactions: { beer: 0, cheer: 0, fire: 0 }
@@ -167,15 +119,15 @@ export async function submitCommunityPost(newPost: Omit<BoardPost, 'id' | 'creat
       if (res.ok) {
         const data = await res.json();
         if (data && data.name) {
-          post.id = data.name; // Firebase 생성 키 부여
+          post.id = data.name; // Firebase 생성 ID 매핑
         }
       }
     } catch (err) {
-      console.warn('Firebase submit failed, saved to local', err);
+      console.warn('Firebase submit failed, saved locally', err);
     }
   }
 
-  // 로컬에도 저장 (오프라인 및 즉시 갱신 보장)
+  // 로컬 캐시 갱신
   try {
     const existing = getLocalPosts();
     const updated = [post, ...existing.filter(p => p.id !== post.id)];
@@ -197,7 +149,7 @@ export async function reactToPost(postId: string, reactionType: 'beer' | 'cheer'
 
   const reactionKey = `${postId}_${reactionType}`;
   if (userReactions[reactionKey]) {
-    return { success: false, newCount: 0 }; // 이미 클릭함
+    return { success: false, newCount: 0 };
   }
 
   userReactions[reactionKey] = true;
@@ -219,13 +171,18 @@ export async function reactToPost(postId: string, reactionType: 'beer' | 'cheer'
 
   // 2. Firebase 원격 동기화
   const firebaseUrl = getFirebaseUrl();
-  if (firebaseUrl) {
+  if (firebaseUrl && postId) {
     try {
+      // Firebase에서 현재 count 조회 후 +1 업데이트
+      const currentRes = await fetch(`${firebaseUrl}/posts/${postId}/reactions/${reactionType}.json`);
+      const currentVal = await currentRes.json();
+      const nextVal = typeof currentVal === 'number' ? currentVal + 1 : updatedCount;
       await fetch(`${firebaseUrl}/posts/${postId}/reactions/${reactionType}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedCount)
+        body: JSON.stringify(nextVal)
       });
+      return { success: true, newCount: nextVal };
     } catch (err) {
       console.warn('Firebase reaction sync failed', err);
     }
