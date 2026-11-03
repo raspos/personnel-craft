@@ -483,7 +483,7 @@ export const CommunityBoardModal: React.FC<Props> = ({
                             ? 'bg-amber-950 text-amber-300 border-amber-500/60'
                             : 'bg-emerald-950 text-emerald-300 border-emerald-500/60'
                         }`}>
-                          {post.assignedDept} {post.resultType === 'first' ? (isEn ? '1st Landed' : '1지망 영전') : post.resultType === 'stay' ? (isEn ? 'Retained' : '잔류') : post.resultType === 'avoid' ? (isEn ? 'Blacklist' : '기피') : (isEn ? 'Transferred' : '발령')}
+                          {isEn ? (getDepartmentByName(post.assignedDept)?.nameEn || post.assignedDept) : post.assignedDept} {post.resultType === 'first' ? (isEn ? '1st Landed' : '1지망 영전') : post.resultType === 'stay' ? (isEn ? 'Retained' : '잔류') : post.resultType === 'avoid' ? (isEn ? 'Blacklist' : '기피') : (isEn ? 'Transferred' : '발령')}
                         </span>
                       )}
                     </div>
