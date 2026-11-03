@@ -5,7 +5,7 @@ const STORAGE_USER_REACTIONS_KEY = 'pcraft_user_reactions_v1';
 const STORAGE_CUSTOM_FIREBASE_KEY = 'pcraft_firebase_db_url';
 
 // 기본 Firebase Realtime Database URL (필요 시 사용자 지정 URL로 교체 가능)
-export const DEFAULT_FIREBASE_URL = '';
+export const DEFAULT_FIREBASE_URL = 'https://personnel-craft-default-rtdb.firebaseio.com';
 
 export function getFirebaseUrl(): string {
   try {
@@ -128,9 +128,15 @@ export async function fetchCommunityPosts(): Promise<BoardPost[]> {
           }));
           // 최신순 정렬
           list.sort((a, b) => b.createdAt - a.createdAt);
+
+          // 프리셋 글들과 병합 (Firebase에 아직 글이 적을 때도 풍성하게 유지)
+          const liveIds = new Set(list.map(p => p.id));
+          const merged = [...list, ...INITIAL_PRESET_POSTS.filter(p => !liveIds.has(p.id))];
+          merged.sort((a, b) => b.createdAt - a.createdAt);
+
           // 로컬에도 백업 캐시
-          localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(list));
-          return list;
+          localStorage.setItem(STORAGE_POSTS_KEY, JSON.stringify(merged));
+          return merged;
         }
       }
     } catch (err) {
