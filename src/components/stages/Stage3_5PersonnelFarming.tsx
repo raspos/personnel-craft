@@ -529,7 +529,7 @@ export const Stage3_5PersonnelFarming: React.FC<Stage3_5Props> = ({
           </h3>
 
           {/* 대상 희망 부서 선택 (A, B 행동용) */}
-          <div className="flex items-center gap-1.5 text-xs font-pixel">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs font-pixel">
             <span className="text-slate-400">{isEn ? 'Target:' : '접촉 대상:'}</span>
             {[1, 2, 3].map((num) => {
               const deptName = num === 1 ? wishes.first.deptName : num === 2 ? wishes.second.deptName : wishes.third.deptName;

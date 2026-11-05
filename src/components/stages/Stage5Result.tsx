@@ -248,18 +248,18 @@ export const Stage5Result: React.FC<Stage5Props> = ({
             </div>
 
             {/* 헤드라인 & 발령 부서 */}
-            <h2 className="font-pixel text-2xl sm:text-3xl text-slate-100 font-extrabold mb-2 tracking-tight">
+            <h2 className="font-pixel text-xl sm:text-3xl text-slate-100 font-extrabold mb-2 tracking-tight break-keep">
               {result.messageHeadline}
             </h2>
-            <div className="font-pixel text-3xl sm:text-5xl text-amber-300 font-black my-4 drop-shadow-lg tracking-wider">
+            <div className="font-pixel text-2xl sm:text-5xl text-amber-300 font-black my-3 sm:my-4 drop-shadow-lg tracking-wider break-keep">
               [ {isEn ? (getDepartmentByName(result.assignedDept)?.nameEn || result.assignedDept) : result.assignedDept} ] {isEn ? 'ORDER ISSUED!' : '발령!'}
             </div>
-            <p className="text-slate-300 text-sm sm:text-base font-medium max-w-xl mx-auto leading-relaxed mb-4">
+            <p className="text-slate-300 text-xs sm:text-base font-medium max-w-xl mx-auto leading-relaxed mb-4 break-keep">
               {result.messageSubtitle}
             </p>
 
             {/* 풍자적인 한마디 명언 */}
-            <div className="pixel-slot p-3.5 text-slate-200 text-xs sm:text-sm font-pixel italic max-w-md mx-auto mb-5">
+            <div className="pixel-slot p-3 sm:p-3.5 text-slate-200 text-xs sm:text-sm font-pixel italic max-w-md mx-auto mb-5 break-keep">
               "{result.flavorQuote}"
             </div>
 
@@ -386,7 +386,7 @@ export const Stage5Result: React.FC<Stage5Props> = ({
                   sound.playClick();
                   onOpenBoardModal(result);
                 }}
-                className="pixel-btn-mc bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 px-4 text-xs font-pixel whitespace-nowrap flex items-center gap-1.5 shadow-md flex-shrink-0"
+                className="pixel-btn-mc bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 px-4 text-xs font-pixel whitespace-nowrap flex items-center justify-center gap-1.5 shadow-md flex-shrink-0 w-full sm:w-auto"
               >
                 <MessageSquareText className="w-4 h-4" />
                 <span>{isEn ? 'Post & View Lounge ➔' : '소감 남기기 & 글 보기 ➔'}</span>

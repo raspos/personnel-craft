@@ -229,7 +229,7 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
       )}
 
       {/* 1지망 / 2지망 / 3지망 탭 버튼 */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
         {[1, 2, 3].map((num) => {
           const cfg = num === 1 ? wishes.first : num === 2 ? wishes.second : wishes.third;
           const isNone = cfg.deptName === '없음' || cfg.deptName === '선택 안 함';
@@ -244,21 +244,21 @@ export const Stage3WishSelect: React.FC<Stage3Props> = ({
                 sound.playClick();
                 setActiveTab(num as 1 | 2 | 3);
               }}
-              className={`pixel-btn-mc py-3 px-2 rounded text-center transition-all ${
+              className={`pixel-btn-mc py-2 sm:py-3 px-1 sm:px-2 rounded text-center transition-all ${
                 isActive
                   ? 'border-amber-400 bg-amber-950/50 text-amber-300 font-bold shadow-[2px_2px_0_#000]'
                   : 'text-slate-300'
               }`}
             >
-              <div className="font-pixel text-xs text-slate-400">
+              <div className="font-pixel text-[11px] sm:text-xs text-slate-400 break-keep">
                 {isEn
                   ? `${num === 1 ? '1st' : num === 2 ? '2nd' : '3rd'} Wish ${isNone ? '(None)' : (num === 1 && cfg.deptName === currentDeptName ? '(Stay)' : '')}`
                   : `${num}지망 ${isNone ? '(미지원)' : (num === 1 && cfg.deptName === currentDeptName ? '(현 부서 잔류)' : '희망부서')}`}
               </div>
-              <div className={`font-pixel text-sm sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
+              <div className={`font-pixel text-xs sm:text-base font-bold mt-0.5 truncate ${isNone ? 'text-slate-400 italic' : ''}`}>
                 {isNone ? (isEn ? 'None' : '없음') : (num === 1 && cfg.deptName === currentDeptName ? (isEn ? `Stay (${displayName})` : `잔류 (${cfg.deptName})`) : displayName)}
               </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
+              <div className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5 break-keep">
                 {isNone ? (isEn ? 'Excluded (0%)' : '가중치 0% (제외)') : (num === 1 && cfg.deptName === currentDeptName ? (isEn ? 'Retention' : '잔류 지망') : `TO: ${cfg.expectedTO}`)}
               </div>
             </button>

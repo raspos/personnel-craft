@@ -146,24 +146,24 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           <Sparkles className="w-4 h-4 text-amber-400" />
           <span>{isEn ? 'Quick Persona Presets' : '캐릭터 프리셋 선택 (원클릭)'}</span>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
           <button
             onClick={() => applyPreset('rookie')}
-            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-blue-300 font-pixel"
+            className="pixel-btn-mc py-2 px-1.5 sm:px-3 rounded text-[11px] sm:text-xs text-center text-blue-300 font-pixel break-keep"
           >
-            {isEn ? '🔥 Eager Rookie' : '🔥 열정 신입형'}
+            {isEn ? '🔥 Rookie' : '🔥 열정 신입형'}
           </button>
           <button
             onClick={() => applyPreset('veteran')}
-            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-slate-300 font-pixel"
+            className="pixel-btn-mc py-2 px-1.5 sm:px-3 rounded text-[11px] sm:text-xs text-center text-slate-300 font-pixel break-keep"
           >
-            {isEn ? '☕ Burnt-out Veteran' : '☕ 야근 베테랑형'}
+            {isEn ? '☕ Veteran' : '☕ 야근 베테랑형'}
           </button>
           <button
             onClick={() => applyPreset('investigative')}
-            className="pixel-btn-mc py-2 px-3 rounded text-xs text-center text-emerald-300 font-pixel"
+            className="pixel-btn-mc py-2 px-1.5 sm:px-3 rounded text-[11px] sm:text-xs text-center text-emerald-300 font-pixel break-keep"
           >
-            {isEn ? '🕵️ Scoop Hunter' : '🕵️ 특종 탐사형'}
+            {isEn ? '🕵️ Hunter' : '🕵️ 특종 탐사형'}
           </button>
         </div>
       </div>
@@ -281,7 +281,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           {/* 머리 색상 */}
           <div>
             <label className="block text-xs text-slate-400 mb-1 font-pixel">{isEn ? 'Hair Color' : '머리 색상'}</label>
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-wrap gap-1.5 items-center">
               {['#0f172a', '#451a03', '#475569', '#b45309'].map((c) => (
                 <button
                   key={c}
@@ -298,7 +298,7 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           {/* 상의 색상 */}
           <div>
             <label className="block text-xs text-slate-400 mb-1 font-pixel">{isEn ? 'Shirt Color' : '옷(셔츠) 색상'}</label>
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-wrap gap-1.5 items-center">
               {['#2563eb', '#dc2626', '#16a34a', '#475569', '#0f172a'].map((c) => (
                 <button
                   key={c}
@@ -316,9 +316,9 @@ export const Stage1CharacterCreate: React.FC<Stage1Props> = ({
           <div>
             <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1 font-pixel">
               <Award className="w-3.5 h-3.5 text-blue-400" />
-              <span>{isEn ? 'Press Pass Lanyard' : '기자증 색상'}</span>
+              <span>{isEn ? 'Press Pass' : '기자증 색상'}</span>
             </label>
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-wrap gap-1.5 items-center">
               {['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'].map((c) => (
                 <button
                   key={c}

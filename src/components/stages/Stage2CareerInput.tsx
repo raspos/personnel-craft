@@ -342,9 +342,9 @@ export const Stage2CareerInput: React.FC<Stage2Props> = ({
 
                 {/* 세부 취재 분야 태그 (단순 클릭 토글형) */}
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                    <span className="font-pixel">{isEn ? 'Covered Sub-beats / Specialties (Click to toggle):' : '취재 출입처·전문 분야 (클릭하여 켜기/끄기):'}</span>
-                    <span className="text-[11px] text-slate-500 font-sans">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-400 mb-2">
+                    <span className="font-pixel break-keep">{isEn ? 'Covered Sub-beats / Specialties (Click to toggle):' : '취재 출입처·전문 분야 (클릭하여 켜기/끄기):'}</span>
+                    <span className="text-[11px] text-slate-500 font-sans break-keep">
                       {isEn ? '* Months are distributed equally across selected sub-beats.' : '* 기간은 전체 근무 기간에 균등 배분됩니다.'}
                     </span>
                   </div>

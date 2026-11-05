@@ -323,16 +323,30 @@ export const App: React.FC = () => {
         </div>
 
         <div>
-          <p className="font-bold text-slate-300">
-            {isEn ? 'PERSONNEL CRAFT — Newsroom Reshuffle Survival Simulator' : '인사 크래프트 (PERSONNEL CRAFT) — 편집국 생존기'}
+          <p className="font-bold text-slate-200 text-xs sm:text-sm leading-relaxed break-keep">
+            {isEn ? (
+              <>
+                <span className="block sm:inline">PERSONNEL CRAFT</span>
+                <span className="hidden sm:inline"> — </span>
+                <span className="block sm:inline text-slate-400 font-medium">Newsroom Reshuffle Survival Simulator</span>
+              </>
+            ) : (
+              <>
+                <span className="block sm:inline">
+                  인사 크래프트 <span className="text-slate-400 font-normal text-[11px] sm:text-xs">(PERSONNEL CRAFT)</span>
+                </span>
+                <span className="hidden sm:inline"> — </span>
+                <span className="block sm:inline text-sky-400 font-medium">편집국 생존기</span>
+              </>
+            )}
           </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">
+          <p className="text-[11px] text-slate-500 mt-1 leading-snug break-keep max-w-md mx-auto">
             {isEn ? 'Data Journalism Virtual Reshuffle Simulation Interactive Project' : '데이터저널리즘 가상 시뮬레이션 인터랙티브 프로젝트'}
           </p>
         </div>
 
-        <div className="pt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
-          <span>
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 text-[11px] text-slate-500 break-keep">
+          <div>
             © <a
               href="https://raspos.github.io/databrew"
               target="_blank"
@@ -341,11 +355,11 @@ export const App: React.FC = () => {
             >
               databrew
             </a>. All rights reserved.
-          </span>
-          <span className="text-slate-700">|</span>
-          <span className="text-slate-500 italic">
+          </div>
+          <span className="hidden sm:inline text-slate-700">|</span>
+          <p className="text-slate-400 italic break-keep">
             {isEn ? '“You sow the reshuffle seeds, but the Editor-in-Chief harvests the orders.”' : '“인사 농사는 내가 짓지만, 발령은 편집국장이 낸다.”'}
-          </span>
+          </p>
         </div>
       </footer>
 
